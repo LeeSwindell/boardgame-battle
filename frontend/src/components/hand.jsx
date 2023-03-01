@@ -8,6 +8,8 @@ function Hand () {
             <MarketCard />
             <MarketCard />
             <MarketCard />
+            <MarketCard />
+            <MarketCard />
         </div>
     )
 }

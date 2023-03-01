@@ -6,9 +6,9 @@ export const Sizes = {
 }
 
 function CardContainer(props) {
-    const { card, size } = props
+    const { card, size, extra } = props
     return (
-        <button className={`border hover:shadow-lg ${Sizes[size]} rounded`}>
+        <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`}>
             {card}
         </button>
     )

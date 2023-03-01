@@ -1,6 +1,6 @@
 function PlayerInfo() {
     return (
-        <div className="flex flex-col p-2 m-2 w-40 h-16 border">
+        <div className="flex flex-col p-2 m-2 w-40 h-16 border rounded">
             <div className="flex justify-between">
                 <div>LeeRocks</div>
                 <div>hp:100</div>

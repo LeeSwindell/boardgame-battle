@@ -1,3 +1,4 @@
+import CardContainer from "./cardcontainer";
 import DarkArtCard from "./darkart";
 import Location from "./location";
 import MarketCard from "./marketcard";
@@ -10,27 +11,27 @@ function Gameboard() {
 
              {/* Top Row */}
             <div className="flex flex-none p-1 space-x-8 justify-between border">
-                <Location />
+                <CardContainer card={<Location />} size="wide"/>
                 <div className="flex space-x-2 justify-center">
-                    <DarkArtCard />
-                    <Monster />
+                    <CardContainer card={<DarkArtCard />} size="reg" />
+                    <CardContainer card={<Monster />} size="reg" />
                 </div>
                 <div className="flex flex-none space-x-2 justify-end">
-                    <MarketCard />
-                    <MarketCard />
-                    <MarketCard />
+                    <CardContainer card={<MarketCard />} size="reg" />
+                    <CardContainer card={<MarketCard />} size="reg" />
+                    <CardContainer card={<MarketCard />} size="reg" />
                 </div>
             </div>
 
             {/* Middle Row */}
             <div className="flex flex-none p-1 space-x-8 justify-between border">
-                <Villain />
-                <Villain />
-                <Villain />
+                <CardContainer card={<Villain />} size="wide" />
+                <CardContainer card={<Villain />} size="wide" />
+                <CardContainer card={<Villain />} size="wide" />
                 <div className="flex flex-none space-x-2 justify-end">
-                    <MarketCard />
-                    <MarketCard />
-                    <MarketCard />
+                    <CardContainer card={<MarketCard />} size="reg" />
+                    <CardContainer card={<MarketCard />} size="reg" />
+                    <CardContainer card={<MarketCard />} size="reg" />
                 </div>
             </div>
         </div>

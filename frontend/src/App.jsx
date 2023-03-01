@@ -9,9 +9,11 @@ import PlayerInfo from "./components/playerinfo"
 function App() {
   return (
     <>
-      <div className="absolute w-full h-full border invisible">
-        <div className="flex justify-center">
-          <MarketCard />
+      <div className="fixed w-full h-full border border-blue-500 visible">
+        <div className="flex w-full h-full border border-green-500 justify-center items-center">
+          <div className="border border-pink-500 w-64 h-64">
+            <MarketCard />
+          </div>
         </div>
       </div>
       <div className="flex flex-row justify-between">

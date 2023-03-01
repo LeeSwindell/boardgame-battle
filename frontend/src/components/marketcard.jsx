@@ -14,16 +14,19 @@ function MarketCard () {
       };
 
     return (
-        <button onClick={handleClick} onContextMenu={handleClick}>
-            <div className="border w-32 h-32 hover:shadow-lg">
-                Market Card
-            </div>
-            {showModal ? (
-                <div className="absolute top-1/2 left-1/2 z-50 shadow-lg w-80 h-80 bg-blue opacity-50">
-                    hi
-                </div>
-            ) : null }
-        </button>
+        <div>
+            Market Card
+        </div>
+        // <button onClick={handleClick} onContextMenu={handleClick}>
+        //     <div className="border w-32 h-32 hover:shadow-lg">
+        //         Market Card
+        //     </div>
+        //     {showModal ? (
+        //         <div className="absolute top-1/2 left-1/2 z-50 shadow-lg w-80 h-80 bg-blue opacity-50">
+        //             hi
+        //         </div>
+        //     ) : null }
+        // </button>
     )
 }
 

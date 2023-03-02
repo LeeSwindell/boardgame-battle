@@ -6,9 +6,14 @@ export const Sizes = {
 }
 
 function CardContainer(props) {
-    const { card, size, extra } = props
+    const { card, size, setInspect, setCardToInspect, extra } = props
+    const onClick = () => {
+        setCardToInspect(card)
+        setInspect(true)
+    }
+
     return (
-        <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`}>
+        <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick}>
             {card}
         </button>
     )

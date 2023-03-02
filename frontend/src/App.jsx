@@ -14,7 +14,7 @@ function App() {
 
   const showInspectCard = (card) => {
     if (inspect) {
-      return <InspectCard card={card}/>
+      return <InspectCard card={card} setInspect={setInspect} setCardToInspect={setCardToInspect}/>
     }
   }
 

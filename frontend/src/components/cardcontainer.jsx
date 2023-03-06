@@ -1,3 +1,5 @@
+import { useInspect } from "../App";
+
 export const Sizes = {
     "reg": "w-32 h-32",
     "wide": "w-40 h-32",
@@ -5,15 +7,18 @@ export const Sizes = {
     "widezoom": "w-80, h-64"
 }
 
-function CardContainer(props) {
-    const { card, size, setInspect, setCardToInspect, extra } = props
-    const onClick = () => {
-        setCardToInspect(card)
-        setInspect(true)
+function CardContainer({ card, size, extra }) {
+    const { setInspectCard } = useInspect();
+
+    const onClick = (e) => {
+        e.preventDefault();
+        if (e.nativeEvent.button === 2) {
+            setInspectCard(card)
+        }
     }
 
     return (
-        <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick}>
+        <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick} onContextMenu={onClick}>
             {card}
         </button>
     )

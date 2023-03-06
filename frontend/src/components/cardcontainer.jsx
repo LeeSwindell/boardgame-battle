@@ -1,4 +1,4 @@
-import { useInspect } from "../App";
+import { useInspect } from "../routes/Game";
 
 export const Sizes = {
     "reg": "w-32 h-32",

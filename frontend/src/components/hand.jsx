@@ -1,4 +1,4 @@
-import CardContainer from "./cardcontainer";
+import CardContainer from "./CardContainer";
 import MarketCard from "./marketcard";
 
 function Hand () {

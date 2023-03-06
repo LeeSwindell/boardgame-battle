@@ -1,5 +1,5 @@
 import MarketCard from "./marketcard";
-import CardContainer from "./cardcontainer";
+import CardContainer from "./CardContainer";
 
 function PlayArea (props) {
     return (

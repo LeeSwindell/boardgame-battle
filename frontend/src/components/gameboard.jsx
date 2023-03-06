@@ -1,10 +1,9 @@
-import { useInspect } from "../App";
-import CardContainer from "./cardcontainer";
-import DarkArtCard from "./darkart";
-import Location from "./location";
+import CardContainer from "./CardContainer";
+import DarkArtCard from "./Darkart";
+import Location from "./Location";
 import MarketCard from "./marketcard";
-import Monster from "./monster";
-import Villain from "./villain";
+import Monster from "./Monster";
+import Villain from "./Villain";
 
 function Gameboard(props) {
     return (

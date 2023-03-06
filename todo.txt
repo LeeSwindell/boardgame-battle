@@ -1,1 +1,0 @@
-usestate to make the inspect card appear/disappear. 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useInspect } from "../App";
-import CardContainer from "./cardcontainer";
+import { useInspect } from "../routes/Game";
+import CardContainer from "./CardContainer";
 
 function InspectCard() {
     const {inspectCard, setInspectCard} = useInspect();

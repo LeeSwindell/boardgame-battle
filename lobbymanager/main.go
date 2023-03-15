@@ -3,12 +3,17 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"math/rand"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
+
+// to start the server
+// go run github.com/leeswindell/boardgame-battle/lobbymanager
+
+var hub = newHub()
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -27,10 +32,6 @@ type Lobbies struct {
 
 type PlayersInLobby struct {
 	Players []Player `json:"players"`
-}
-
-func (pl *PlayersInLobby) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 }
 
 type Player struct {
@@ -87,9 +88,8 @@ func LobbyHandler(w http.ResponseWriter, r *http.Request, players *PlayersInLobb
 
 }
 
-// Probably won't collide. should fix later
-func getUniquePlayerId() int {
-	return rand.Intn(100000)
+func getUniquePlayerId() uuid.UUID {
+	return uuid.New()
 }
 
 func main() {

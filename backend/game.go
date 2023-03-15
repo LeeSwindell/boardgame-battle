@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreateGame() Gamestate {
+func CreateGame() *Gamestate {
 	player1 := Player{
 		name:      "leerocks",
 		character: "Ron",
@@ -26,16 +26,27 @@ func CreateGame() Gamestate {
 	villain1 := Villain{name: "moldyvort"}
 
 	gs := Gamestate{
-		players:  []Player{player1, player2},
-		villains: []Villain{villain1},
+		players:     []Player{player1, player2},
+		villains:    []Villain{villain1},
+		currentTurn: player1,
 	}
 
-	return gs
+	return &gs
 }
 
+func endTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
+
+}
+
+func endTurn()
+
 func GameServer() {
+	// gs := CreateGame()
+
 	r := mux.NewRouter()
-	r.HandleFunc("/initialize", StartGameHandler).Methods("GET")
+	// r.HandleFunc("/game", StartGameHandler).Methods("GET")
+	// r.HandleFunc("/endturn", endTurnHandler).Methods("GET")
+	// r.Handle
 
 	srv := &http.Server{
 		Handler: r,
@@ -49,4 +60,5 @@ func GameServer() {
 }
 
 func StartGameHandler(w http.ResponseWriter, r *http.Request) {
+
 }

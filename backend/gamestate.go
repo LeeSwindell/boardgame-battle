@@ -1,8 +1,10 @@
 package game
 
 type Gamestate struct {
-	players  []Player
-	villains []Villain
+	players     []Player
+	villains    []Villain
+	locations   []Location
+	currentTurn Player
 }
 
 type Player struct {
@@ -23,6 +25,12 @@ type Card struct {
 	effects []Effect
 }
 
+type Location struct {
+	maxControl int
+	curControl int
+	effect     []Effect
+}
+
 type PlayArea struct {
 	cards []Card
 }
@@ -40,7 +48,10 @@ type Discard struct {
 }
 
 type Villain struct {
-	name string
+	name        string
+	curDamage   int
+	maxHp       int
+	deathEffect Effect
 }
 
 type Effect struct {

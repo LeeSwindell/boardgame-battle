@@ -29,7 +29,6 @@ function Lobby() {
 
         axios.get(baseUrl+`/lobby/${lobbyId}/refresh`)
             .then((res) => {
-                console.log(res.data)
                 setPlayers(res.data.players)
             })
 
@@ -38,10 +37,8 @@ function Lobby() {
         
             newSocket.onmessage = (event) => {
                 const data = JSON.parse(event.data)
-                console.log(data)
                 switch (data.type) {
                     case 'RefreshRequest':
-                        console.log('should submit refresh')
                         axios.get(baseUrl+`/lobby/${lobbyId}/refresh`)
                             .then((res) => {
                                 console.log(res.data)
@@ -63,16 +60,13 @@ function Lobby() {
       }, [params])
 
     function handleRefresh() {
-        console.log('sending refresh request')
         const message = {
             'Type': 'RefreshLobby'
         }
         socket.send(JSON.stringify(message))
-        console.log('sent refresh request')
     }
 
     function addPlayer() {
-        console.log('adding player')
         const newPlayer = {
             id: 123,
             name: 'Bing Bong',

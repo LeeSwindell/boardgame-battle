@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -61,80 +60,80 @@ type Message struct {
 	Data interface{} `json:"data"`
 }
 
-func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+// func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
+// 	// w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	res := Lobbies{
-		[]Lobby{
-			{
-				ID:   1,
-				Name: "Casual Lobby",
-				Host: "pico paco",
-			},
-			{
-				ID:   2,
-				Name: "superior lobby",
-				Host: "leeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-			},
-			{
-				ID:   3,
-				Name: "fun time Lobby",
-				Host: "boilly bill",
-			},
-		},
-	}
+// 	res := Lobbies{
+// 		[]Lobby{
+// 			{
+// 				ID:   1,
+// 				Name: "Casual Lobby",
+// 				Host: "pico paco",
+// 			},
+// 			{
+// 				ID:   2,
+// 				Name: "superior lobby",
+// 				Host: "leeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+// 			},
+// 			{
+// 				ID:   3,
+// 				Name: "fun time Lobby",
+// 				Host: "boilly bill",
+// 			},
+// 		},
+// 	}
 
-	l, err := json.Marshal(res)
-	if err != nil {
-		log.Println(err)
-	}
+// 	l, err := json.Marshal(res)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	w.Write(l)
-}
+// 	w.Write(l)
+// }
 
-func AddClientHandler(w http.ResponseWriter, r *http.Request) {
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	pid := getUniquePlayerId()
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+// func AddClientHandler(w http.ResponseWriter, r *http.Request) {
+// 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+// 	pid := getUniquePlayerId()
+// 	conn, err := upgrader.Upgrade(w, r, nil)
+// 	if err != nil {
+// 		log.Println(err)
+// 		return
+// 	}
 
-	client := &Client{hub: hub, conn: conn, pid: pid}
-	client.hub.register <- client
+// 	client := &Client{hub: hub, conn: conn, pid: pid}
+// 	client.hub.register <- client
 
-	println("player ", pid.String(), " is connecting")
-	conn.WriteJSON(players)
+// 	println("player ", pid.String(), " is connecting")
+// 	conn.WriteJSON(players)
 
-	// start go routines for the client
-	go client.readPump()
-	// go client.writePump()
-}
+// 	// start go routines for the client
+// 	go client.readPump()
+// 	// go client.writePump()
+// }
 
-func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	res, err := json.Marshal(players)
-	if err != nil {
-		log.Println(err)
-	}
+// func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	res, err := json.Marshal(players)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	w.Write(res)
-}
+// 	w.Write(res)
+// }
 
-func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {
-	var player Player
-	err := json.NewDecoder(r.Body).Decode(&player)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+// func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {
+// 	var player Player
+// 	err := json.NewDecoder(r.Body).Decode(&player)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
 
-	players.Players = append(players.Players, player)
-	hub.SendRefreshRequest()
+// 	players.Players = append(players.Players, player)
+// 	hub.SendRefreshRequest()
 
-	w.WriteHeader(http.StatusCreated)
-}
+// 	w.WriteHeader(http.StatusCreated)
+// }
 
 func getUniquePlayerId() uuid.UUID {
 	return uuid.New()

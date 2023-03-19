@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -72,6 +73,18 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	go client.readPump()
 }
 
+func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
+	// create a lobby
+	// attach session id to player in lobby
+	// attach connections to players
+	// create group of connections just for players in the lobby.
+}
+
+func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
+	// add client and player id to lobby group
+	// redirect to lobby.
+}
+
 func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	res, err := json.Marshal(players)
@@ -89,6 +102,8 @@ func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	player.ID = rand.Intn(102030)
 
 	players.Players = append(players.Players, player)
 	hub.SendRefreshRequest()

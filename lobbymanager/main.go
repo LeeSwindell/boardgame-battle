@@ -74,6 +74,8 @@ func main() {
 
 	go hub.run()
 
+	r.HandleFunc("/sessionid", sessionidHandler)
+	r.HandleFunc("/login", loginHandler)
 	r.HandleFunc("/lobbies", GetLobbiesHandler)
 	r.HandleFunc("/lobby/{id}", AddClientHandler)
 	r.HandleFunc("/lobby/create", CreateLobbyHandler)

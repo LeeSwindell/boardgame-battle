@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -49,6 +50,7 @@ func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
 
 	l, err := json.Marshal(res)
 	if err != nil {
+		log.Println("GetLobbies error: ")
 		log.Println(err)
 	}
 
@@ -60,6 +62,7 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	pid := getUniquePlayerId()
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		log.Println("AddClient error: ")
 		log.Println(err)
 		return
 	}
@@ -74,10 +77,14 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
-	// create a lobby
-	// attach session id to player in lobby
-	// attach connections to players
-	// create group of connections just for players in the lobby.
+	globalMu.Lock()
+	lobbyid := lobbyNumber
+	lobbyNumber++
+	globalMu.Unlock()
+
+	newUrl := "/lobby/" + fmt.Sprint(lobbyid)
+
+	http.Redirect(w, r, newUrl, http.StatusSeeOther)
 }
 
 func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {

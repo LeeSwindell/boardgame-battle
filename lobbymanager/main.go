@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -14,6 +15,8 @@ import (
 // go run github.com/leeswindell/boardgame-battle/lobbymanager
 
 var hub = newHub()
+var lobbyNumber int
+var globalMu sync.Mutex
 
 var players = PlayersInLobby{
 	[]Player{
@@ -67,9 +70,10 @@ func getUniquePlayerId() uuid.UUID {
 func main() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 
 	go hub.run()
@@ -77,9 +81,9 @@ func main() {
 	r.HandleFunc("/sessionid", sessionidHandler)
 	r.HandleFunc("/login", loginHandler)
 	r.HandleFunc("/lobbies", GetLobbiesHandler)
-	r.HandleFunc("/lobby/{id}", AddClientHandler)
+	r.HandleFunc("/connectsocket", AddClientHandler)
 	r.HandleFunc("/lobby/create", CreateLobbyHandler)
-	r.HandleFunc("lobby/join/{id}", JoinLobbyHandler)
+	r.HandleFunc("lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lobby/{id}/addplayer", AddPlayerHandler)
 

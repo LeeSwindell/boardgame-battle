@@ -17,6 +17,7 @@ import (
 var hub = newHub()
 var lobbyNumber int
 var globalMu sync.Mutex
+var lobbies Lobbies
 
 var players = PlayersInLobby{
 	[]Player{

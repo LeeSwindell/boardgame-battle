@@ -1,9 +1,9 @@
-function Monster () {
-    return (
-        <div className="">
-            Monster
-        </div>
-    )
+function Monster() {
+  return (
+    <div className="">
+      Monster
+    </div>
+  );
 }
 
 export default Monster;

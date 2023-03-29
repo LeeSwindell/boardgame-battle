@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -80,11 +81,21 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	lobbyid := lobbyNumber
 	lobbyNumber++
+
+	hostname := r.Header.Get("Authorization")
+	lobby := Lobby{
+		ID:   lobbyid,
+		Name: hostname + "'s lobby!",
+		Host: hostname,
+	}
+
+	lobbies.Lobbies = append(lobbies.Lobbies, lobby)
 	globalMu.Unlock()
 
-	newUrl := "/lobby/" + fmt.Sprint(lobbyid)
-
-	http.Redirect(w, r, newUrl, http.StatusSeeOther)
+	_, err := io.WriteString(w, fmt.Sprint(lobbyid))
+	if err != nil {
+		log.Println("err creating lobby:", err)
+	}
 }
 
 func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {

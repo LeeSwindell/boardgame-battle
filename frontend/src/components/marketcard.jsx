@@ -1,9 +1,9 @@
-function MarketCard () {
-    return (
-        <div>
-            Market Card
-        </div>
-    )
+function MarketCard() {
+  return (
+    <div>
+      Market Card
+    </div>
+  );
 }
 
 export default MarketCard;

@@ -1,9 +1,9 @@
-function Villain () {
-    return (
-        <div className="">
-            Villain
-        </div>
-    )
+function Villain() {
+  return (
+    <div className="">
+      Villain
+    </div>
+  );
 }
 
 export default Villain;

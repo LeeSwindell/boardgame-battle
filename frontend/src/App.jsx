@@ -39,7 +39,7 @@ function App() {
         }
       })
       .catch((response) => {
-        console.log('error using api to get /sessionid');
+        console.log('error using api to get /sessionid', response.data);
       });
   }, []);
 

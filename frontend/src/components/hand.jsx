@@ -1,5 +1,5 @@
 import CardContainer from "./CardContainer";
-import MarketCard from "./marketcard";
+import MarketCard from "./Marketcard";
 
 function Hand () {
     return (

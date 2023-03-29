@@ -18,12 +18,12 @@ function CharSelect() {
     )
 }
 
-function Lobby() {
+function Lobby({ socket }) {
     let params = useParams()
 
     const [players, setPlayers] = useState([])
-    const [socket, setSocket] = useState(null)
 
+    // is the lobbyid param needed?
     useEffect(() => {
         const lobbyId = params["id"]
 
@@ -32,10 +32,8 @@ function Lobby() {
                 setPlayers(res.data.players)
             })
 
-        if (socket === null && lobbyId) {
-            const newSocket = new WebSocket(`ws://localhost:8000/lobby/${lobbyId}`)
-        
-            newSocket.onmessage = (event) => {
+        if (socket !== null && lobbyId) {        
+            socket.onmessage = (event) => {
                 const data = JSON.parse(event.data)
                 switch (data.type) {
                     case 'RefreshRequest':
@@ -46,14 +44,6 @@ function Lobby() {
                             })
                     case 'LobbyUpdate':
 
-                }
-            }
-        
-            setSocket(newSocket)
-
-            return () => {
-                if (newSocket.readyState === 1) {
-                    newSocket.close()
                 }
             }
         }

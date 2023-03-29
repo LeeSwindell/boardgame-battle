@@ -1,9 +1,9 @@
-function DarkArtCard () {
-    return (
-        <div className="">
-            Dark Art
-        </div>
-    )
+function DarkArtCard() {
+  return (
+    <div className="">
+      Dark Art
+    </div>
+  );
 }
 
 export default DarkArtCard;

@@ -1,7 +1,7 @@
 import CardContainer from "./CardContainer";
 import DarkArtCard from "./Darkart";
 import Location from "./Location";
-import MarketCard from "./marketcard";
+import MarketCard from "./Marketcard";
 import Monster from "./Monster";
 import Villain from "./Villain";
 

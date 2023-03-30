@@ -104,7 +104,6 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	res, err := json.Marshal(players)
 	if err != nil {
 		log.Println(err)

@@ -10,31 +10,18 @@ import api from './api';
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [socket, setSocket] = useState(null);
-
-  // create socket on component mount
-  useEffect(() => {
-    const sock = new WebSocket('ws://localhost:8000/connectsocket');
-    setSocket(sock);
-
-    return () => {
-      if (sock.readyState === 1) {
-        sock.close();
-      }
-    };
-  }, []);
 
   // Check for existing user session
   useEffect(() => {
-    const localSessionid = localStorage.getItem('sessionid');
-    console.log('session id found locally:', localSessionid);
+    // const localSessionid = localStorage.getItem('sessionid');
+    // console.log('session id found locally:', localSessionid);
 
     api
       .get('/sessionid')
       .then((response) => {
         setIsLoading(false);
         if (response.data === true) {
-          console.log('logged in with session id:', localSessionid);
+          // console.log('logged in with session id:', localSessionid);
           setLoggedIn(true);
         }
       })
@@ -53,10 +40,10 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home socket={socket} />} />
-      <Route path="lobby/:id" loader={({ params }) => console.log(params[':id'])} element={<Lobby socket={socket} />} />
-      <Route path="lobbies" element={<Lobbies socket={socket} />} />
-      <Route path="game" element={<Game socket={socket} />} />
+      <Route path="/" element={<Home />} />
+      <Route path="lobby/:id" loader={({ params }) => console.log(params[':id'])} element={<Lobby />} />
+      <Route path="lobbies" element={<Lobbies />} />
+      <Route path="game" element={<Game />} />
     </Routes>
   );
 }

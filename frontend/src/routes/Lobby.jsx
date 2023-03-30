@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-
-const baseUrl = 'http://localhost:8000';
+import api from '../api';
 
 function CharSelect() {
   return (
@@ -17,31 +15,43 @@ function CharSelect() {
   );
 }
 
-function Lobby({ socket }) {
+function Lobby() {
   const params = useParams();
-
   const [players, setPlayers] = useState([]);
+  const socket = useRef(null);
 
-  // is the lobbyid param needed?
+  // Create the socket connection
+  useEffect(() => {
+    socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    socket.current.onopen = () => console.log('lobby socket opened');
+    socket.current.onclose = () => console.log('lobby socket closed');
+    return () => socket.current.close();
+  }, []);
+
+  // Add the socket onmessage effects
   useEffect(() => {
     const lobbyId = params.id;
 
-    axios.get(`${baseUrl}/lobby/${lobbyId}/refresh`)
+    api
+      .get(`/lobby/${lobbyId}/refresh`)
       .then((res) => {
         setPlayers(res.data.players);
       });
 
     if (socket !== null && lobbyId) {
-      socket.onmessage = (event) => {
+      socket.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         switch (data.type) {
           case 'RefreshRequest':
-            axios.get(`${baseUrl}/lobby/${lobbyId}/refresh`)
+            api
+              .get(`/lobby/${lobbyId}/refresh`)
               .then((res) => {
                 console.log(res.data);
                 setPlayers(res.data.players);
               });
-          case 'LobbyUpdate':
+            break;
+          default:
+            break;
         }
       };
     }
@@ -51,7 +61,7 @@ function Lobby({ socket }) {
     const message = {
       Type: 'RefreshLobby',
     };
-    socket.send(JSON.stringify(message));
+    socket.current.send(JSON.stringify(message));
   }
 
   function addPlayer() {
@@ -61,8 +71,8 @@ function Lobby({ socket }) {
       character: 'Ron',
     };
 
-    axios
-      .post(`${baseUrl}/lobby/${params.id}/addplayer`, newPlayer)
+    api
+      .post(`/lobby/${params.id}/addplayer`, newPlayer)
       .then((res) => {
         console.log(res);
       })
@@ -94,8 +104,8 @@ function Lobby({ socket }) {
           </tbody>
         </table>
       </div>
-      <button className="border" onClick={handleRefresh}>refresh lobbies</button>
-      <button className="border" onClick={addPlayer}>addPlayer</button>
+      <button className="border" onClick={handleRefresh} type="submit">refresh lobbies</button>
+      <button className="border" onClick={addPlayer} type="submit">addPlayer</button>
     </div>
   );
 }

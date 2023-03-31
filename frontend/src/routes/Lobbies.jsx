@@ -1,20 +1,38 @@
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-
-const url = 'http://localhost:8000/lobbies';
+import api from '../api';
 
 function Lobbies() {
   const [lobbies, setLobbies] = useState([]);
+  const [url, setUrl] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(url)
+    if (url) {
+      navigate(url);
+    }
+  });
+
+  useEffect(() => {
+    api
+      .get('/lobbies')
       .then((res) => {
-        console.log(res.data.lobbies);
-        setLobbies(res.data.lobbies);
+        if (res.data.lobbies) {
+          console.log(res.data.lobbies);
+          setLobbies(res.data.lobbies);
+        }
       });
   }, []);
+
+  function joinLobby(id) {
+    return () => {
+      api
+        .get(`/lobby/${id}/join`)
+        .then(() => {
+          setUrl(`/lobby/${id}`);
+        });
+    };
+  }
 
   return (
     <div className="flex flex-col w-screen h-screen items-center p-8 space-y-24">
@@ -25,7 +43,7 @@ function Lobbies() {
             <tr>
               <th className="px-6 py-2 font-bold">Name</th>
               <th className="px-6 py-2 font-bold">Host</th>
-              <th className="px-6 py-2 font-bold" />
+              <th className="px-6 py-2 font-bold" aria-label="hidden" />
             </tr>
           </thead>
           <tbody className="">
@@ -34,11 +52,11 @@ function Lobbies() {
                 return (
                   <tr key={lobby.id} className="bg-gray-50 justify-center items-center px-4 py-2 rounded">
                     <td className="px-6 py-2">{lobby.name}</td>
-                    <td className="px-6 py-2">{lobby.hostname}</td>
+                    <td className="px-6 py-2">{lobby.host}</td>
                     <td className="px-6 py-2">
-                      <Link to={`/lobby/${lobby.id}`} className="bg-blue-500 hover:bg-blue-700 text-white justify-center items-center px-4 py-2 font-bold rounded">
+                      <button onClick={joinLobby(lobby.id)} type="submit" className="bg-blue-500 hover:bg-blue-700 text-white justify-center items-center px-4 py-2 font-bold rounded">
                         Join
-                      </Link>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -46,11 +64,11 @@ function Lobbies() {
               return (
                 <tr key={lobby.id} className="justify-center items-center px-4 py-2 rounded">
                   <td className="px-6 py-2">{lobby.name}</td>
-                  <td className="px-6 py-2">{lobby.hostname}</td>
+                  <td className="px-6 py-2">{lobby.host}</td>
                   <td className="px-6 py-2">
-                    <Link to={`/lobby/${lobby.id}`} className="bg-blue-500 hover:bg-blue-700 text-white justify-center items-center px-4 py-2 font-bold rounded">
+                    <button onClick={joinLobby(lobby.id)} type="submit" className="bg-blue-500 hover:bg-blue-700 text-white justify-center items-center px-4 py-2 font-bold rounded">
                       Join
-                    </Link>
+                    </button>
                   </td>
                 </tr>
               );

@@ -19,21 +19,6 @@ var lobbyNumber int
 var globalMu sync.Mutex
 var lobbies Lobbies
 
-var players = PlayersInLobby{
-	[]Player{
-		{
-			ID:        1,
-			Name:      "pico",
-			Character: "Harry",
-		},
-		{
-			ID:        2,
-			Name:      "paco",
-			Character: "Ron",
-		},
-	},
-}
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -48,10 +33,6 @@ type Lobby struct {
 
 type Lobbies struct {
 	Lobbies []Lobby `json:"lobbies"`
-}
-
-type PlayersInLobby struct {
-	Players []Player `json:"players"`
 }
 
 type Player struct {
@@ -85,7 +66,7 @@ func main() {
 	r.HandleFunc("/lobbies", GetLobbiesHandler)
 	r.HandleFunc("/connectsocket", AddClientHandler)
 	r.HandleFunc("/lobby/create", CreateLobbyHandler)
-	r.HandleFunc("lobby/{id}/join", JoinLobbyHandler)
+	r.HandleFunc("/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lobby/{id}/addplayer", AddPlayerHandler)
 

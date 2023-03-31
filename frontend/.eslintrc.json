@@ -18,6 +18,11 @@
         "react"
     ],
     "rules": {
-        "no-console":"off"
+        "no-console":"off",
+        "jsx-a11y/label-has-associated-control": [ "error", {
+            "required": {
+              "some": [ "nesting", "id"  ]
+            }
+          }]
     }
 }

@@ -40,9 +40,10 @@ var upgrader = websocket.Upgrader{
 }
 
 type Lobby struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Host string `json:"host"`
+	ID      int      `json:"id"`
+	Name    string   `json:"name"`
+	Host    string   `json:"host"`
+	Players []Player `json:"players"`
 }
 
 type Lobbies struct {

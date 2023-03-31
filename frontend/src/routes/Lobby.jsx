@@ -35,6 +35,7 @@ function Lobby() {
     api
       .get(`/lobby/${lobbyId}/refresh`)
       .then((res) => {
+        console.log(res.data);
         setPlayers(res.data.players);
       });
 

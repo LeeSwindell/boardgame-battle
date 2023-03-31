@@ -7,6 +7,9 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func RefreshLobby(c *Client) {
@@ -87,6 +90,13 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		ID:   lobbyid,
 		Name: hostname + "'s lobby!",
 		Host: hostname,
+		Players: []Player{
+			{
+				ID:        0,
+				Name:      hostname,
+				Character: "Harry",
+			},
+		},
 	}
 
 	lobbies.Lobbies = append(lobbies.Lobbies, lobby)
@@ -104,7 +114,15 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
-	res, err := json.Marshal(players)
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("error with lobbyid:", err.Error())
+	}
+
+	lobby := lobbies.Lobbies[id]
+
+	res, err := json.Marshal(lobby)
 	if err != nil {
 		log.Println(err)
 	}

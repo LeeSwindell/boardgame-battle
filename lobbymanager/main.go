@@ -14,9 +14,10 @@ import (
 // to start the server
 // go run github.com/leeswindell/boardgame-battle/lobbymanager
 
+// Keep global mutex or attach to types?
+var globalMu sync.Mutex
 var hub = newHub()
 var lobbyNumber int
-var globalMu sync.Mutex
 var lobbies Lobbies
 
 var upgrader = websocket.Upgrader{
@@ -68,6 +69,7 @@ func main() {
 	r.HandleFunc("/lobby/create", CreateLobbyHandler)
 	r.HandleFunc("/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
+	r.HandleFunc("/lobby/{id}/setchar", SetCharHandler)
 	r.HandleFunc("/lobby/{id}/addplayer", AddPlayerHandler)
 
 	handler := c.Handler(r)

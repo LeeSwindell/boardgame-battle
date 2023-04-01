@@ -26,7 +26,6 @@ func (h *Hub) SendRefreshRequest() {
 	}
 
 	for c := range h.clients {
-		log.Print("sending refresh request")
 		c.conn.WriteJSON(message)
 	}
 }
@@ -55,7 +54,6 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	client.hub.register <- client
 
 	println("player ", pid.String(), " is connecting")
-	// conn.WriteJSON(players)
 
 	go client.readPump()
 }
@@ -122,6 +120,8 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("error with lobbyid:", err.Error())
 	}
 
+	globalMu.Lock()
+	defer globalMu.Unlock()
 	lobby := lobbies.Lobbies[id]
 
 	res, err := json.Marshal(lobby)
@@ -130,6 +130,42 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(res)
+}
+
+func SetCharHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	lobbyid, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("err getting lobbyid in setchar:", err.Error())
+	}
+	user := r.Header.Get("Authorization")
+	if user == "" {
+		log.Println("empty username in setchar handler")
+		return
+	}
+	var data map[string]interface{}
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	newChar, ok := data["character"].(string)
+	if !ok {
+		log.Println("error selecting char")
+	}
+
+	globalMu.Lock()
+	defer globalMu.Unlock()
+	// find the player
+	for i, p := range lobbies.Lobbies[lobbyid].Players {
+		if p.Name == user {
+			lobbies.Lobbies[lobbyid].Players[i].Character = newChar
+			break
+		}
+	}
+
+	hub.SendRefreshRequest()
+
 }
 
 func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {

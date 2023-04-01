@@ -2,19 +2,29 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 
-function CharSelect({ lobbyid, characterSelection }) {
+function CharSelect({
+  lobbyid, characterSelection, canEdit, player,
+}) {
   const [character, setCharacter] = useState(characterSelection);
 
   useEffect(() => {
-    api
-      .post(`/lobby/${lobbyid}/setchar`, { character })
-      .then(() => {
-        console.log('char update');
-      })
-      .catch((res) => {
-        console.log(res);
-      });
+    console.log(`sending char post, char:${character} player:${player} charselection: ${characterSelection}`);
+
+    if (canEdit) {
+      api
+        .post(`/lobby/${lobbyid}/setchar`, { character })
+        .then(() => {
+          console.log('char update');
+        })
+        .catch((res) => {
+          console.log(res);
+        });
+    }
   }, [character]);
+
+  if (!canEdit) {
+    return characterSelection;
+  }
 
   const handleOptionChange = (event) => {
     setCharacter(event.target.value);
@@ -22,8 +32,7 @@ function CharSelect({ lobbyid, characterSelection }) {
 
   return (
     <form>
-      <select name="char" id="char-select" value={characterSelection} onChange={handleOptionChange} className="w-full p-2 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
-        <option value="">Select</option>
+      <select name="char" id="char-select" value={characterSelection} onChange={handleOptionChange} className="block w-full p-2 rounded bg-gray-50 border border-gray-200 text-sm focus:ring-blue-500 focus:border-blue-500 ">
         <option value="Ron">Ron</option>
         <option value="Hermione">Hermione</option>
         <option value="Neville">Neville</option>
@@ -31,41 +40,6 @@ function CharSelect({ lobbyid, characterSelection }) {
         <option value="Luna">Luna</option>
       </select>
     </form>
-  );
-}
-
-function CharSelect2({ lobbyid, character }) {
-  const [characterSelection, setCharacterSelection] = useState(character);
-  const [showMenu, setShowMenu] = useState(false);
-
-  useEffect(() => {
-    api
-      .post(`/lobby/${lobbyid}/setchar`, { characterSelection })
-      .then(() => {
-        console.log('char update');
-      })
-      .catch((res) => {
-        console.log(res);
-      });
-  }, [character]);
-
-  if (showMenu) {
-    return (
-      <div className="flex justify-center">
-        <button type="button" className="relative flex items-center w-full p-2 rounded bg-gray-50 hover:bg-gray-100" onClick={() => setShowMenu(true)}>
-          ahhh
-          {characterSelection}
-        </button>
-
-        <button type="submit" className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">a</button>
-      </div>
-    );
-  }
-  return (
-    <button type="button" className="w-full p-2 rounded bg-gray-50 hover:bg-gray-100" onClick={() => setShowMenu(true)}>
-      aaa
-      {characterSelection}
-    </button>
   );
 }
 
@@ -100,7 +74,7 @@ function Lobby() {
             api
               .get(`/lobby/${lobbyId}/refresh`)
               .then((res) => {
-                console.log(res.data);
+                console.log(res.data.players);
                 setPlayers(res.data.players);
               });
             break;
@@ -110,30 +84,6 @@ function Lobby() {
       };
     }
   }, [params]);
-
-  // function handleRefresh() {
-  //   const message = {
-  //     Type: 'RefreshLobby',
-  //   };
-  //   socket.current.send(JSON.stringify(message));
-  // }
-
-  // function addPlayer() {
-  //   const newPlayer = {
-  //     id: 123,
-  //     name: 'Bing Bong',
-  //     character: 'Ron',
-  //   };
-
-  //   api
-  //     .post(`/lobby/${params.id}/addplayer`, newPlayer)
-  //     .then((res) => {
-  //       console.log(res);
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -149,18 +99,15 @@ function Lobby() {
           <tbody className="">
             {players.map((player) => (
               <tr key={player.id} className="justify-center items-center px-4 py-2 rounded border-b">
-                <td className="px-6 py-2">{player.name}</td>
-                <td className="px-6 py-2">
-                  {/* <CharSelect2 lobbyid={params.id} character={player.character} /> */}
-                  <CharSelect lobbyid={params.id} characterSelection={player.character} />
+                <td className="px-4 py-2">{player.name}</td>
+                <td className="px-4 py-2">
+                  <CharSelect lobbyid={params.id} characterSelection={player.character} canEdit={player.name === localStorage.getItem('sessionid')} player={player.name} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {/* <button className="border" onClick={handleRefresh} type="submit">refresh lobbies</button>
-      <button className="border" onClick={addPlayer} type="submit">addPlayer</button> */}
     </div>
   );
 }

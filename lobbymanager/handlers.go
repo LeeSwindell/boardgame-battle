@@ -13,6 +13,8 @@ import (
 )
 
 func RefreshLobby(c *Client) {
+	globalMu.Lock()
+	defer globalMu.Unlock()
 	err := c.conn.WriteJSON(lobbies)
 	if err != nil {
 		log.Println("error writing json in RefreshLobby, ", err)
@@ -97,6 +99,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	defer globalMu.Unlock()
 
 	newPlayerID := len(lobbies.Lobbies[id].Players)
+	log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
 		newPlayer := Player{
@@ -129,9 +132,14 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
+	log.Println("#############################")
+	log.Println(lobbies.Lobbies[id].Players)
+
 	w.Write(res)
 }
 
+// FIX, set the char that actually changed, not the one who sent the request.
+// ??
 func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	lobbyid, err := strconv.Atoi(vars["id"])
@@ -159,6 +167,7 @@ func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	// find the player
 	for i, p := range lobbies.Lobbies[lobbyid].Players {
 		if p.Name == user {
+			log.Println("!@#$%$^%&* user", user, "setting char of", p.Name, "to ", newChar)
 			lobbies.Lobbies[lobbyid].Players[i].Character = newChar
 			break
 		}

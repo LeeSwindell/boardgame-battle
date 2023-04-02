@@ -70,6 +70,7 @@ func main() {
 	r.HandleFunc("/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lobby/{id}/setchar", SetCharHandler)
+	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
 	r.HandleFunc("/lobby/{id}/addplayer", AddPlayerHandler)
 
 	handler := c.Handler(r)

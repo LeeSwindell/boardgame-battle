@@ -132,14 +132,9 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	log.Println("#############################")
-	log.Println(lobbies.Lobbies[id].Players)
-
 	w.Write(res)
 }
 
-// FIX, set the char that actually changed, not the one who sent the request.
-// ??
 func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	lobbyid, err := strconv.Atoi(vars["id"])
@@ -167,14 +162,45 @@ func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	// find the player
 	for i, p := range lobbies.Lobbies[lobbyid].Players {
 		if p.Name == user {
-			log.Println("!@#$%$^%&* user", user, "setting char of", p.Name, "to ", newChar)
 			lobbies.Lobbies[lobbyid].Players[i].Character = newChar
 			break
 		}
 	}
 
 	hub.SendRefreshRequest()
+}
 
+func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	lobbyid, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("err getting lobbyid in leavelobbyhandler:", err.Error())
+	}
+	user := r.Header.Get("Authorization")
+	if user == "" {
+		log.Println("empty username in leavelobby handler")
+		return
+	}
+
+	globalMu.Lock()
+	defer globalMu.Unlock()
+
+	remove := func(slice []Player, s int) []Player {
+		return append(slice[:s], slice[s+1:]...)
+	}
+
+	if len(lobbies.Lobbies[lobbyid].Players) <= 1 {
+		lobbies.Lobbies[lobbyid].Players = []Player{}
+	} else {
+		for i, p := range lobbies.Lobbies[lobbyid].Players {
+			if p.Name == user {
+				log.Println(lobbies.Lobbies[lobbyid].Players)
+				lobbies.Lobbies[lobbyid].Players = remove(lobbies.Lobbies[lobbyid].Players, i)
+				hub.SendRefreshRequest()
+				break
+			}
+		}
+	}
 }
 
 func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {

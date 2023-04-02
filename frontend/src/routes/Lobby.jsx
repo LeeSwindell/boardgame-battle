@@ -2,19 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 
-function CharSelect({
-  lobbyid, characterSelection, canEdit, player,
-}) {
+// TODO!!!
+// leaving a lobby
+// start game button for host
+
+function CharSelect({ lobbyid, characterSelection, canEdit }) {
   const [character, setCharacter] = useState(characterSelection);
 
   useEffect(() => {
-    console.log(`sending char post, char:${character} player:${player} charselection: ${characterSelection}`);
-
     if (canEdit) {
       api
         .post(`/lobby/${lobbyid}/setchar`, { character })
         .then(() => {
-          console.log('char update');
+          // console.log('char update');
         })
         .catch((res) => {
           console.log(res);
@@ -32,7 +32,7 @@ function CharSelect({
 
   return (
     <form>
-      <select name="char" id="char-select" value={characterSelection} onChange={handleOptionChange} className="block w-full p-2 rounded bg-gray-50 border border-gray-200 text-sm focus:ring-blue-500 focus:border-blue-500 ">
+      <select name="char" id="char-select" value={characterSelection} onChange={handleOptionChange} className="block w-full p-2 rounded bg-gray-50 border border-gray-200 focus:ring-blue-500 focus:border-blue-500 ">
         <option value="Ron">Ron</option>
         <option value="Hermione">Hermione</option>
         <option value="Neville">Neville</option>
@@ -53,7 +53,12 @@ function Lobby() {
     socket.current = new WebSocket('ws://localhost:8000/connectsocket');
     socket.current.onopen = () => console.log('lobby socket opened');
     socket.current.onclose = () => console.log('lobby socket closed');
-    return () => socket.current.close();
+
+    // cleanup socket connection and send a leavelobby request to backend when leaving page.
+    return () => {
+      api.get(`/lobby/${params.id}/leave`);
+      socket.current.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -62,7 +67,7 @@ function Lobby() {
     api
       .get(`/lobby/${lobbyId}/refresh`)
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setPlayers(res.data.players);
       });
 
@@ -74,7 +79,7 @@ function Lobby() {
             api
               .get(`/lobby/${lobbyId}/refresh`)
               .then((res) => {
-                console.log(res.data.players);
+                // console.log(res.data.players);
                 setPlayers(res.data.players);
               });
             break;
@@ -84,6 +89,14 @@ function Lobby() {
       };
     }
   }, [params]);
+
+  function leaveLobby() {
+    api
+      .get(`/lobby/${params.id}/leave`)
+      .then(() => {
+        // do nothing? presumably having left the page
+      });
+  }
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -108,6 +121,7 @@ function Lobby() {
           </tbody>
         </table>
       </div>
+      <button type="button" onClick={leaveLobby}>leave lobby</button>
     </div>
   );
 }

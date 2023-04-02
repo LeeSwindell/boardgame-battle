@@ -17,9 +17,8 @@ function Lobbies() {
     api
       .get('/lobbies')
       .then((res) => {
-        if (res.data.lobbies) {
-          console.log(res.data.lobbies);
-          setLobbies(res.data.lobbies);
+        if (res.data) {
+          setLobbies(res.data);
         }
       });
   }, []);

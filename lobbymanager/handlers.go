@@ -5,32 +5,11 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 )
-
-func RefreshLobby(c *Client) {
-	globalMu.Lock()
-	defer globalMu.Unlock()
-	err := c.conn.WriteJSON(lobbies)
-	if err != nil {
-		log.Println("error writing json in RefreshLobby, ", err)
-	}
-}
-
-func (h *Hub) SendRefreshRequest() {
-	message := Message{
-		Type: "RefreshRequest",
-		Data: "",
-	}
-
-	for c := range h.clients {
-		c.conn.WriteJSON(message)
-	}
-}
 
 func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
 	l, err := json.Marshal(lobbies)
@@ -80,7 +59,7 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	lobbies.Lobbies = append(lobbies.Lobbies, lobby)
+	lobbies = append(lobbies, lobby)
 
 	_, err := io.WriteString(w, fmt.Sprint(lobbyid))
 	if err != nil {
@@ -98,7 +77,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
 
-	newPlayerID := len(lobbies.Lobbies[id].Players)
+	newPlayerID := len(lobbies[id].Players)
 	log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
@@ -107,7 +86,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 			Name:      username,
 			Character: "Harry",
 		}
-		lobbies.Lobbies[id].Players = append(lobbies.Lobbies[id].Players, newPlayer)
+		lobbies[id].Players = append(lobbies[id].Players, newPlayer)
 	} else {
 		log.Println("err joining lobby, username empty")
 	}
@@ -125,7 +104,7 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	globalMu.Lock()
 	defer globalMu.Unlock()
-	lobby := lobbies.Lobbies[id]
+	lobby := lobbies[id]
 
 	res, err := json.Marshal(lobby)
 	if err != nil {
@@ -137,9 +116,9 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	lobbyid, err := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Println("err getting lobbyid in setchar:", err.Error())
+		log.Println("err getting id in setchar:", err.Error())
 	}
 	user := r.Header.Get("Authorization")
 	if user == "" {
@@ -159,10 +138,10 @@ func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 
 	globalMu.Lock()
 	defer globalMu.Unlock()
-	// find the player
-	for i, p := range lobbies.Lobbies[lobbyid].Players {
+
+	for i, p := range lobbies[id].Players {
 		if p.Name == user {
-			lobbies.Lobbies[lobbyid].Players[i].Character = newChar
+			lobbies[id].Players[i].Character = newChar
 			break
 		}
 	}
@@ -172,9 +151,9 @@ func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 
 func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	lobbyid, err := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Println("err getting lobbyid in leavelobbyhandler:", err.Error())
+		log.Println("err getting id in leavelobbyhandler:", err.Error())
 	}
 	user := r.Header.Get("Authorization")
 	if user == "" {
@@ -189,32 +168,16 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		return append(slice[:s], slice[s+1:]...)
 	}
 
-	if len(lobbies.Lobbies[lobbyid].Players) <= 1 {
-		lobbies.Lobbies[lobbyid].Players = []Player{}
+	if len(lobbies[id].Players) <= 1 {
+		lobbies[id].Players = []Player{}
 	} else {
-		for i, p := range lobbies.Lobbies[lobbyid].Players {
+		for i, p := range lobbies[id].Players {
 			if p.Name == user {
-				log.Println(lobbies.Lobbies[lobbyid].Players)
-				lobbies.Lobbies[lobbyid].Players = remove(lobbies.Lobbies[lobbyid].Players, i)
+				log.Println(lobbies[id].Players)
+				lobbies[id].Players = remove(lobbies[id].Players, i)
 				hub.SendRefreshRequest()
 				break
 			}
 		}
 	}
-}
-
-func AddPlayerHandler(w http.ResponseWriter, r *http.Request) {
-	var player Player
-	err := json.NewDecoder(r.Body).Decode(&player)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	player.ID = rand.Intn(102030)
-
-	// players.Players = append(players.Players, player)
-	hub.SendRefreshRequest()
-
-	w.WriteHeader(http.StatusCreated)
 }

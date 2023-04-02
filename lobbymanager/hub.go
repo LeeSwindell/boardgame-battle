@@ -21,10 +21,21 @@ func newHub() *Hub {
 func (h *Hub) handleMessage(c *Client, msgType int, message Message) {
 	switch message.Type {
 	case "RefreshLobby":
-		println("get lobbies request")
-		RefreshLobby(c)
+		// println("get lobbies request")
+		// RefreshLobby(c)
 	default:
 		log.Printf("unknown message type %s", message.Type)
+	}
+}
+
+func (h *Hub) SendRefreshRequest() {
+	message := Message{
+		Type: "RefreshRequest",
+		Data: "",
+	}
+
+	for c := range h.clients {
+		c.conn.WriteJSON(message)
 	}
 }
 

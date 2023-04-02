@@ -18,7 +18,10 @@ import (
 var globalMu sync.Mutex
 var hub = newHub()
 var lobbyNumber int
-var lobbies Lobbies
+var lobbies []Lobby
+
+// var lobbies Lobbies
+// var testlobbies []Lobby
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -71,7 +74,6 @@ func main() {
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lobby/{id}/setchar", SetCharHandler)
 	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
-	r.HandleFunc("/lobby/{id}/addplayer", AddPlayerHandler)
 
 	handler := c.Handler(r)
 	log.Fatal(http.ListenAndServe(":8000", handler))

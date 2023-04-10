@@ -1,58 +1,64 @@
 package game
 
+import "sync"
+
 type Gamestate struct {
-	players     []Player
-	villains    []Villain
-	locations   []Location
-	currentTurn Player
+	Players     []Player   `json:"players"`
+	Villains    []Villain  `json:"villains"`
+	Locations   []Location `json:"locations"`
+	CurrentTurn Player     `json:"currentturn"`
+	mu          sync.Mutex
 }
 
 type Player struct {
-	name      string
-	character string
-	health    int
-	damage    int
-	money     int
-	deck      Deck
-	hand      Hand
-	discard   Discard
-	playArea  PlayArea
+	Name      string
+	Character string
+	Health    int
+	Damage    int
+	Money     int
+	Deck      Deck
+	Hand      Hand
+	Discard   Discard
+	PlayArea  PlayArea
 }
 
 type Card struct {
-	id      int
-	name    string
-	effects []Effect
+	Id      int
+	Name    string
+	Effects []Effect
 }
 
 type Location struct {
-	maxControl int
-	curControl int
-	effect     []Effect
+	MaxControl int
+	CurControl int
+	Effect     []Effect
 }
 
 type PlayArea struct {
-	cards []Card
+	Cards []Card
 }
 
 type Deck struct {
-	cards []Card
+	Cards []Card
 }
 
 type Hand struct {
-	cards []Card
+	Cards []Card
 }
 
 type Discard struct {
-	cards []Card
+	Cards []Card
 }
 
 type Villain struct {
-	name        string
-	curDamage   int
-	maxHp       int
-	deathEffect Effect
+	Name        string
+	CurDamage   int
+	MaxHp       int
+	Effect      Effect
+	DeathEffect Effect
 }
 
-type Effect struct {
+// Define an effect as something that changes the gamestate.
+type Effect interface {
+	Trigger(gs *Gamestate)
 }

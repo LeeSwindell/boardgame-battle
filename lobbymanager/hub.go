@@ -2,12 +2,19 @@ package main
 
 import (
 	"log"
+
+	game "github.com/LeeSwindell/boardgame-battle/backend"
 )
 
 type Hub struct {
 	clients    map[*Client]bool
 	register   chan *Client
 	unregister chan *Client
+}
+
+type Message struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 func newHub() *Hub {
@@ -32,6 +39,28 @@ func (h *Hub) SendRefreshRequest() {
 	message := Message{
 		Type: "RefreshRequest",
 		Data: "",
+	}
+
+	for c := range h.clients {
+		c.conn.WriteJSON(message)
+	}
+}
+
+func (h *Hub) SendStartGame() {
+	message := Message{
+		Type: "StartGame",
+		Data: "",
+	}
+
+	for c := range h.clients {
+		c.conn.WriteJSON(message)
+	}
+}
+
+func (h *Hub) SendGameState(gs game.Gamestate) {
+	message := Message{
+		Type: "Gamestate",
+		Data: gs,
 	}
 
 	for c := range h.clients {

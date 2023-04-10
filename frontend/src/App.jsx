@@ -5,7 +5,7 @@ import Home from './routes/Home';
 import Lobby from './routes/Lobby';
 import Lobbies from './routes/Lobbies';
 import LoginPage from './routes/LoginPage';
-import api from './api';
+import { api } from './api';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -43,7 +43,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="lobby/:id" loader={({ params }) => console.log(params[':id'])} element={<Lobby />} />
       <Route path="lobbies" element={<Lobbies />} />
-      <Route path="game" element={<Game />} />
+      <Route path="game/:id" loader={({ params }) => console.log(params[':id'])} element={<Game />} />
     </Routes>
   );
 }

@@ -1,4 +1,6 @@
-import { useState, createContext, useContext } from 'react';
+import {
+  useState, createContext, useContext, useEffect, useRef,
+} from 'react';
 import CardContainer from '../components/CardContainer';
 import DiscardPile from '../components/Discard';
 import EndTurn from '../components/Endturn';
@@ -8,6 +10,7 @@ import InspectCard from '../components/Inspectcard';
 import PlayArea from '../components/Playarea';
 import PlayerInfo from '../components/Playerinfo';
 // import { Route, Link, BrowserRouter as Router } from "react-router-dom"
+import { api, gameapi } from '../api';
 
 // use react context to pass inspect around
 const InspectContext = createContext();
@@ -29,6 +32,33 @@ function useInspect() {
 export { useInspect };
 
 function Game() {
+  // create socket, read values from gamestate to set health.
+  const socket = useRef(null);
+  const [gs, setGs] = useState(null);
+  console.log(gs);
+
+  useEffect(() => {
+    socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    socket.current.onopen = () => console.log('lobby socket opened');
+    socket.current.onclose = () => console.log('lobby socket closed');
+
+    socket.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case 'Gamestate':
+          setGs(data.data);
+          break;
+        default:
+          break;
+      }
+    };
+
+    // cleanup socket connection and send a request to backend when leaving page.
+    return () => {
+      socket.current.close();
+    };
+  }, []);
+
   return (
     <InspectProvider>
       <InspectCard />

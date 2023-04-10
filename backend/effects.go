@@ -2,66 +2,76 @@ package game
 
 import "math/rand"
 
+type DamageAllPlayers struct {
+	amount int
+}
+
+func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
+	for _, player := range gs.Players {
+		player.Health -= effect.amount
+	}
+}
+
 func Damage(p *Player, amount int) {
-	p.health -= amount
+	p.Health -= amount
 }
 
 func DamageAll(gs *Gamestate, amount int) {
-	for _, p := range gs.players {
-		p.health -= amount
+	for _, p := range gs.Players {
+		p.Health -= amount
 	}
 }
 
 func spendMoney(p *Player, amount int) {
-	p.money -= amount
+	p.Money -= amount
 }
 
 func gainMoney(p *Player, amount int) {
-	p.money += amount
+	p.Money += amount
 }
 
 func giveAllMoney(gs *Gamestate, amount int) {
-	for _, p := range gs.players {
-		p.money += amount
+	for _, p := range gs.Players {
+		p.Money += amount
 	}
 }
 
 func changeDamage(p *Player, amount int) {
-	p.damage += amount
+	p.Damage += amount
 }
 
 func giveAllDamage(gs *Gamestate, amount int) {
-	for _, p := range gs.players {
-		p.damage += amount
+	for _, p := range gs.Players {
+		p.Damage += amount
 	}
 }
 
 func buyCard(gs *Gamestate, p *Player, card Card, cost int) {
 	spendMoney(p, cost)
-	p.discard.cards = append(p.discard.cards, card)
+	p.Discard.Cards = append(p.Discard.Cards, card)
 	// Remove from market FIX
 }
 
 func addControl(gs *Gamestate) {
-	l := gs.locations[0]
-	l.curControl += 1
-	if l.curControl == l.maxControl && len(gs.locations) > 1 {
-		gs.locations = gs.locations[1:]
-	} else if l.curControl == l.maxControl && len(gs.locations) == 1 {
+	l := gs.Locations[0]
+	l.CurControl += 1
+	if l.CurControl == l.MaxControl && len(gs.Locations) > 1 {
+		gs.Locations = gs.Locations[1:]
+	} else if l.CurControl == l.MaxControl && len(gs.Locations) == 1 {
 		gameOver(gs, "no")
 	}
 }
 
 func damageVillain(v *Villain) {
-	v.curDamage += 1
-	if v.curDamage == v.maxHp {
+	v.CurDamage += 1
+	if v.CurDamage == v.MaxHp {
 		// FIX trigger death effect, draw new villain
 	}
 }
 
 func healVillain(v *Villain) {
-	if v.curDamage > 0 {
-		v.curDamage -= 1
+	if v.CurDamage > 0 {
+		v.CurDamage -= 1
 	}
 }
 

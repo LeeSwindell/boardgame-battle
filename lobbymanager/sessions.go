@@ -61,7 +61,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			Expires: expiration,
 		})
 	}
-
 }
 
 func verifyCredentials(username string) bool {

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	game "github.com/LeeSwindell/boardgame-battle/backend"
 	"github.com/gorilla/mux"
 )
 
@@ -42,8 +43,9 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
-	lobbyid := lobbyNumber
+	lobbyid := len(lobbies)
 	lobbyNumber++
+	playerid := int(getUniquePlayerId().ID())
 
 	hostname := r.Header.Get("Authorization")
 	lobby := Lobby{
@@ -52,7 +54,7 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		Host: hostname,
 		Players: []Player{
 			{
-				ID:        0,
+				ID:        playerid,
 				Name:      hostname,
 				Character: "Harry",
 			},
@@ -77,7 +79,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
 
-	newPlayerID := len(lobbies[id].Players)
+	newPlayerID := int(getUniquePlayerId().ID())
 	log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
@@ -169,7 +171,9 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(lobbies[id].Players) <= 1 {
-		lobbies[id].Players = []Player{}
+		// lobbies[id].Players = []Player{}
+		// just delete the empty lobby.
+		lobbies = append(lobbies[:id], lobbies[id+1:]...)
 	} else {
 		for i, p := range lobbies[id].Players {
 			if p.Name == user {
@@ -180,4 +184,38 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+func StartGameHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("err getting id in startlobbyhandler:", err.Error())
+	}
+
+	startingPlayers := []game.Player{}
+	for _, p := range lobbies[id].Players {
+		startingPlayers = append(startingPlayers, game.Player{
+			Name:      p.Name,
+			Character: p.Character,
+		})
+	}
+
+	game.StartGame(startingPlayers)
+	hub.SendStartGame()
+	// delete lobby info.
+}
+
+func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
+	// Not needed until lobbies are grouped by id - currently only one game will work.
+	// vars := mux.Vars(r)
+	// id, err := strconv.Atoi(vars["id"])
+	// if err != nil {
+	// 	log.Println("err getting id in refreshgamestatehandler:", err.Error())
+	// }
+
+	var gs game.Gamestate
+	json.NewDecoder(r.Body).Decode(&gs)
+
+	hub.SendGameState(gs)
 }

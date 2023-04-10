@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import api from '../api';
-
-// TODO!!!
-// leaving a lobby
-// start game button for host
+import { useParams, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 
 function CharSelect({ lobbyid, characterSelection, canEdit }) {
   const [character, setCharacter] = useState(characterSelection);
@@ -45,8 +41,16 @@ function CharSelect({ lobbyid, characterSelection, canEdit }) {
 
 function Lobby() {
   const params = useParams();
-  const [players, setPlayers] = useState([]);
   const socket = useRef(null);
+  const navigate = useNavigate();
+  const [players, setPlayers] = useState([]);
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    if (url) {
+      navigate(url);
+    }
+  });
 
   // Create the socket connection
   useEffect(() => {
@@ -54,7 +58,7 @@ function Lobby() {
     socket.current.onopen = () => console.log('lobby socket opened');
     socket.current.onclose = () => console.log('lobby socket closed');
 
-    // cleanup socket connection and send a leavelobby request to backend when leaving page.
+    // cleanup socket connection and send a request to backend when leaving page.
     return () => {
       api.get(`/lobby/${params.id}/leave`);
       socket.current.close();
@@ -83,6 +87,9 @@ function Lobby() {
                 setPlayers(res.data.players);
               });
             break;
+          case 'StartGame':
+            setUrl(`/game/${lobbyId}`);
+            break;
           default:
             break;
         }
@@ -90,12 +97,9 @@ function Lobby() {
     }
   }, [params]);
 
-  function leaveLobby() {
+  function startGame() {
     api
-      .get(`/lobby/${params.id}/leave`)
-      .then(() => {
-        // do nothing? presumably having left the page
-      });
+      .get(`/lobby/${params.id}/startgame`);
   }
 
   return (
@@ -121,7 +125,7 @@ function Lobby() {
           </tbody>
         </table>
       </div>
-      <button type="button" onClick={leaveLobby}>leave lobby</button>
+      <button type="button" onClick={startGame} className="bg-blue-500 rounded py-2 px-4 m-4 text-white hover:bg-blue-700 hover:shadow-lg font-bold">Start</button>
     </div>
   );
 }

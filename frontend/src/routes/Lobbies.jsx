@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import api from '../api';
+import { api } from '../api';
 
 function Lobbies() {
   const [lobbies, setLobbies] = useState([]);

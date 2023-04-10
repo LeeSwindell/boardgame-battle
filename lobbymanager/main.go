@@ -20,9 +20,6 @@ var hub = newHub()
 var lobbyNumber int
 var lobbies []Lobby
 
-// var lobbies Lobbies
-// var testlobbies []Lobby
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -35,19 +32,10 @@ type Lobby struct {
 	Players []Player `json:"players"`
 }
 
-type Lobbies struct {
-	Lobbies []Lobby `json:"lobbies"`
-}
-
 type Player struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	Character string `json:"character"`
-}
-
-type Message struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
 }
 
 func getUniquePlayerId() uuid.UUID {
@@ -74,6 +62,8 @@ func main() {
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lobby/{id}/setchar", SetCharHandler)
 	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
+	r.HandleFunc("/lobby/{id}/startgame", StartGameHandler)
+	r.HandleFunc("/game/{id}/refreshgamestate", RefreshGamestateHandler)
 
 	handler := c.Handler(r)
 	log.Fatal(http.ListenAndServe(":8000", handler))

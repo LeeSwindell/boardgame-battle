@@ -1,8 +1,11 @@
 function DarkArtCard() {
   return (
-    <div className="">
-      Dark Art
-    </div>
+    <>
+      <img src="/images/darkarts/dementorskiss.jpg" alt="dementors kiss" />
+      {/* <div className="">
+        Dark Art
+      </div> */}
+    </>
   );
 }
 

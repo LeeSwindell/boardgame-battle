@@ -1,8 +1,6 @@
 function Location() {
   return (
-    <div className="">
-      Location
-    </div>
+    <img src="/images/locations/location3.jpg" alt="great hall" />
   );
 }
 

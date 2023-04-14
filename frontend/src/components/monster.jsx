@@ -1,8 +1,6 @@
 function Monster() {
   return (
-    <div className="">
-      Monster
-    </div>
+    <img src="/images/monsters/pixies.jpg" alt="pixies" />
   );
 }
 

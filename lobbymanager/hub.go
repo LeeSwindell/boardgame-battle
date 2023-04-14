@@ -57,7 +57,7 @@ func (h *Hub) SendStartGame() {
 	}
 }
 
-func (h *Hub) SendGameState(gs game.Gamestate) {
+func (h *Hub) SendGameState(gs *game.Gamestate) {
 	message := Message{
 		Type: "Gamestate",
 		Data: gs,

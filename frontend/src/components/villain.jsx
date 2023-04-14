@@ -1,8 +1,6 @@
 function Villain() {
   return (
-    <div className="">
-      Villain
-    </div>
+    <img src="/images/villains/cornishpixies.jpg" alt="cornish pixies" />
   );
 }
 

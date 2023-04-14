@@ -1,6 +1,9 @@
 package game
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,5 +26,17 @@ func getUserAndId(r *http.Request) (int, string) {
 }
 
 func SendLobbyUpdate(id int, gs *Gamestate) {
+	url := fmt.Sprintf("http://localhost:8000/game/%d/refreshgamestate", id)
+	data, err := json.Marshal(gs)
+	if err != nil {
+		log.Println("err marshaling gamestate:", err.Error())
+	}
 
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Println("err sending lobby update:", err.Error())
+	}
+
+	client := http.Client{}
+	client.Do(req)
 }

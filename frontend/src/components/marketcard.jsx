@@ -1,8 +1,6 @@
 function MarketCard() {
   return (
-    <div>
-      Market Card
-    </div>
+    <img src="/images/marketcards/detention.jpg" alt="detention" />
   );
 }
 

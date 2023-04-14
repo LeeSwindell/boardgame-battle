@@ -217,5 +217,5 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 	var gs game.Gamestate
 	json.NewDecoder(r.Body).Decode(&gs)
 
-	hub.SendGameState(gs)
+	hub.SendGameState(&gs)
 }

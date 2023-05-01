@@ -26,6 +26,9 @@ func RunGameServer(gs *Gamestate) {
 	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
 		PlayCardHandler(w, r, gs)
 	})
+	r.HandleFunc("/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
+		GetGamestateHandler(w, r, gs)
+	})
 
 	handler := c.Handler(r)
 	log.Println("starting game engine on port 8080!")

@@ -1,5 +1,5 @@
 import {
-  useState, createContext, useContext, useEffect, useRef,
+  useState, createContext, useContext, useEffect, useRef, useMemo,
 } from 'react';
 import CardContainer from '../components/CardContainer';
 import DiscardPile from '../components/Discard';
@@ -10,14 +10,18 @@ import InspectCard from '../components/Inspectcard';
 import PlayArea from '../components/Playarea';
 import PlayerInfo from '../components/Playerinfo';
 // import { Route, Link, BrowserRouter as Router } from "react-router-dom"
-import { api, gameapi } from '../api';
+import { gameapi } from '../api';
 
 // use react context to pass inspect around
+
+// FIX! EXTRACT PROVIDERS TO A COMPONENT, ONE CONTEXT PER PROVIDER
+
 const InspectContext = createContext();
 
 function InspectProvider({ children }) {
   const [inspectCard, setInspectCard] = useState();
-  const value = { inspectCard, setInspectCard };
+  const value = useMemo(() => ({ inspectCard, setInspectCard }), [inspectCard]);
+
   return <InspectContext.Provider value={value}>{children}</InspectContext.Provider>;
 }
 
@@ -35,7 +39,21 @@ const GamestateContext = createContext();
 
 function GamestateProvider({ children }) {
   const socket = useRef(null);
-  const [gamestate, setGamestate] = useState({});
+  const [gamestate, setGamestate] = useState();
+  const value = useMemo(() => ({ gamestate, setGamestate, socket }), [gamestate, socket]);
+
+  useEffect(() => {
+    gameapi
+      .get('/0/getgamestate')
+      .then((response) => {
+        setGamestate(response.data);
+      });
+  }, []);
+
+  // just to see how gamestate changes.
+  useEffect(() => {
+    console.log(gamestate);
+  }, [gamestate]);
 
   useEffect(() => {
     socket.current = new WebSocket('ws://localhost:8000/connectsocket');
@@ -47,8 +65,7 @@ function GamestateProvider({ children }) {
       switch (data.type) {
         case 'Gamestate':
           setGamestate(data.data);
-          console.log(data.data);
-          console.log(gamestate);
+          // console.log(data.data);
           break;
         default:
           break;
@@ -62,65 +79,58 @@ function GamestateProvider({ children }) {
   }, []);
 
   return (
-    <GamestateContext.Provider value={gamestate}>
+    <GamestateContext.Provider value={value}>
       {children}
     </GamestateContext.Provider>
   );
 }
 
+function useGamestate() {
+  const context = useContext(GamestateContext);
+  if (context === undefined) {
+    throw new Error('useGamestate must be used within GamestateProvider');
+  }
+  return context;
+}
+
+export { useGamestate };
+
+function GameWithState() {
+  const { gamestate, socket } = useGamestate();
+  console.log('gs: ', gamestate);
+  console.log(socket);
+  return (
+    <>
+      <InspectCard />
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col space-y-4 w-auto h-auto">
+          <Gameboard />
+          <PlayArea />
+          <Hand />
+        </div>
+        <div className="flex flex-col border justify-between items-center">
+          <div>
+            {gamestate && gamestate.players.map((p, i) => (
+              // console.log('mapping players')
+              <PlayerInfo key={p.Name} playerName={p.Name} playerIndex={i} />
+            ))}
+            <EndTurn />
+          </div>
+          <div className="flex flex-col">
+            <div className="text-center">Discard Pile</div>
+            <CardContainer card={<DiscardPile />} size="reg" extra="p-2 m-2" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function Game() {
-  // // create socket, read values from gamestate to set health.
-  // const socket = useRef(null);
-  // const [gs, setGs] = useState(null);
-
-  // useEffect(() => {
-  //   socket.current = new WebSocket('ws://localhost:8000/connectsocket');
-  //   socket.current.onopen = () => console.log('lobby socket opened');
-  //   socket.current.onclose = () => console.log('lobby socket closed');
-
-  //   socket.current.onmessage = (event) => {
-  //     const data = JSON.parse(event.data);
-  //     switch (data.type) {
-  //       case 'Gamestate':
-  //         setGs(data.data);
-  //         console.log(data.data);
-  //         console.log(gs);
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   };
-
-  //   // cleanup socket connection and send a request to backend when leaving page.
-  //   return () => {
-  //     socket.current.close();
-  //   };
-  // }, []);
-
   return (
     <GamestateProvider>
       <InspectProvider>
-        <InspectCard />
-        <div className="flex flex-row justify-between">
-          <div className="flex flex-col space-y-4 w-auto h-auto">
-            <Gameboard />
-            <PlayArea />
-            <Hand />
-          </div>
-          <div className="flex flex-col border justify-between items-center">
-            <div>
-              <PlayerInfo />
-              <PlayerInfo />
-              <PlayerInfo />
-              <PlayerInfo />
-              <EndTurn />
-            </div>
-            <div className="flex flex-col">
-              <div className="text-center">Discard Pile</div>
-              <CardContainer card={<DiscardPile />} size="reg" extra="p-2 m-2" />
-            </div>
-          </div>
-        </div>
+        <GameWithState />
       </InspectProvider>
     </GamestateProvider>
   );

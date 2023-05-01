@@ -9,7 +9,7 @@ function Gameboard(props) {
   return (
     <div className="flex flex-col m-1 border">
       {/* Top Row */}
-      <div className="flex flex-none p-1 space-x-8 justify-between border">
+      <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
         <CardContainer card={<Location />} size="wide" />
         <div className="flex space-x-2 justify-center">
           <CardContainer card={<DarkArtCard />} size="reg" />
@@ -23,7 +23,7 @@ function Gameboard(props) {
       </div>
 
       {/* Middle Row */}
-      <div className="flex flex-none p-1 space-x-8 justify-between border">
+      <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
         <CardContainer card={<Villain />} size="wide" />
         <CardContainer card={<Villain />} size="wide" />
         <CardContainer card={<Villain />} size="wide" />

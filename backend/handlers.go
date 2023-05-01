@@ -27,3 +27,12 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	SendLobbyUpdate(id, gs)
 }
+
+func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
+	// id, _ := getUserAndId(r)
+
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	json.NewEncoder(w).Encode(gs)
+}

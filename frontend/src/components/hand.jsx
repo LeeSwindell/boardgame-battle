@@ -1,8 +1,10 @@
 import CardContainer from './CardContainer';
 import MarketCard from './Marketcard';
 import { gameapi } from '../api';
+import { useGamestate } from '../routes/Game';
 
 function Hand() {
+  const { gamestate } = useGamestate();
   function playCardHandler() {
     console.log('playcard TestCard');
     gameapi

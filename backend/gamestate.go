@@ -2,11 +2,12 @@ package game
 
 import "sync"
 
+// players --> map[string]Player based on username
 type Gamestate struct {
-	Players     []Player   `json:"players"`
-	Villains    []Villain  `json:"villains"`
-	Locations   []Location `json:"locations"`
-	CurrentTurn Player     `json:"currentturn"`
+	Players     map[string]Player `json:"players"`
+	Villains    []Villain         `json:"villains"`
+	Locations   []Location        `json:"locations"`
+	CurrentTurn Player            `json:"currentturn"`
 	mu          sync.Mutex
 }
 

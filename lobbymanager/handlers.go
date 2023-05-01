@@ -193,15 +193,21 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting id in startlobbyhandler:", err.Error())
 	}
 
-	startingPlayers := []game.Player{}
+	startingPlayers := map[string]game.Player{}
+	turnOrder := []string{}
 	for _, p := range lobbies[id].Players {
-		startingPlayers = append(startingPlayers, game.Player{
+		startingPlayers[p.Name] = game.Player{
 			Name:      p.Name,
 			Character: p.Character,
-		})
+			Health:    10,
+			Money:     0,
+			Damage:    0,
+		}
+
+		turnOrder = append(turnOrder, p.Name)
 	}
 
-	game.StartGame(startingPlayers)
+	game.StartGame(startingPlayers, turnOrder)
 	hub.SendStartGame()
 	// delete lobby info.
 }

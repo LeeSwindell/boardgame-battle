@@ -65,7 +65,6 @@ function GamestateProvider({ children }) {
       switch (data.type) {
         case 'Gamestate':
           setGamestate(data.data);
-          // console.log(data.data);
           break;
         default:
           break;
@@ -96,34 +95,34 @@ function useGamestate() {
 export { useGamestate };
 
 function GameWithState() {
-  const { gamestate, socket } = useGamestate();
-  console.log('gs: ', gamestate);
-  console.log(socket);
-  return (
-    <>
-      <InspectCard />
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-col space-y-4 w-auto h-auto">
-          <Gameboard />
-          <PlayArea />
-          <Hand />
-        </div>
-        <div className="flex flex-col border justify-between items-center">
-          <div>
-            {gamestate && gamestate.players.map((p, i) => (
-              // console.log('mapping players')
-              <PlayerInfo key={p.Name} playerName={p.Name} playerIndex={i} />
-            ))}
-            <EndTurn />
+  const { gamestate } = useGamestate();
+  if (gamestate) {
+    return (
+      <>
+        <InspectCard />
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-col space-y-4 w-auto h-auto">
+            <Gameboard />
+            <PlayArea />
+            <Hand />
           </div>
-          <div className="flex flex-col">
-            <div className="text-center">Discard Pile</div>
-            <CardContainer card={<DiscardPile />} size="reg" extra="p-2 m-2" />
+          <div className="flex flex-col border justify-between items-center">
+            <div>
+              {
+                Object.entries(gamestate.players)
+                  .map(([username]) => (<PlayerInfo key={username} username={username} />))
+              }
+              <EndTurn />
+            </div>
+            <div className="flex flex-col">
+              <div className="text-center">Discard Pile</div>
+              <CardContainer card={<DiscardPile />} size="reg" extra="p-2 m-2" />
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  }
 }
 
 function Game() {

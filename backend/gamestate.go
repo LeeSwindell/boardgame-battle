@@ -26,6 +26,7 @@ type Player struct {
 type Card struct {
 	Id      int
 	Name    string
+	ImgPath string
 	Effects []Effect
 }
 

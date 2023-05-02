@@ -1,15 +1,44 @@
 package game
 
-import "math/rand"
+import (
+	"log"
+	"math/rand"
+)
 
 type DamageAllPlayers struct {
 	amount int
 }
 
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
-	for _, player := range gs.Players {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	for name, _ := range gs.Players {
+		player, ok := gs.Players[name]
+		if !ok {
+			log.Println("error getting player in DamageAllPlayers effect")
+			return
+		}
 		player.Health -= effect.amount
 	}
+}
+
+type GainMoney struct {
+	amount int
+}
+
+// FIX - give only current turn player
+func (effect GainMoney) Trigger(gs *Gamestate) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	for name := range gs.Players {
+		player, ok := gs.Players[name]
+		if !ok {
+			log.Println("error getting player in GainMoney effect")
+			return
+		}
+		player.Money += effect.amount
+	}
+
 }
 
 func Damage(p *Player, amount int) {
@@ -24,10 +53,6 @@ func DamageAll(gs *Gamestate, amount int) {
 
 func spendMoney(p *Player, amount int) {
 	p.Money -= amount
-}
-
-func gainMoney(p *Player, amount int) {
-	p.Money += amount
 }
 
 func giveAllMoney(gs *Gamestate, amount int) {

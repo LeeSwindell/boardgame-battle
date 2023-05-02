@@ -1,6 +1,6 @@
-function MarketCard() {
+function MarketCard({ img }) {
   return (
-    <img src="/images/marketcards/detention.jpg" alt="detention" className="object-contain" />
+    <img src={img} alt="detention" className="object-contain" />
   );
 }
 

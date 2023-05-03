@@ -6,26 +6,35 @@ import (
 	"net/http"
 )
 
+type CardId struct {
+	Id int `json:"id"`
+}
+
 func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
-	id, user := getUserAndId(r)
+	lobbyId, user := getUserAndId(r)
 	if gs.CurrentTurn.Name != user {
 		log.Println("Not your turn!")
 		return
 	}
 
-	var data map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&data)
-	cardname := data["cardname"]
-
-	card := cards[cardname.(string)]
+	var cardId CardId
+	json.NewDecoder(r.Body).Decode(&cardId)
+	log.Println("*******cardID", cardId.Id)
 
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
-	for _, e := range card.Effects {
-		e.Trigger(gs)
+	for _, c := range gs.Players[user].Hand.Cards {
+		if c.Id == cardId.Id {
+			card := c
+			log.Println("playing card:", card.Name)
+			for _, e := range card.Effects {
+				log.Println("triggering an effect:", e)
+				e.Trigger(gs)
+			}
+		}
 	}
 
-	SendLobbyUpdate(id, gs)
+	SendLobbyUpdate(lobbyId, gs)
 }
 
 func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {

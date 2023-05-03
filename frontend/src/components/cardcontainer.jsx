@@ -1,4 +1,5 @@
 import { useInspect } from '../routes/Game';
+import { gameapi } from '../api';
 
 export const Sizes = {
   reg: 'w-32 h-40',
@@ -7,13 +8,27 @@ export const Sizes = {
   widezoom: 'w-80, h-64',
 };
 
-function CardContainer({ card, size, extra }) {
+function CardContainer({
+  card, size, extra, cardId, cardType,
+}) {
   const { setInspectCard } = useInspect();
+
+  function playCardHandler(id) {
+    console.log('playing card:', id);
+    gameapi
+      .post('/0/playcard', { id })
+      .then(() => {
+        // console.log('playcard TestCard');
+      });
+  }
 
   const onClick = (e) => {
     e.preventDefault();
     if (e.nativeEvent.button === 2) {
       setInspectCard(card);
+    }
+    if (cardType === 'hand' && e.nativeEvent.button === 0) {
+      playCardHandler(cardId);
     }
   };
 

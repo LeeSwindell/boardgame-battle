@@ -1,6 +1,7 @@
 import {
   useState, createContext, useContext, useEffect, useRef, useMemo,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CardContainer from '../components/CardContainer';
 import DiscardPile from '../components/Discard';
 import EndTurn from '../components/Endturn';
@@ -41,12 +42,17 @@ function GamestateProvider({ children }) {
   const socket = useRef(null);
   const [gamestate, setGamestate] = useState();
   const value = useMemo(() => ({ gamestate, setGamestate, socket }), [gamestate, socket]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     gameapi
       .get('/0/getgamestate')
       .then((response) => {
         setGamestate(response.data);
+      })
+      .catch(() => {
+        console.log('error');
+        navigate('/');
       });
   }, []);
 

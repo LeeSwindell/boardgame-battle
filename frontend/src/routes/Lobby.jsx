@@ -73,6 +73,10 @@ function Lobby() {
       .then((res) => {
         // console.log(res.data);
         setPlayers(res.data.players);
+      })
+      .catch(() => {
+        console.log('error');
+        navigate('/');
       });
 
     if (socket !== null && lobbyId) {

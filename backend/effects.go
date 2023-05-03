@@ -10,8 +10,6 @@ type DamageAllPlayers struct {
 }
 
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
-	gs.mu.Lock()
-	defer gs.mu.Unlock()
 	for name, _ := range gs.Players {
 		player, ok := gs.Players[name]
 		if !ok {
@@ -28,17 +26,14 @@ type GainMoney struct {
 
 // FIX - give only current turn player
 func (effect GainMoney) Trigger(gs *Gamestate) {
-	gs.mu.Lock()
-	defer gs.mu.Unlock()
 	for name := range gs.Players {
 		player, ok := gs.Players[name]
 		if !ok {
-			log.Println("error getting player in GainMoney effect")
 			return
 		}
 		player.Money += effect.amount
+		gs.Players[name] = player
 	}
-
 }
 
 func Damage(p *Player, amount int) {

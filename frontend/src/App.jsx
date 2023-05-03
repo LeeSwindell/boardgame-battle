@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Game from './routes/Game';
 import Home from './routes/Home';
@@ -21,7 +21,6 @@ function App() {
       .then((response) => {
         setIsLoading(false);
         if (response.data === true) {
-          // console.log('logged in with session id:', localSessionid);
           setLoggedIn(true);
         }
       })

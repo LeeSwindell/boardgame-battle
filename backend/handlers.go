@@ -11,7 +11,7 @@ type CardId struct {
 }
 
 func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
-	lobbyId, user := getUserAndId(r)
+	gameid, user := getIdAndUser(r)
 	if gs.CurrentTurn.Name != user {
 		log.Println("Not your turn!")
 		return
@@ -34,7 +34,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		}
 	}
 
-	SendLobbyUpdate(lobbyId, gs)
+	SendLobbyUpdate(gameid, gs)
 }
 
 func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
@@ -44,4 +44,18 @@ func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) 
 	defer gs.mu.Unlock()
 
 	json.NewEncoder(w).Encode(gs)
+}
+
+func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
+	gameid, user := getIdAndUser(r)
+
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	updatedPlayer := gs.Players[user]
+	updatedPlayer.Discard.Cards = append(updatedPlayer.Discard.Cards, updatedPlayer.PlayArea.Cards...)
+	updatedPlayer.PlayArea.Cards = []Card{}
+	gs.Players[user] = updatedPlayer
+
+	SendLobbyUpdate(gameid, gs)
 }

@@ -9,10 +9,6 @@ import (
 	"github.com/rs/cors"
 )
 
-func endTurnHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func RunGameServer(gs *Gamestate) {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
@@ -22,7 +18,9 @@ func RunGameServer(gs *Gamestate) {
 		AllowCredentials: true,
 	})
 
-	r.HandleFunc("/{id}/endturn", endTurnHandler)
+	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
+		EndTurnHandler(w, r, gs)
+	})
 	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
 		PlayCardHandler(w, r, gs)
 	})

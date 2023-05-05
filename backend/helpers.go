@@ -13,7 +13,7 @@ import (
 )
 
 // returns the lobbyid and username associated with a request
-func getUserAndId(r *http.Request) (int, string) {
+func getIdAndUser(r *http.Request) (int, string) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {

@@ -22,7 +22,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
-	for _, c := range gs.Players[user].Hand.Cards {
+	for i, c := range gs.Players[user].Hand.Cards {
 		if c.Id == cardId.Id {
 			card := c
 			log.Println("playing card:", card.Name)
@@ -30,6 +30,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 				log.Println("triggering an effect:", e)
 				e.Trigger(gs)
 			}
+			MoveToPlayed(user, i, gs)
 		}
 	}
 

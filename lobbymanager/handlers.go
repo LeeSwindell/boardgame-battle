@@ -204,6 +204,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 			Damage:    0,
 			Deck:      game.RonStartingDeck(),
 			Hand:      game.Hand{game.RonStartingDeck().Cards[0:5]},
+			PlayArea:  game.PlayArea{[]game.Card{}},
 		}
 
 		turnOrder = append(turnOrder, p.Name)

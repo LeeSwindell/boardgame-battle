@@ -1,6 +1,5 @@
 import CardContainer from './CardContainer';
 import MarketCard from './Marketcard';
-import { gameapi } from '../api';
 import { useGamestate } from '../routes/Game';
 
 function Hand() {
@@ -8,6 +7,7 @@ function Hand() {
   const username = localStorage.getItem('sessionid');
 
   if (gamestate) {
+    console.log(gamestate);
     return (
       <div className="flex flex-row space-x-2 p-2 justify-center border">
         {gamestate.players[username].Hand.Cards.map((card) => (

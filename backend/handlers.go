@@ -19,7 +19,6 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	var cardId CardId
 	json.NewDecoder(r.Body).Decode(&cardId)
-	log.Println("*******cardID", cardId.Id)
 
 	gs.mu.Lock()
 	defer gs.mu.Unlock()

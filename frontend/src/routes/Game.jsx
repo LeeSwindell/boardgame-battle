@@ -11,12 +11,9 @@ import InspectCard from '../components/Inspectcard';
 import PlayArea from '../components/Playarea';
 import PlayerInfo from '../components/Playerinfo';
 // import { Route, Link, BrowserRouter as Router } from "react-router-dom"
-import { gameapi } from '../api';
+import { api, gameapi } from '../api';
 
 // use react context to pass inspect around
-
-// FIX! EXTRACT PROVIDERS TO A COMPONENT, ONE CONTEXT PER PROVIDER
-
 const InspectContext = createContext();
 
 function InspectProvider({ children }) {
@@ -41,7 +38,13 @@ const GamestateContext = createContext();
 function GamestateProvider({ children }) {
   const socket = useRef(null);
   const [gamestate, setGamestate] = useState();
-  const value = useMemo(() => ({ gamestate, setGamestate, socket }), [gamestate, socket]);
+  const [userInput, setUserInput] = useState();
+  const value = useMemo(
+    () => ({
+      gamestate, setGamestate, socket, userInput, setUserInput,
+    }),
+    [gamestate, socket, userInput],
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,7 +54,6 @@ function GamestateProvider({ children }) {
         setGamestate(response.data);
       })
       .catch(() => {
-        console.log('error');
         navigate('/');
       });
   }, []);
@@ -71,6 +73,10 @@ function GamestateProvider({ children }) {
       switch (data.type) {
         case 'Gamestate':
           setGamestate(data.data);
+          break;
+        case 'UserInput':
+          console.log(userInput);
+          setUserInput(data.data);
           break;
         default:
           break;
@@ -101,10 +107,40 @@ function useGamestate() {
 export { useGamestate };
 
 function GameWithState() {
-  const { gamestate } = useGamestate();
+  const { gamestate, userInput, setUserInput } = useGamestate();
+
+  // FIX user game lobby id
+  function SubmitUserChoice(choice) {
+    return (
+      () => {
+        api
+          .post('/game/0/submituserchoice', { choice })
+          .then(() => {
+            setUserInput(null);
+          })
+          .catch((res) => {
+            console.log(res);
+          });
+      }
+    );
+  }
+
   if (gamestate) {
     return (
       <>
+        {
+          userInput
+          && (
+          <div className="fixed w-full h-full backdrop-contrast-50">
+            <div className="flex w-full h-full justify-center items-center">
+              <div className="border bg-white z-50 shadow-2xl">
+                <p className="p-2 w-full text-center font-bold">Choose One</p>
+                {userInput.map((option) => <button key={option} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
+              </div>
+            </div>
+          </div>
+          )
+        }
         <InspectCard />
         <div className="flex flex-row justify-between">
           <div className="flex flex-col space-y-4 w-auto h-auto">

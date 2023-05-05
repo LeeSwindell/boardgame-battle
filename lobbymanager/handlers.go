@@ -224,7 +224,33 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 
 	var gs game.Gamestate
 	json.NewDecoder(r.Body).Decode(&gs)
-	// log.Println(gs)
 
 	hub.SendGameState(&gs)
+}
+
+var userInputChan = make(chan string)
+
+func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
+	// find user to ask for input from.
+	var chooseOne game.ChooseOne
+	json.NewDecoder(r.Body).Decode(&chooseOne)
+	log.Println("chooseone:", chooseOne)
+
+	hub.askPlayerChoice(chooseOne.Options)
+
+	// If a user submits multiple inputs somehow, this will block and be offset
+	// Change to check for a submit id with each choice?
+	choice := <-userInputChan
+	log.Println("received on chan", choice)
+	w.Write([]byte(choice))
+}
+
+func SubmitUserChoiceHandler(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Choice string `json:"choice"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+	println("data:", data.Choice)
+
+	userInputChan <- data.Choice
 }

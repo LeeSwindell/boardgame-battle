@@ -2,7 +2,6 @@ package game
 
 import "sync"
 
-// players --> map[string]Player based on username
 type Gamestate struct {
 	Players     map[string]Player `json:"players"`
 	Villains    []Villain         `json:"villains"`
@@ -63,4 +62,5 @@ type Villain struct {
 // Define an effect as something that changes the gamestate.
 type Effect interface {
 	Trigger(gs *Gamestate)
+	// Describe() string
 }

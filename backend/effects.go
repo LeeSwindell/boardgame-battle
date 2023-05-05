@@ -1,12 +1,13 @@
 package game
 
 import (
+	"fmt"
 	"log"
-	"math/rand"
 )
 
 type DamageAllPlayers struct {
-	amount int
+	Amount      int
+	Description string
 }
 
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
@@ -16,12 +17,17 @@ func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 			log.Println("error getting player in DamageAllPlayers effect")
 			return
 		}
-		player.Health -= effect.amount
+		player.Health -= effect.Amount
 	}
 }
 
+func (effect DamageAllPlayers) Describe() string {
+	return fmt.Sprintf("Damage all players for %d", effect.Amount)
+}
+
 type GainMoney struct {
-	amount int
+	Amount      int
+	Description string
 }
 
 // FIX - give only current turn player
@@ -31,85 +37,72 @@ func (effect GainMoney) Trigger(gs *Gamestate) {
 		if !ok {
 			return
 		}
-		player.Money += effect.amount
+		player.Money += effect.Amount
 		gs.Players[name] = player
 	}
 }
 
-func Damage(p *Player, amount int) {
-	p.Health -= amount
+func (effect GainMoney) Describe() string {
+	return effect.Description
 }
 
-func DamageAll(gs *Gamestate, amount int) {
-	for _, p := range gs.Players {
-		p.Health -= amount
+type ChooseOne struct {
+	Effects     []Effect
+	Options     []string `json:"options"`
+	Description string   `json:"description"`
+}
+
+// FIX Lobbyid!
+func (effect ChooseOne) Trigger(gs *Gamestate) {
+	choice := getUserInput(0, gs.CurrentTurn.Name, effect)
+
+	for i, option := range effect.Options {
+		if choice == option {
+			effect.Effects[i].Trigger(gs)
+		}
 	}
 }
 
-func spendMoney(p *Player, amount int) {
-	p.Money -= amount
+func (effect ChooseOne) Describe() string {
+	return effect.Description
 }
 
-func giveAllMoney(gs *Gamestate, amount int) {
-	for _, p := range gs.Players {
-		p.Money += amount
+type GainDamage struct {
+	Amount      int
+	Description string
+}
+
+func (effect GainDamage) Trigger(gs *Gamestate) {
+	for name := range gs.Players {
+		player, ok := gs.Players[name]
+		if !ok {
+			return
+		}
+		player.Damage += effect.Amount
+		gs.Players[name] = player
 	}
 }
 
-func changeDamage(p *Player, amount int) {
-	p.Damage += amount
+func (effect GainDamage) Describe() string {
+	return effect.Description
 }
 
-func giveAllDamage(gs *Gamestate, amount int) {
-	for _, p := range gs.Players {
-		p.Damage += amount
+type GainHealth struct {
+	Amount      int
+	Description string
+}
+
+func (effect GainHealth) Trigger(gs *Gamestate) {
+	for name := range gs.Players {
+		player, ok := gs.Players[name]
+		if !ok {
+			return
+		}
+		player.Health += effect.Amount
+		gs.Players[name] = player
 	}
 }
 
-func buyCard(gs *Gamestate, p *Player, card Card, cost int) {
-	spendMoney(p, cost)
-	p.Discard.Cards = append(p.Discard.Cards, card)
-	// Remove from market FIX
-}
-
-func addControl(gs *Gamestate) {
-	l := gs.Locations[0]
-	l.CurControl += 1
-	if l.CurControl == l.MaxControl && len(gs.Locations) > 1 {
-		gs.Locations = gs.Locations[1:]
-	} else if l.CurControl == l.MaxControl && len(gs.Locations) == 1 {
-		gameOver(gs, "no")
-	}
-}
-
-func damageVillain(v *Villain) {
-	v.CurDamage += 1
-	if v.CurDamage == v.MaxHp {
-		// FIX trigger death effect, draw new villain
-	}
-}
-
-func healVillain(v *Villain) {
-	if v.CurDamage > 0 {
-		v.CurDamage -= 1
-	}
-}
-
-func rollSlytherinDie(p *Player) {
-	n := rand.Intn(6)
-
-	switch {
-	case n < 3:
-		// damage
-	case n == 3:
-		//health
-	case n == 4:
-		//draw card
-	case n == 5:
-		//money
-	}
-}
-
-func gameOver(gs *Gamestate, didYaWin string) {
-	// You Lose!!!!
+func (effect GainHealth) Describe() string {
+	return effect.Description
 }

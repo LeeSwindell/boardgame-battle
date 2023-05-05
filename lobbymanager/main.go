@@ -64,6 +64,8 @@ func main() {
 	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
 	r.HandleFunc("/lobby/{id}/startgame", StartGameHandler)
 	r.HandleFunc("/game/{id}/refreshgamestate", RefreshGamestateHandler)
+	r.HandleFunc("/game/{id}/getuserinput", GetUserInputHandler)
+	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
 
 	handler := c.Handler(r)
 	log.Fatal(http.ListenAndServe(":8000", handler))

@@ -2,7 +2,6 @@ import { useGamestate } from '../routes/Game';
 
 function PlayerInfo({ username }) {
   const { gamestate } = useGamestate();
-  console.log(username);
   if (gamestate && username !== undefined) {
     return (
       <div className="flex flex-col p-2 m-2 w-40 h-16 border rounded">

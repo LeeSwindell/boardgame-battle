@@ -70,3 +70,12 @@ func getUserInput(id int, user string, effect Effect) string {
 
 	return string(body)
 }
+
+func stringifyCards(cards []Card) string {
+	res := ""
+	for _, c := range cards {
+		res += c.Name + " "
+	}
+
+	return res
+}

@@ -203,7 +203,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 			Money:     0,
 			Damage:    0,
 			Deck:      game.RonStartingDeck(),
-			Hand:      game.RonStartingDeck()[0:5],
+			Hand:      []game.Card{},
 			PlayArea:  []game.Card{},
 			Discard:   []game.Card{},
 		}

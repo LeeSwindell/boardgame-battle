@@ -43,5 +43,10 @@ func StartGame(players map[string]Player, turnOrder []string) {
 		mu:          sync.Mutex{},
 	}
 
+	for _, p := range gs.Players {
+		user := p.Name
+		Draw5Cards(user, &gs)
+	}
+
 	go RunGameServer(&gs)
 }

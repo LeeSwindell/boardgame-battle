@@ -9,7 +9,7 @@ function PlayArea() {
   if (gamestate) {
     return (
       <div className="flex flex-row space-x-2 p-2 justify-center border">
-        {gamestate.players[username].PlayArea.Cards.map((card) => (
+        {gamestate.players[username].PlayArea.map((card) => (
           <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
         ))}
       </div>

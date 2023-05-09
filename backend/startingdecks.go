@@ -1,11 +1,11 @@
 package game
 
-func RonStartingDeck() Deck {
-	deck := Deck{}
+func RonStartingDeck() []Card {
+	deck := []Card{}
 
-	deck.Cards = append(deck.Cards, pigwidgeon())
+	deck = append(deck, pigwidgeon())
 	for i := 0; i < 7; i++ {
-		deck.Cards = append(deck.Cards, alohamora())
+		deck = append(deck, alohamora())
 	}
 
 	return deck

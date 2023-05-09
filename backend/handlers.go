@@ -22,7 +22,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
-	for i, c := range gs.Players[user].Hand.Cards {
+	for i, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			card := c
 			log.Println("playing card:", card.Name)
@@ -52,10 +52,10 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
-	updatedPlayer := gs.Players[user]
-	updatedPlayer.Discard.Cards = append(updatedPlayer.Discard.Cards, updatedPlayer.PlayArea.Cards...)
-	updatedPlayer.PlayArea.Cards = []Card{}
-	gs.Players[user] = updatedPlayer
+	MoveToDiscard(user, gs)
+	// damage money to 0
+	Draw5Cards(user, gs)
+	// change turn order
 
 	SendLobbyUpdate(gameid, gs)
 }

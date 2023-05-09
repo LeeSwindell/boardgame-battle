@@ -16,10 +16,10 @@ type Player struct {
 	Health    int
 	Damage    int
 	Money     int
-	Deck      Deck
-	Hand      Hand
-	Discard   Discard
-	PlayArea  PlayArea
+	Deck      []Card
+	Hand      []Card
+	Discard   []Card
+	PlayArea  []Card
 }
 
 type Card struct {
@@ -33,22 +33,6 @@ type Location struct {
 	MaxControl int
 	CurControl int
 	Effect     []Effect
-}
-
-type PlayArea struct {
-	Cards []Card
-}
-
-type Deck struct {
-	Cards []Card
-}
-
-type Hand struct {
-	Cards []Card
-}
-
-type Discard struct {
-	Cards []Card
 }
 
 type Villain struct {

@@ -158,7 +158,7 @@ function GameWithState() {
             </div>
             <div className="flex flex-col">
               <div className="text-center">Discard Pile</div>
-              <CardContainer card={<DiscardPile />} size="reg" extra="p-2 m-2" />
+              <DiscardPile />
             </div>
           </div>
         </div>

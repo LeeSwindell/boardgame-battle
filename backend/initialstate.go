@@ -10,3 +10,13 @@ func RonStartingDeck() []Card {
 
 	return deck
 }
+
+func CreateVillains() []Villain {
+	villains := []Villain{
+		draco(),
+		quirrell(),
+		crabbeAndGoyle(),
+	}
+
+	return villains
+}

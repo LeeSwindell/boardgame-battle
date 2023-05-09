@@ -1,3 +1,4 @@
+import { useGamestate } from '../routes/Game';
 import CardContainer from './CardContainer';
 import DarkArtCard from './Darkart';
 import Location from './Location';
@@ -6,6 +7,8 @@ import Monster from './Monster';
 import Villain from './Villain';
 
 function Gameboard(props) {
+  const { gamestate } = useGamestate();
+
   return (
     <div className="flex flex-col">
       {/* Top Row */}
@@ -24,9 +27,9 @@ function Gameboard(props) {
 
       {/* Middle Row */}
       <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
-        <CardContainer card={<Villain />} size="wide" />
-        <CardContainer card={<Villain />} size="wide" />
-        <CardContainer card={<Villain />} size="wide" />
+        {gamestate && gamestate.villains.map((v) => (
+          <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<MarketCard img={v.ImgPath} />} size="wide" />
+        ))}
         <div className="flex flex-none space-x-2 justify-end">
           <CardContainer card={<MarketCard />} size="reg" />
           <CardContainer card={<MarketCard />} size="reg" />

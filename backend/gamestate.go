@@ -37,6 +37,9 @@ type Location struct {
 
 type Villain struct {
 	Name        string
+	Id          int
+	ImgPath     string
+	SetId       string
 	CurDamage   int
 	MaxHp       int
 	Effect      Effect

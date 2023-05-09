@@ -27,6 +27,9 @@ func RunGameServer(gs *Gamestate) {
 	r.HandleFunc("/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
 		GetGamestateHandler(w, r, gs)
 	})
+	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
+		DamageVillainHandler(w, r, gs)
+	})
 
 	handler := c.Handler(r)
 	log.Println("starting game engine on port 8080!")
@@ -37,7 +40,7 @@ func RunGameServer(gs *Gamestate) {
 func StartGame(players map[string]Player, turnOrder []string) {
 	gs := Gamestate{
 		Players:     players,
-		Villains:    []Villain{},
+		Villains:    CreateVillains(),
 		Locations:   []Location{},
 		CurrentTurn: players[turnOrder[0]],
 		mu:          sync.Mutex{},

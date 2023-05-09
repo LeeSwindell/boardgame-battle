@@ -22,6 +22,15 @@ function CardContainer({
       });
   }
 
+  function damageVillainHandler(id) {
+    console.log('damaging villain: ', id);
+    gameapi
+      .get(`/0/damagevillain/${id}`)
+      .then(() => {
+        // console.log(`damaged villain ${id}`, )
+      });
+  }
+
   const onClick = (e) => {
     e.preventDefault();
     if (e.nativeEvent.button === 2) {
@@ -29,6 +38,9 @@ function CardContainer({
     }
     if (cardType === 'hand' && e.nativeEvent.button === 0) {
       playCardHandler(cardId);
+    }
+    if (cardType === 'villain' && e.nativeEvent.button === 0) {
+      damageVillainHandler(cardId);
     }
   };
 

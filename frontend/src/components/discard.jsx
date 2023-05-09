@@ -5,7 +5,6 @@ function DiscardPile() {
   const { gamestate } = useGamestate();
   const { setInspectCard } = useInspect();
   const user = localStorage.getItem('sessionid');
-  console.log(gamestate.players[user].Discard);
 
   const onClick = (e) => {
     e.preventDefault();

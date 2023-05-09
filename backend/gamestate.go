@@ -7,6 +7,7 @@ type Gamestate struct {
 	Villains    []Villain         `json:"villains"`
 	Locations   []Location        `json:"locations"`
 	CurrentTurn Player            `json:"currentturn"`
+	turnStats   TurnStats
 	mu          sync.Mutex
 }
 
@@ -23,10 +24,11 @@ type Player struct {
 }
 
 type Card struct {
-	Id      int
-	Name    string
-	ImgPath string
-	Effects []Effect
+	Id       int
+	Name     string
+	ImgPath  string
+	CardType string
+	Effects  []Effect
 }
 
 type Location struct {
@@ -50,4 +52,11 @@ type Villain struct {
 type Effect interface {
 	Trigger(gs *Gamestate)
 	// Describe() string
+}
+
+type TurnStats struct {
+	AlliesPlayed   int
+	ItemsPlayed    int
+	SpellsPlayed   int
+	VillainsKilled int
 }

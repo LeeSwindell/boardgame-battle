@@ -14,7 +14,7 @@ function CardContainer({
   const { setInspectCard } = useInspect();
 
   function playCardHandler(id) {
-    console.log('playing card:', id);
+    // console.log('playing card:', id);
     gameapi
       .post('/0/playcard', { id })
       .then(() => {
@@ -23,7 +23,7 @@ function CardContainer({
   }
 
   function damageVillainHandler(id) {
-    console.log('damaging villain: ', id);
+    // console.log('damaging villain: ', id);
     gameapi
       .get(`/0/damagevillain/${id}`)
       .then(() => {
@@ -45,7 +45,7 @@ function CardContainer({
   };
 
   return (
-    <button className={`border hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick} onContextMenu={onClick} type="button">
+    <button className={`flex items-center justify-center hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick} onContextMenu={onClick} type="button">
       {card}
     </button>
   );

@@ -1,6 +1,14 @@
-function Villain() {
+function Villain({ maxHp, curDamage, img }) {
   return (
-    <img src="/images/villains/cornishpixies.jpg" alt="cornish pixies" />
+    <div className="">
+      <p>
+        Health:
+        {maxHp - curDamage}
+        /
+        {maxHp}
+      </p>
+      <img src={img} alt="cornish pixies" />
+    </div>
   );
 }
 

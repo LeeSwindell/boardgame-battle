@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -21,9 +20,9 @@ func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 	}
 }
 
-func (effect DamageAllPlayers) Describe() string {
-	return fmt.Sprintf("Damage all players for %d", effect.Amount)
-}
+// func (effect DamageAllPlayers) Describe() string {
+// 	return fmt.Sprintf("Damage all players for %d", effect.Amount)
+// }
 
 type GainMoney struct {
 	Amount      int
@@ -42,9 +41,9 @@ func (effect GainMoney) Trigger(gs *Gamestate) {
 	}
 }
 
-func (effect GainMoney) Describe() string {
-	return effect.Description
-}
+// func (effect GainMoney) Describe() string {
+// 	return effect.Description
+// }
 
 type ChooseOne struct {
 	Effects     []Effect
@@ -63,9 +62,9 @@ func (effect ChooseOne) Trigger(gs *Gamestate) {
 	}
 }
 
-func (effect ChooseOne) Describe() string {
-	return effect.Description
-}
+// func (effect ChooseOne) Describe() string {
+// 	return effect.Description
+// }
 
 type GainDamage struct {
 	Amount      int
@@ -83,9 +82,9 @@ func (effect GainDamage) Trigger(gs *Gamestate) {
 	}
 }
 
-func (effect GainDamage) Describe() string {
-	return effect.Description
-}
+// func (effect GainDamage) Describe() string {
+// 	return effect.Description
+// }
 
 type GainHealth struct {
 	Amount      int
@@ -103,6 +102,22 @@ func (effect GainHealth) Trigger(gs *Gamestate) {
 	}
 }
 
-func (effect GainHealth) Describe() string {
-	return effect.Description
+// func (effect GainHealth) Describe() string {
+// 	return effect.Description
+// }
+
+type GainDamagePerAllyPlayed struct {
+}
+
+func (effect GainDamagePerAllyPlayed) Trigger(gs *Gamestate) {
+	damage := gs.turnStats.AlliesPlayed
+
+	for name := range gs.Players {
+		player, ok := gs.Players[name]
+		if !ok {
+			return
+		}
+		player.Damage += damage
+		gs.Players[name] = player
+	}
 }

@@ -28,7 +28,7 @@ function Gameboard(props) {
       {/* Middle Row */}
       <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
         {gamestate && gamestate.villains.map((v) => (
-          <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<MarketCard img={v.ImgPath} />} size="wide" />
+          <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<Villain img={v.ImgPath} maxHp={v.MaxHp} curDamage={v.CurDamage} />} size="wide" />
         ))}
         <div className="flex flex-none space-x-2 justify-end">
           <CardContainer card={<MarketCard />} size="reg" />

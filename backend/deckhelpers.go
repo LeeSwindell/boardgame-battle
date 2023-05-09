@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log"
 	"math/rand"
 	"time"
 )
@@ -26,10 +25,18 @@ func MoveToPlayed(user string, index int, gs *Gamestate) {
 }
 
 // Moves a users cards from the PlayArea into the Discard
-func MoveToDiscard(user string, gs *Gamestate) {
+func MovePlayedToDiscard(user string, gs *Gamestate) {
 	updatedPlayer := gs.Players[user]
 	updatedPlayer.Discard = append(updatedPlayer.Discard, updatedPlayer.PlayArea...)
 	updatedPlayer.PlayArea = []Card{}
+	gs.Players[user] = updatedPlayer
+}
+
+// Moves a users cards from the PlayArea into the Discard
+func MoveHandToDiscard(user string, gs *Gamestate) {
+	updatedPlayer := gs.Players[user]
+	updatedPlayer.Discard = append(updatedPlayer.Discard, updatedPlayer.Hand...)
+	updatedPlayer.Hand = []Card{}
 	gs.Players[user] = updatedPlayer
 }
 
@@ -71,7 +78,6 @@ func PopFromDeck(player *Player) Card {
 func Draw5Cards(user string, gs *Gamestate) {
 	updated := gs.Players[user]
 	for i := 0; i < 5; i++ {
-		log.Println("deck:", stringifyCards(updated.Deck), "hand:", stringifyCards(updated.Hand))
 		updated.Hand = append(updated.Hand, PopFromDeck(&updated))
 	}
 

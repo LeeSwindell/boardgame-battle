@@ -43,6 +43,7 @@ func StartGame(players map[string]Player, turnOrder []string) {
 		Villains:    CreateVillains(),
 		Locations:   []Location{},
 		CurrentTurn: players[turnOrder[0]],
+		turnStats:   TurnStats{},
 		mu:          sync.Mutex{},
 	}
 

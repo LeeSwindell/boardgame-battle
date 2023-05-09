@@ -32,9 +32,11 @@ function InspectCard() {
       <div className="fixed w-full h-full backdrop-contrast-50" ref={ref}>
         <div className="flex w-full h-full justify-center items-center">
           <div className="border bg-white z-50 shadow-2xl">
-            {inspectCard.map((card) => (
-              <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
-            ))}
+            <div className="grid grid-cols-8">
+              {inspectCard.map((card) => (
+                <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
+              ))}
+            </div>
           </div>
         </div>
       </div>

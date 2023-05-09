@@ -28,10 +28,18 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	for i, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			card := c
-			log.Println("playing card:", card.Name)
+			// log.Println("playing card:", card.Name)
 			for _, e := range card.Effects {
-				log.Println("triggering an effect:", e)
+				// log.Println("triggering an effect:", e)
 				e.Trigger(gs)
+			}
+			switch c.CardType {
+			case "spell":
+				gs.turnStats.SpellsPlayed += 1
+			case "item":
+				gs.turnStats.ItemsPlayed += 1
+			case "ally":
+				gs.turnStats.AlliesPlayed += 1
 			}
 			MoveToPlayed(user, i, gs)
 		}
@@ -55,10 +63,12 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
-	MoveToDiscard(user, gs)
+	MovePlayedToDiscard(user, gs)
+	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)
 	Draw5Cards(user, gs)
-	// change turn orde
+	gs.turnStats = TurnStats{}
+	// change turn order
 
 	SendLobbyUpdate(gameid, gs)
 }

@@ -143,7 +143,7 @@ function GameWithState() {
         }
         <InspectCard />
         <div className="flex flex-row justify-between">
-          <div className="flex flex-col space-y-4 w-auto h-auto">
+          <div className="flex flex-col space-y-1 p-1 w-auto h-auto">
             <Gameboard />
             <PlayArea />
             <Hand />

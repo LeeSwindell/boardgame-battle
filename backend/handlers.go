@@ -53,7 +53,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	defer gs.mu.Unlock()
 
 	MoveToDiscard(user, gs)
-	// damage money to 0
+	MoneyDamageToZero(user, gs)
 	Draw5Cards(user, gs)
 	// change turn order
 

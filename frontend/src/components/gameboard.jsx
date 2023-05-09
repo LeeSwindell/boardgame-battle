@@ -7,7 +7,7 @@ import Villain from './Villain';
 
 function Gameboard(props) {
   return (
-    <div className="flex flex-col m-1 border">
+    <div className="flex flex-col">
       {/* Top Row */}
       <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
         <CardContainer card={<Location />} size="wide" />

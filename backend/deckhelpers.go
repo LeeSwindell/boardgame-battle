@@ -77,3 +77,10 @@ func Draw5Cards(user string, gs *Gamestate) {
 
 	gs.Players[user] = updated
 }
+
+func MoneyDamageToZero(user string, gs *Gamestate) {
+	updated := gs.Players[user]
+	updated.Damage = 0
+	updated.Money = 0
+	gs.Players[user] = updated
+}

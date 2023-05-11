@@ -25,6 +25,7 @@ func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
 func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	pid := getUniquePlayerId()
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("AddClient error: ")
@@ -32,7 +33,31 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, pid: pid}
+	client := &Client{hub: hub, conn: conn, pid: pid, username: ""}
+	client.hub.register <- client
+
+	println("player ", pid.String(), " is connecting")
+
+	go client.readPump()
+}
+
+func AddClientWithUsernameHandler(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	pid := getUniquePlayerId()
+	vars := mux.Vars(r)
+	username, ok := vars["username"]
+	if !ok {
+		log.Println("error adding client with username, no username")
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("AddClient error: ")
+		log.Println(err)
+		return
+	}
+
+	client := &Client{hub: hub, conn: conn, pid: pid, username: username}
 	client.hub.register <- client
 
 	println("player ", pid.String(), " is connecting")
@@ -171,7 +196,6 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(lobbies[id].Players) <= 1 {
-		// lobbies[id].Players = []Player{}
 		// just delete the empty lobby.
 		lobbies = append(lobbies[:id], lobbies[id+1:]...)
 	} else {
@@ -233,17 +257,20 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 var userInputChan = make(chan string)
 
 func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
-	// find user to ask for input from.
+	vars := mux.Vars(r)
+	user, ok := vars["user"]
+	if !ok {
+		log.Println("err getting username in getuserinputhandler")
+	}
+
 	var chooseOne game.ChooseOne
 	json.NewDecoder(r.Body).Decode(&chooseOne)
-	log.Println("chooseone:", chooseOne)
 
-	hub.askPlayerChoice(chooseOne.Options)
+	hub.askPlayerChoice(user, chooseOne.Options)
 
 	// If a user submits multiple inputs somehow, this will block and be offset
 	// Change to check for a submit id with each choice?
 	choice := <-userInputChan
-	log.Println("received on chan", choice)
 	w.Write([]byte(choice))
 }
 

@@ -45,7 +45,7 @@ func SendLobbyUpdate(id int, gs *Gamestate) {
 
 func getUserInput(id int, user string, effect Effect) string {
 	// pass result to card effect.
-	url := fmt.Sprintf("http://localhost:8000/game/%d/getuserinput", id)
+	url := fmt.Sprintf("http://localhost:8000/game/%d/getuserinput/%s", id, user)
 	data, err := json.Marshal(effect)
 	if err != nil {
 		log.Println("err marshaling options:", err.Error())

@@ -6,7 +6,8 @@ type Gamestate struct {
 	Players     map[string]Player `json:"players"`
 	Villains    []Villain         `json:"villains"`
 	Locations   []Location        `json:"locations"`
-	CurrentTurn Player            `json:"currentturn"`
+	CurrentTurn string            `json:"currentturn"`
+	TurnOrder   []string          `json:"turnorder"`
 	turnStats   TurnStats
 	mu          sync.Mutex
 }
@@ -32,9 +33,13 @@ type Card struct {
 }
 
 type Location struct {
+	Name       string
+	Id         int
+	SetId      string
+	ImgPath    string
 	MaxControl int
 	CurControl int
-	Effect     []Effect
+	Effect     Effect
 }
 
 type Villain struct {

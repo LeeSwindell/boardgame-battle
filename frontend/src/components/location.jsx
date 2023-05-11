@@ -1,6 +1,14 @@
-function Location() {
+function Location({ curControl, maxControl, imgPath }) {
   return (
-    <img src="/images/locations/location3.jpg" alt="great hall" />
+    <div>
+      <p>
+        Control:
+        {curControl}
+        /
+        {maxControl}
+      </p>
+      <img src={imgPath} alt="great hall" />
+    </div>
   );
 }
 

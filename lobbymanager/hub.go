@@ -68,14 +68,16 @@ func (h *Hub) SendGameState(gs *game.Gamestate) {
 	}
 }
 
-func (h *Hub) askPlayerChoice(choices []string) {
+func (h *Hub) askPlayerChoice(user string, choices []string) {
 	message := Message{
 		Type: "UserInput",
 		Data: choices,
 	}
 
 	for c := range h.clients {
-		c.conn.WriteJSON(message)
+		if c.username == user {
+			c.conn.WriteJSON(message)
+		}
 	}
 }
 

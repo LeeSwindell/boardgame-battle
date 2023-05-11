@@ -13,7 +13,8 @@ function Gameboard(props) {
     <div className="flex flex-col">
       {/* Top Row */}
       <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
-        <CardContainer card={<Location />} size="wide" />
+        {gamestate
+        && <CardContainer card={<Location imgPath={gamestate.locations[0].ImgPath} curControl={gamestate.locations[0].CurControl} maxControl={gamestate.locations[0].MaxControl} />} size="wide" />}
         <div className="flex space-x-2 justify-center">
           <CardContainer card={<DarkArtCard />} size="reg" />
           <CardContainer card={<Monster />} size="reg" />

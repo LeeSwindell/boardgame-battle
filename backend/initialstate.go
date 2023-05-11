@@ -22,3 +22,11 @@ func CreateVillains() []Villain {
 
 	return villains
 }
+
+func CreateLocations() []Location {
+	locations := []Location{
+		greatHall(),
+	}
+
+	return locations
+}

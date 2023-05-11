@@ -64,7 +64,8 @@ function GamestateProvider({ children }) {
   }, [gamestate]);
 
   useEffect(() => {
-    socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    const username = localStorage.getItem('sessionid');
+    socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
     socket.current.onopen = () => console.log('lobby socket opened');
     socket.current.onclose = () => console.log('lobby socket closed');
 

@@ -90,3 +90,12 @@ func MoneyDamageToZero(user string, gs *Gamestate) {
 	updated.Money = 0
 	gs.Players[user] = updated
 }
+
+func NextTurnInOrder(gs *Gamestate) {
+	for i, name := range gs.TurnOrder {
+		if name == gs.CurrentTurn {
+			gs.CurrentTurn = gs.TurnOrder[(i+1)%len(gs.TurnOrder)]
+			break
+		}
+	}
+}

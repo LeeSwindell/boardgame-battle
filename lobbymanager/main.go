@@ -57,6 +57,7 @@ func main() {
 	r.HandleFunc("/login", loginHandler)
 	r.HandleFunc("/lobbies", GetLobbiesHandler)
 	r.HandleFunc("/connectsocket", AddClientHandler)
+	r.HandleFunc("/connectsocket/{username}", AddClientWithUsernameHandler)
 	r.HandleFunc("/lobby/create", CreateLobbyHandler)
 	r.HandleFunc("/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
@@ -64,7 +65,7 @@ func main() {
 	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
 	r.HandleFunc("/lobby/{id}/startgame", StartGameHandler)
 	r.HandleFunc("/game/{id}/refreshgamestate", RefreshGamestateHandler)
-	r.HandleFunc("/game/{id}/getuserinput", GetUserInputHandler)
+	r.HandleFunc("/game/{id}/getuserinput/{user}", GetUserInputHandler)
 	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
 
 	handler := c.Handler(r)

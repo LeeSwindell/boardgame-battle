@@ -29,12 +29,10 @@ func (eb *EventBroker) StartPublishing() {
 	for {
 		m := <-eb.Messages
 		if m.message == "unsub" {
-			log.Println("sending unsub ack")
 			eb.Subscribers[m.senderId].messageChan <- "unsub ack"
 			eb.Unsubscribe(m.senderId)
 		} else {
 			for _, s := range eb.Subscribers {
-				log.Println("sending", s.id, "message: ", m.message)
 				s.messageChan <- m.message
 			}
 		}
@@ -45,7 +43,6 @@ func (eb *EventBroker) Unsubscribe(id int) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
 	delete(eb.Subscribers, id)
-	log.Println("unsubscribing ", id)
 }
 
 func (eb *EventBroker) Subscribe(sub Subscriber) {
@@ -87,3 +84,8 @@ func (s *Subscriber) Receive() bool {
 
 	return res
 }
+
+// *****************************************************
+// Here's some predefined common events to use
+
+var EndTurnEvent = Event{senderId: -1, message: "end turn"}

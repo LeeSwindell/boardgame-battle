@@ -15,7 +15,11 @@ type CardId struct {
 
 func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gameid, user := getIdAndUser(r)
-	if gs.CurrentTurn.Name != user {
+
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	if gs.CurrentTurn != user {
 		log.Println("Not your turn!")
 		return
 	}
@@ -23,14 +27,10 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	var cardId CardId
 	json.NewDecoder(r.Body).Decode(&cardId)
 
-	gs.mu.Lock()
-	defer gs.mu.Unlock()
 	for i, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			card := c
-			// log.Println("playing card:", card.Name)
 			for _, e := range card.Effects {
-				// log.Println("triggering an effect:", e)
 				e.Trigger(gs)
 			}
 			switch c.CardType {
@@ -63,12 +63,13 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
+	eventBroker.Messages <- EndTurnEvent
 	MovePlayedToDiscard(user, gs)
 	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)
 	Draw5Cards(user, gs)
+	NextTurnInOrder(gs)
 	gs.turnStats = TurnStats{}
-	// change turn order
 
 	SendLobbyUpdate(gameid, gs)
 }

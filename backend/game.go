@@ -47,8 +47,9 @@ func StartGame(players map[string]Player, turnOrder []string) {
 	gs := Gamestate{
 		Players:     players,
 		Villains:    CreateVillains(),
-		Locations:   []Location{},
-		CurrentTurn: players[turnOrder[0]],
+		Locations:   CreateLocations(),
+		CurrentTurn: turnOrder[0],
+		TurnOrder:   turnOrder,
 		turnStats:   TurnStats{},
 		mu:          sync.Mutex{},
 	}

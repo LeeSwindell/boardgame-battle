@@ -32,12 +32,16 @@ func pigwidgeon() Card {
 }
 
 func cleansweep() Card {
+	id := int(uuid.New().ID())
 	return Card{
-		Id:       int(uuid.New().ID()),
+		Id:       id,
 		Name:     "Cleansweep 11",
 		ImgPath:  "/images/starters/cleansweep.jpg",
 		CardType: "item",
-		Effects:  []Effect{},
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			MoneyIfVillainKilled{Id: id, Amount: 1},
+		},
 	}
 }
 

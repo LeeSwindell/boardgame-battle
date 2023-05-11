@@ -5,7 +5,8 @@ func RonStartingDeck() []Card {
 
 	deck = append(deck, pigwidgeon())
 	deck = append(deck, bertieBottsEveryFlavourBeans())
-	for i := 0; i < 8; i++ {
+	deck = append(deck, cleansweep())
+	for i := 0; i < 7; i++ {
 		deck = append(deck, alohamora())
 	}
 

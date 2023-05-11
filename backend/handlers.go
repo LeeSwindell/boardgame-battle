@@ -85,20 +85,27 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 	defer gs.mu.Unlock()
 
 	updatedPlayer := gs.Players[user]
-	log.Println(gs.Players[user].Damage)
 	if updatedPlayer.Damage <= 0 {
 		log.Println("not enough damage tokens to do this")
 		return
 	}
-	updatedPlayer.Damage -= 1
-	gs.Players[user] = updatedPlayer
 
 	for i, v := range gs.Villains {
 		if v.Id == villainid {
+			if gs.Villains[i].CurDamage == v.MaxHp {
+				// do nothing if villain is already dead.
+				return
+			}
+
 			gs.Villains[i].CurDamage += 1
-			// if gs.Villains[i].CurDamage == v.MaxHp {
-			// 	// remove villain, get new one
-			// }
+			updatedPlayer.Damage -= 1
+			gs.Players[user] = updatedPlayer
+
+			// check if villain is now dead.
+			if gs.Villains[i].CurDamage == v.MaxHp {
+				// remove villain, get new one
+				eventBroker.Messages <- Event{senderId: -1, message: "villain killed"}
+			}
 		}
 	}
 

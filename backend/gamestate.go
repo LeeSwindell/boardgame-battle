@@ -51,7 +51,6 @@ type Villain struct {
 // Define an effect as something that changes the gamestate.
 type Effect interface {
 	Trigger(gs *Gamestate)
-	// Describe() string
 }
 
 type TurnStats struct {

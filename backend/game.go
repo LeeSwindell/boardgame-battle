@@ -9,6 +9,12 @@ import (
 	"github.com/rs/cors"
 )
 
+var eventBroker = EventBroker{
+	mu:          sync.Mutex{},
+	Subscribers: map[int]Subscriber{},
+	Messages:    make(chan Event),
+}
+
 func RunGameServer(gs *Gamestate) {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
@@ -52,5 +58,6 @@ func StartGame(players map[string]Player, turnOrder []string) {
 		Draw5Cards(user, &gs)
 	}
 
+	go eventBroker.StartPublishing()
 	go RunGameServer(&gs)
 }

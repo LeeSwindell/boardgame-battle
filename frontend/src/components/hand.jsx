@@ -8,7 +8,7 @@ function Hand() {
 
   if (gamestate) {
     return (
-      <div className="flex flex-row space-x-2 justify-center border">
+      <div className="flex flex-row space-x-2 justify-center border h-40">
         {gamestate.players[username].Hand.map((card) => (
           <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
         ))}

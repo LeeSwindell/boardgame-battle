@@ -4,7 +4,7 @@ function PlayerInfo({ username }) {
   const { gamestate } = useGamestate();
   if (gamestate && username !== undefined) {
     return (
-      <div className="flex flex-col p-2 m-2 w-40 h-16 border rounded">
+      <div className={`flex flex-col p-2 m-2 w-40 h-16 border ${gamestate.currentturn === username ? 'border-blue-500' : ''} rounded`}>
         <div className="flex justify-between">
           <div>{gamestate.players[username].Name}</div>
           <div>

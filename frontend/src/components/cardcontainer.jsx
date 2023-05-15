@@ -1,5 +1,6 @@
 import { useInspect } from '../routes/Game';
 import { gameapi } from '../api';
+import { logger } from '../logger/logger';
 
 export const Sizes = {
   reg: 'w-32 h-40',
@@ -14,20 +15,20 @@ function CardContainer({
   const { setInspectCard } = useInspect();
 
   function playCardHandler(id) {
-    // console.log('playing card:', id);
+    // logger.log('playing card:', id);
     gameapi
       .post('/0/playcard', { id })
       .then(() => {
-        // console.log('playcard TestCard');
+        // logger.log('playcard TestCard');
       });
   }
 
   function damageVillainHandler(id) {
-    // console.log('damaging villain: ', id);
+    // logger.log('damaging villain: ', id);
     gameapi
       .get(`/0/damagevillain/${id}`)
       .then(() => {
-        // console.log(`damaged villain ${id}`, )
+        // logger.log(`damaged villain ${id}`, )
       });
   }
 

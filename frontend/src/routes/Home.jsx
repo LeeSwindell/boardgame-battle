@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import { logger } from '../logger/logger';
 
 function Home() {
   const [url, setUrl] = useState(null);
@@ -13,15 +14,15 @@ function Home() {
   });
 
   function createLobbyHandler() {
-    console.log('get /lobby/create');
+    logger.log('get /lobby/create');
 
     api
       .get('/lobby/create')
       .then((response) => {
         const lobbyid = response.data;
-        console.log(lobbyid);
+        logger.log(lobbyid);
         const newUrl = `/lobby/${lobbyid}`;
-        console.log(newUrl);
+        logger.log(newUrl);
         setUrl(newUrl);
       });
   }

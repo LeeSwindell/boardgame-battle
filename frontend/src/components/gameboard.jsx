@@ -14,9 +14,9 @@ function Gameboard(props) {
       {/* Top Row */}
       <div className="flex flex-none p-1 space-x-8 justify-between border items-center">
         {gamestate
-        && <CardContainer card={<Location imgPath={gamestate.locations[0].ImgPath} curControl={gamestate.locations[0].CurControl} maxControl={gamestate.locations[0].MaxControl} />} size="wide" />}
+        && <CardContainer card={<Location imgPath={gamestate.locations[gamestate.currentlocation].ImgPath} curControl={gamestate.locations[gamestate.currentlocation].CurControl} maxControl={gamestate.locations[gamestate.currentlocation].MaxControl} />} size="wide" />}
         <div className="flex space-x-2 justify-center">
-          <CardContainer card={<DarkArtCard />} size="reg" />
+          <CardContainer card={<DarkArtCard imgPath={gamestate.darkartsplayed[gamestate.darkartsplayed.length - 1].imgPath} />} size="reg" />
           <CardContainer card={<Monster />} size="reg" />
         </div>
         <div className="flex flex-none space-x-2 justify-end">

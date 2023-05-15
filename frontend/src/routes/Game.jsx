@@ -12,6 +12,8 @@ import PlayArea from '../components/Playarea';
 import PlayerInfo from '../components/Playerinfo';
 // import { Route, Link, BrowserRouter as Router } from "react-router-dom"
 import { api, gameapi } from '../api';
+import { logger } from '../logger/logger';
+import useLobbySocket from '../hooks/useLobbySocket';
 
 // use react context to pass inspect around
 const InspectContext = createContext();
@@ -36,9 +38,24 @@ export { useInspect };
 const GamestateContext = createContext();
 
 function GamestateProvider({ children }) {
-  const socket = useRef(null);
   const [gamestate, setGamestate] = useState();
   const [userInput, setUserInput] = useState();
+  const socket = useLobbySocket({
+    onMessage: (event) => {
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case 'Gamestate':
+          setGamestate(data.data);
+          break;
+        case 'UserInput':
+          logger.log(userInput);
+          setUserInput(data.data);
+          break;
+        default:
+          break;
+      }
+    },
+  });
   const value = useMemo(
     () => ({
       gamestate, setGamestate, socket, userInput, setUserInput,
@@ -60,35 +77,8 @@ function GamestateProvider({ children }) {
 
   // just to see how gamestate changes.
   useEffect(() => {
-    console.log(gamestate);
+    logger.log(gamestate);
   }, [gamestate]);
-
-  useEffect(() => {
-    const username = localStorage.getItem('sessionid');
-    socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
-    socket.current.onopen = () => console.log('lobby socket opened');
-    socket.current.onclose = () => console.log('lobby socket closed');
-
-    socket.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      switch (data.type) {
-        case 'Gamestate':
-          setGamestate(data.data);
-          break;
-        case 'UserInput':
-          console.log(userInput);
-          setUserInput(data.data);
-          break;
-        default:
-          break;
-      }
-    };
-
-    // cleanup socket connection and send a request to backend when leaving page.
-    return () => {
-      socket.current.close();
-    };
-  }, []);
 
   return (
     <GamestateContext.Provider value={value}>
@@ -120,7 +110,7 @@ function GameWithState() {
             setUserInput(null);
           })
           .catch((res) => {
-            console.log(res);
+            logger.error(res);
           });
       }
     );

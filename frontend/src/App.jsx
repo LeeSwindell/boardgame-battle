@@ -6,6 +6,7 @@ import Lobby from './routes/Lobby';
 import Lobbies from './routes/Lobbies';
 import LoginPage from './routes/LoginPage';
 import { api } from './api';
+import { logger } from './logger/logger';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -14,7 +15,7 @@ function App() {
   // Check for existing user session
   useEffect(() => {
     // const localSessionid = localStorage.getItem('sessionid');
-    // console.log('session id found locally:', localSessionid);
+    // logger.log('session id found locally:', localSessionid);
 
     api
       .get('/sessionid')
@@ -25,7 +26,7 @@ function App() {
         }
       })
       .catch((response) => {
-        console.log('error using api to get /sessionid', response.data);
+        logger.error('error using api to get /sessionid', response.data);
       });
   }, []);
 
@@ -40,9 +41,9 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="lobby/:id" loader={({ params }) => console.log(params[':id'])} element={<Lobby />} />
+      <Route path="lobby/:id" loader={({ params }) => logger.log(params[':id'])} element={<Lobby />} />
       <Route path="lobbies" element={<Lobbies />} />
-      <Route path="game/:id" loader={({ params }) => console.log(params[':id'])} element={<Game />} />
+      <Route path="game/:id" loader={({ params }) => logger.log(params[':id'])} element={<Game />} />
     </Routes>
   );
 }

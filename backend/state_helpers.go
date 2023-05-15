@@ -64,6 +64,22 @@ func ShuffleCards(cards []Card) []Card {
 	return shuffledCards
 }
 
+func ShuffleDarkArts(da []DarkArt) []DarkArt {
+	rand.Seed(time.Now().UnixNano())
+
+	// Create a new slice to store the shuffled cards
+	shuffledDA := make([]DarkArt, len(da))
+	copy(shuffledDA, da)
+
+	// Shuffle the cards
+	for i := range shuffledDA {
+		j := rand.Intn(i + 1)
+		shuffledDA[i], shuffledDA[j] = shuffledDA[j], shuffledDA[i]
+	}
+
+	return shuffledDA
+}
+
 // Removes the top card of a players deck, returns the card.
 func PopFromDeck(player *Player) Card {
 	if len(player.Deck) == 0 {

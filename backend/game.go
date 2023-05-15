@@ -42,16 +42,18 @@ func RunGameServer(gs *Gamestate) {
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
-// FIX turn order
 func StartGame(players map[string]Player, turnOrder []string) {
 	gs := Gamestate{
-		Players:     players,
-		Villains:    CreateVillains(),
-		Locations:   CreateLocations(),
-		CurrentTurn: turnOrder[0],
-		TurnOrder:   turnOrder,
-		turnStats:   TurnStats{},
-		mu:          sync.Mutex{},
+		Players:         players,
+		Villains:        CreateVillains(),
+		Locations:       CreateLocations(),
+		DarkArts:        CreateDarkArtDeck(),
+		CurrentDarkArt:  0,
+		CurrentLocation: 0,
+		CurrentTurn:     turnOrder[0],
+		TurnOrder:       turnOrder,
+		turnStats:       TurnStats{},
+		mu:              sync.Mutex{},
 	}
 
 	for _, p := range gs.Players {

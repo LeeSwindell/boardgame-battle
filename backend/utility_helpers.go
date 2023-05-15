@@ -71,6 +71,31 @@ func getUserInput(id int, user string, effect Effect) string {
 	return string(body)
 }
 
+// Sends a request to lobby manager for the cardId to discard from a users hand.
+func AskUserToDiscard(gameid int, user string, hand []Card) string {
+	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertodiscard/%s", gameid, user)
+	data, err := json.Marshal(hand)
+	if err != nil {
+		log.Println("err marshaling options:", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	client := http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println("err reading response body:", err.Error())
+	}
+
+	return string(body)
+}
+
 func stringifyCards(cards []Card) string {
 	res := ""
 	for _, c := range cards {

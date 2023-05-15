@@ -3,13 +3,17 @@ package game
 import "sync"
 
 type Gamestate struct {
-	Players     map[string]Player `json:"players"`
-	Villains    []Villain         `json:"villains"`
-	Locations   []Location        `json:"locations"`
-	CurrentTurn string            `json:"currentturn"`
-	TurnOrder   []string          `json:"turnorder"`
-	turnStats   TurnStats
-	mu          sync.Mutex
+	Players         map[string]Player `json:"players"`
+	Villains        []Villain         `json:"villains"`
+	Locations       []Location        `json:"locations"`
+	DarkArts        []DarkArt         `json:"darkarts"`
+	CurrentTurn     string            `json:"currentturn"`
+	TurnOrder       []string          `json:"turnorder"`
+	CurrentDarkArt  int               `json:"currentdarkart"`
+	CurrentLocation int               `json:"currentlocation"`
+	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
+	turnStats       TurnStats
+	mu              sync.Mutex
 }
 
 type Player struct {
@@ -25,11 +29,13 @@ type Player struct {
 }
 
 type Card struct {
-	Id       int
-	Name     string
-	ImgPath  string
-	CardType string
-	Effects  []Effect
+	Id       int      `json:"Id"`
+	Name     string   `json:"Name"`
+	SetId    string   `json:"SetId"`
+	ImgPath  string   `json:"ImgPath"`
+	CardType string   `json:"CardType"`
+	Cost     int      `json:"Cost"`
+	Effects  []Effect `json:"Effects"`
 }
 
 type Location struct {
@@ -49,8 +55,20 @@ type Villain struct {
 	SetId       string
 	CurDamage   int
 	MaxHp       int
-	Effect      Effect
-	DeathEffect Effect
+	Active      bool
+	Effect      []Effect
+	DeathEffect []Effect
+
+	// true if this villain should be played before DA events - for triggered events.
+	playBeforeDA bool
+}
+
+type DarkArt struct {
+	Name    string
+	Id      int
+	ImgPath string
+	SetId   string
+	Effects []Effect
 }
 
 // Define an effect as something that changes the gamestate.

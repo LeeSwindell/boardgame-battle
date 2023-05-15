@@ -1,5 +1,6 @@
 import { useState, useNavigate, useEffect } from 'react';
 import axios from 'axios';
+import { logger } from '../logger/logger';
 
 const baseUrl = 'http://localhost:8000';
 
@@ -13,13 +14,13 @@ function LoginPage({ onLogin }) {
         username,
       })
       .then(() => {
-        console.log(`setting session id to ${username}`);
+        logger.log(`setting session id to ${username}`);
         localStorage.setItem('sessionid', username);
         onLogin(username);
       })
       .catch((error) => {
-        console.log('error sending /login post');
-        console.log(error);
+        logger.error('error sending /login post');
+        logger.error(error);
       });
   }
 

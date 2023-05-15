@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { logger } from '../logger/logger';
 
 function CharSelect({ lobbyid, characterSelection, canEdit }) {
   const [character, setCharacter] = useState(characterSelection);
@@ -10,10 +11,10 @@ function CharSelect({ lobbyid, characterSelection, canEdit }) {
       api
         .post(`/lobby/${lobbyid}/setchar`, { character })
         .then(() => {
-          // console.log('char update');
+          // logger.log('char update');
         })
         .catch((res) => {
-          console.log(res);
+          logger.error(res);
         });
     }
   }, [character]);
@@ -55,8 +56,8 @@ function Lobby() {
   // Create the socket connection
   useEffect(() => {
     socket.current = new WebSocket('ws://localhost:8000/connectsocket');
-    socket.current.onopen = () => console.log('lobby socket opened');
-    socket.current.onclose = () => console.log('lobby socket closed');
+    socket.current.onopen = () => logger.log('lobby socket opened');
+    socket.current.onclose = () => logger.log('lobby socket closed');
 
     // cleanup socket connection and send a request to backend when leaving page.
     return () => {
@@ -71,11 +72,11 @@ function Lobby() {
     api
       .get(`/lobby/${lobbyId}/refresh`)
       .then((res) => {
-        // console.log(res.data);
+        // logger.log(res.data);
         setPlayers(res.data.players);
       })
       .catch(() => {
-        console.log('error');
+        logger.error('error refreshing lobbies');
         navigate('/');
       });
 
@@ -87,7 +88,7 @@ function Lobby() {
             api
               .get(`/lobby/${lobbyId}/refresh`)
               .then((res) => {
-                // console.log(res.data.players);
+                // logger.log(res.data.players);
                 setPlayers(res.data.players);
               });
             break;

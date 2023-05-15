@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useInspect } from '../routes/Game';
 import CardContainer from './CardContainer';
 import MarketCard from './Marketcard';
+import { logger } from '../logger/logger';
 
 function InspectCard() {
   const { inspectCard, setInspectCard } = useInspect();
@@ -27,7 +28,7 @@ function InspectCard() {
   }
 
   if (Array.isArray(inspectCard)) {
-    console.log('array of inspects: ', inspectCard);
+    logger.log('array of inspects: ', inspectCard);
     return (
       <div className="fixed w-full h-full backdrop-contrast-50" ref={ref}>
         <div className="flex w-full h-full justify-center items-center">

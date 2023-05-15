@@ -5,11 +5,9 @@ import (
 )
 
 type DamageAllPlayers struct {
-	Amount      int
-	Description string
+	Amount int
 }
 
-// This definitely doesn't work - changes value in map during range
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 	for name := range gs.Players {
 		player, ok := gs.Players[name]
@@ -18,6 +16,36 @@ func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 			return
 		}
 		player.Health -= effect.Amount
+		gs.Players[name] = player
+	}
+}
+
+type DamageCurrentPlayer struct {
+	Amount int
+}
+
+func (effect DamageCurrentPlayer) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+	player.Health -= effect.Amount
+	gs.Players[user] = player
+}
+
+type DamageAllPlayersButCurrent struct {
+	Amount int
+}
+
+func (effect DamageAllPlayersButCurrent) Trigger(gs *Gamestate) {
+	for name := range gs.Players {
+		if name != gs.CurrentTurn {
+			player, ok := gs.Players[name]
+			if !ok {
+				log.Println("error getting player in DamageAllPlayers effect")
+				return
+			}
+			player.Health -= effect.Amount
+			gs.Players[name] = player
+		}
 	}
 }
 
@@ -142,10 +170,65 @@ func (effect MoneyIfVillainKilled) Trigger(gs *Gamestate) {
 	}
 }
 
-type RevealDarkArts struct {
+type AllPlayersGainHealth struct {
 	Amount int
 }
 
-func (effect RevealDarkArts) Trigger(gs *Gamestate) {
+func (effect AllPlayersGainHealth) Trigger(gs *Gamestate) {
+	for _, p := range gs.Players {
+		p.Health += effect.Amount
+		gs.Players[p.Name] = p
+	}
+}
 
+type AllPlayersGainMoney struct {
+	Amount int
+}
+
+func (effect AllPlayersGainMoney) Trigger(gs *Gamestate) {
+	for _, p := range gs.Players {
+		p.Money += effect.Amount
+		gs.Players[p.Name] = p
+	}
+}
+
+type ActivePlayerDiscards struct {
+	Amount int
+}
+
+func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+	cardName := AskUserToDiscard(0, user, player.Hand)
+
+	for i, c := range player.Hand {
+		if c.Name == cardName {
+			player.Hand = RemoveCardAtIndex(player.Hand, i)
+			break
+		}
+	}
+
+	gs.Players[user] = player
+
+	// send discard on event chan
+	// update turnstats
+}
+
+type AddToLocation struct {
+	Amount int
+}
+
+func (effect AddToLocation) Trigger(gs *Gamestate) {
+	loc := gs.Locations[gs.CurrentLocation]
+	loc.CurControl += effect.Amount
+	gs.Locations[gs.CurrentLocation] = loc
+
+	if loc.CurControl >= loc.MaxControl {
+		switch gs.CurrentLocation {
+		case len(gs.Locations) - 1:
+			log.Println("game over! you lose. pathetic")
+		default:
+			gs.CurrentLocation += 1
+		}
+	}
 }

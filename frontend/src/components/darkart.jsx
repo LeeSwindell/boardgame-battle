@@ -1,11 +1,6 @@
-function DarkArtCard() {
+function DarkArtCard({ imgPath }) {
   return (
-    <>
-      <img src="/images/darkarts/dementorskiss.jpg" alt="dementors kiss" />
-      {/* <div className="">
-        Dark Art
-      </div> */}
-    </>
+    <img src={imgPath} alt="dark art" />
   );
 }
 

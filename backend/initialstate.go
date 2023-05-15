@@ -25,8 +25,20 @@ func CreateVillains() []Villain {
 
 func CreateLocations() []Location {
 	locations := []Location{
+		castleGates(),
+		hagridsHut(),
 		greatHall(),
 	}
 
 	return locations
+}
+
+func CreateDarkArtDeck() []DarkArt {
+	darkArts := []DarkArt{
+		dementorsKiss(),
+		heWhoMustNotBeNamed(),
+		flipendo(),
+	}
+
+	return darkArts
 }

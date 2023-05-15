@@ -66,6 +66,7 @@ func main() {
 	r.HandleFunc("/lobby/{id}/startgame", StartGameHandler)
 	r.HandleFunc("/game/{id}/refreshgamestate", RefreshGamestateHandler)
 	r.HandleFunc("/game/{id}/getuserinput/{user}", GetUserInputHandler)
+	r.HandleFunc("/game/{id}/askusertodiscard/{user}", AskUserToDiscardHandler)
 	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
 
 	handler := c.Handler(r)

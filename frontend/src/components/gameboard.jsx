@@ -16,8 +16,8 @@ function Gameboard(props) {
         {gamestate
         && <CardContainer card={<Location imgPath={gamestate.locations[gamestate.currentlocation].ImgPath} curControl={gamestate.locations[gamestate.currentlocation].CurControl} maxControl={gamestate.locations[gamestate.currentlocation].MaxControl} />} size="wide" />}
         <div className="flex space-x-2 justify-center">
-          <CardContainer card={<DarkArtCard imgPath={gamestate.darkartsplayed[gamestate.darkartsplayed.length - 1].imgPath} />} size="reg" />
-          <CardContainer card={<Monster />} size="reg" />
+          <DarkArtCard />
+          <CardContainer card={<Monster />} size="small" extra="m-4" />
         </div>
         <div className="flex flex-none space-x-2 justify-end">
           <CardContainer card={<MarketCard />} size="reg" />

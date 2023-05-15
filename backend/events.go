@@ -21,8 +21,11 @@ type Subscriber struct {
 }
 
 type Event struct {
+	// for unsubscribing to changes. not really needed for publishin them atm.
 	senderId int
 	message  string
+	// for things like the user info and turn ordering. to prevent issues with locks.
+	data interface{}
 }
 
 func (eb *EventBroker) StartPublishing() {
@@ -89,3 +92,5 @@ func (s *Subscriber) Receive() bool {
 // Here's some predefined common events to use
 
 var EndTurnEvent = Event{senderId: -1, message: "end turn"}
+var LocationAddedEvent = Event{senderId: -1, message: "location added"}
+var PlayerDiscarded = Event{senderId: -1, message: "player discarded"}

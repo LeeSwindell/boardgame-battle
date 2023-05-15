@@ -14,6 +14,7 @@ func (effect RevealDarkArts) Trigger(gs *Gamestate) {
 
 		// Play current dark art.
 		curDarkArt := gs.DarkArts[curDarkArtIndex]
+		gs.DarkArtsPlayed = append(gs.DarkArtsPlayed, curDarkArt)
 		for _, e := range curDarkArt.Effects {
 			e.Trigger(gs)
 		}

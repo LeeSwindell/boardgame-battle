@@ -3,6 +3,7 @@ import { gameapi } from '../api';
 import { logger } from '../logger/logger';
 
 export const Sizes = {
+  small: 'w-32 h-32',
   reg: 'w-32 h-40',
   wide: 'w-40 h-32',
   regzoom: 'w-64 h-64',

@@ -74,6 +74,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	MovePlayedToDiscard(user, gs)
 	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)
+	gs.DarkArtsPlayed = []DarkArt{}
 	Draw5Cards(user, gs)
 	NextTurnInOrder(gs)
 	gs.turnStats = TurnStats{}
@@ -81,7 +82,21 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	SendLobbyUpdate(gameid, gs)
 
 	// Starting next turn actions.
-	gs.Locations[0].Effect.Trigger(gs)
+	for _, v := range gs.Villains {
+		if v.playBeforeDA {
+			for _, e := range v.Effect {
+				e.Trigger(gs)
+			}
+		}
+	}
+	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+	for _, v := range gs.Villains {
+		if !v.playBeforeDA {
+			for _, e := range v.Effect {
+				e.Trigger(gs)
+			}
+		}
+	}
 
 	SendLobbyUpdate(gameid, gs)
 

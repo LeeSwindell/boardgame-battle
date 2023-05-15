@@ -126,7 +126,7 @@ function GameWithState() {
             <div className="flex w-full h-full justify-center items-center">
               <div className="border bg-white z-50 shadow-2xl">
                 <p className="p-2 w-full text-center font-bold">Choose One</p>
-                {userInput.map((option) => <button key={option} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
+                {userInput.map((option, i) => <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
               </div>
             </div>
           </div>

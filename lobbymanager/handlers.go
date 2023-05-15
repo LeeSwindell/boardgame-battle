@@ -301,7 +301,6 @@ func SubmitUserChoiceHandler(w http.ResponseWriter, r *http.Request) {
 		Choice string `json:"choice"`
 	}
 	json.NewDecoder(r.Body).Decode(&data)
-	println("data:", data.Choice)
 
 	userInputChan <- data.Choice
 }

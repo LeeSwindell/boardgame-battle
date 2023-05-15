@@ -204,13 +204,15 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 	for i, c := range player.Hand {
 		if c.Name == cardName {
 			player.Hand = RemoveCardAtIndex(player.Hand, i)
+			player.Discard = append(player.Discard, c)
 			break
 		}
 	}
 
 	gs.Players[user] = player
 
-	// send discard on event chan
+	event := Event{senderId: -1, message: "player discarded", data: user}
+	eventBroker.Messages <- event
 	// update turnstats
 }
 
@@ -222,11 +224,12 @@ func (effect AddToLocation) Trigger(gs *Gamestate) {
 	loc := gs.Locations[gs.CurrentLocation]
 	loc.CurControl += effect.Amount
 	gs.Locations[gs.CurrentLocation] = loc
+	eventBroker.Messages <- LocationAddedEvent
 
 	if loc.CurControl >= loc.MaxControl {
 		switch gs.CurrentLocation {
 		case len(gs.Locations) - 1:
-			log.Println("game over! you lose. pathetic")
+			log.Println("game over, loser!!!")
 		default:
 			gs.CurrentLocation += 1
 		}

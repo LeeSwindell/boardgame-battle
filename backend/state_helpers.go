@@ -1,6 +1,7 @@
 package game
 
 import (
+	"log"
 	"math/rand"
 	"time"
 )
@@ -81,20 +82,27 @@ func ShuffleDarkArts(da []DarkArt) []DarkArt {
 }
 
 // Removes the top card of a players deck, returns the card.
-func PopFromDeck(player *Player) Card {
+func PopFromDeck(player *Player) (Card, bool) {
 	if len(player.Deck) == 0 {
 		ShuffleDiscardToDeck(player)
+		if len(player.Deck) == 0 {
+			log.Println("deck is completely empty mate")
+			return Card{}, false
+		}
 	}
 
 	topCard := player.Deck[len(player.Deck)-1]
 	player.Deck = player.Deck[:len(player.Deck)-1]
-	return topCard
+	return topCard, true
 }
 
 func Draw5Cards(user string, gs *Gamestate) {
 	updated := gs.Players[user]
 	for i := 0; i < 5; i++ {
-		updated.Hand = append(updated.Hand, PopFromDeck(&updated))
+		card, ok := PopFromDeck(&updated)
+		if ok {
+			updated.Hand = append(updated.Hand, card)
+		}
 	}
 
 	gs.Players[user] = updated

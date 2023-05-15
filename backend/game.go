@@ -50,6 +50,7 @@ func StartGame(players map[string]Player, turnOrder []string) {
 		DarkArts:        CreateDarkArtDeck(),
 		CurrentDarkArt:  0,
 		CurrentLocation: 0,
+		DarkArtsPlayed:  []DarkArt{},
 		CurrentTurn:     turnOrder[0],
 		TurnOrder:       turnOrder,
 		turnStats:       TurnStats{},

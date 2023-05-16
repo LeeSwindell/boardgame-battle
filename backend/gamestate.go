@@ -7,6 +7,8 @@ type Gamestate struct {
 	Villains        []Villain         `json:"villains"`
 	Locations       []Location        `json:"locations"`
 	DarkArts        []DarkArt         `json:"darkarts"`
+	MarketDeck      []Card            `json:"marketdeck"`
+	Market          []Card            `json:"market"`
 	CurrentTurn     string            `json:"currentturn"`
 	TurnOrder       []string          `json:"turnorder"`
 	CurrentDarkArt  int               `json:"currentdarkart"`

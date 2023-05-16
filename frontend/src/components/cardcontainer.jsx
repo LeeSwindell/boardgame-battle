@@ -33,6 +33,14 @@ function CardContainer({
       });
   }
 
+  function buyCardHandler(id) {
+    gameapi
+      .get(`/0/buycard/${id}`)
+      .then(() => {
+        // logger.log(`damaged villain ${id}`, )
+      });
+  }
+
   const onClick = (e) => {
     e.preventDefault();
     if (e.nativeEvent.button === 2) {
@@ -43,6 +51,9 @@ function CardContainer({
     }
     if (cardType === 'villain' && e.nativeEvent.button === 0) {
       damageVillainHandler(cardId);
+    }
+    if (cardType === 'market' && e.nativeEvent.button === 0) {
+      buyCardHandler(cardId);
     }
   };
 

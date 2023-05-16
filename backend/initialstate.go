@@ -10,6 +10,8 @@ func RonStartingDeck() []Card {
 		deck = append(deck, alohamora())
 	}
 
+	deck = ShuffleCards(deck)
+
 	return deck
 }
 
@@ -41,4 +43,25 @@ func CreateDarkArtDeck() []DarkArt {
 	}
 
 	return darkArts
+}
+
+func CreateMarketDeck() []Card {
+	deck := []Card{
+		crystalBall(),
+		finite(),
+		incendio(),
+	}
+
+	return deck
+}
+
+// IDs cause render errors with react currently since market cards aren't unique.
+func CreateMarket() []Card {
+	market := []Card{
+		crystalBall(),
+		finite(),
+		incendio(),
+	}
+
+	return market
 }

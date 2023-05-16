@@ -20,9 +20,9 @@ function Gameboard(props) {
           <CardContainer card={<Monster />} size="small" extra="m-4" />
         </div>
         <div className="flex flex-none space-x-2 justify-end">
-          <CardContainer card={<MarketCard />} size="reg" />
-          <CardContainer card={<MarketCard />} size="reg" />
-          <CardContainer card={<MarketCard />} size="reg" />
+          {/* Top Row Market */}
+          {gamestate
+          && gamestate.market.map((c) => <CardContainer key={c.Id} cardId={c.Id} cardType="market" card={<MarketCard img={c.ImgPath} />} size="reg" />)}
         </div>
       </div>
 

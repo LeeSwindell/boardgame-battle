@@ -27,7 +27,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	var cardId CardId
 	json.NewDecoder(r.Body).Decode(&cardId)
 
-	for i, c := range gs.Players[user].Hand {
+	for _, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			card := c
 			for _, e := range card.Effects {
@@ -41,7 +41,9 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			case "ally":
 				gs.turnStats.AlliesPlayed += 1
 			}
-			MoveToPlayed(user, i, gs)
+
+			// FIX -- doesn't work if effects change the hand, index will be invalid.
+			MoveToPlayed(user, c.Id, gs)
 		}
 	}
 
@@ -63,6 +65,11 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
+	if gs.CurrentTurn != user {
+		log.Println("not your turn!")
+		return
+	}
+
 	//
 	// Potentially refactor into 2 separate events, end turn and start turn.
 	// Release lock between these two events to any ongoing effects like villains
@@ -75,7 +82,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)
 	gs.DarkArtsPlayed = []DarkArt{}
-	Draw5Cards(user, gs)
+	DrawXCards(user, gs, 5)
 	NextTurnInOrder(gs)
 	gs.turnStats = TurnStats{}
 
@@ -137,6 +144,36 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			}
 		}
 	}
+
+	SendLobbyUpdate(gameid, gs)
+}
+
+func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
+	gameid, user := getIdAndUser(r)
+	vars := mux.Vars(r)
+	cardid, err := strconv.Atoi(vars["cardid"])
+	if err != nil {
+		log.Println("err getting cardid:", err.Error())
+	}
+
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	if gs.CurrentTurn != user {
+		log.Println("not your turn!")
+		return
+	}
+
+	player := gs.Players[user]
+	for _, c := range gs.Market {
+		if c.Id == cardid && player.Money >= c.Cost {
+			player.Money -= c.Cost
+			player.Discard = append(player.Discard, c)
+		}
+	}
+
+	gs.Players[user] = player
+	// don't remove from market for now.
 
 	SendLobbyUpdate(gameid, gs)
 }

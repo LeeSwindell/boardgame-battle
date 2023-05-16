@@ -36,6 +36,9 @@ func RunGameServer(gs *Gamestate) {
 	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
 		DamageVillainHandler(w, r, gs)
 	})
+	r.HandleFunc("/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
+		BuyCardHandler(w, r, gs)
+	})
 
 	handler := c.Handler(r)
 	log.Println("starting game engine on port 8080!")
@@ -48,6 +51,8 @@ func StartGame(players map[string]Player, turnOrder []string) {
 		Villains:        CreateVillains(),
 		Locations:       CreateLocations(),
 		DarkArts:        CreateDarkArtDeck(),
+		MarketDeck:      CreateMarketDeck(),
+		Market:          CreateMarket(),
 		CurrentDarkArt:  0,
 		CurrentLocation: 0,
 		DarkArtsPlayed:  []DarkArt{},
@@ -59,9 +64,11 @@ func StartGame(players map[string]Player, turnOrder []string) {
 
 	for _, p := range gs.Players {
 		user := p.Name
-		Draw5Cards(user, &gs)
+		DrawXCards(user, &gs, 5)
 	}
 
 	go eventBroker.StartPublishing()
 	go RunGameServer(&gs)
+
+	StartNewTurn(0, &gs)
 }

@@ -235,3 +235,31 @@ func (effect AddToLocation) Trigger(gs *Gamestate) {
 		}
 	}
 }
+
+type RemoveFromLocation struct {
+	Amount int
+}
+
+func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
+	loc := gs.Locations[gs.CurrentLocation]
+	loc.CurControl -= effect.Amount
+	if loc.CurControl < 0 {
+		loc.CurControl = 0
+	}
+	gs.Locations[gs.CurrentLocation] = loc
+}
+
+type DrawCards struct {
+	Amount int
+}
+
+func (effect DrawCards) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	DrawXCards(user, gs, 2)
+}
+
+type SendGameUpdateEffect struct{}
+
+func (effect SendGameUpdateEffect) Trigger(gs *Gamestate) {
+	SendLobbyUpdate(0, gs)
+}

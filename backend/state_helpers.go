@@ -13,16 +13,23 @@ func RemoveCardAtIndex(s []Card, index int) []Card {
 	return append(ret, s[index+1:]...)
 }
 
-// Removes a card at index and moves it to the PlayArea.
-func MoveToPlayed(user string, index int, gs *Gamestate) {
-	card := gs.Players[user].Hand[index]
-	newHand := RemoveCardAtIndex(gs.Players[user].Hand, index)
-	updatedPlayer := gs.Players[user]
+// Removes a card and moves it to the PlayArea given a cardid.
+func MoveToPlayed(user string, id int, gs *Gamestate) {
+	for index, c := range gs.Players[user].Hand {
+		if c.Id == id {
+			card := gs.Players[user].Hand[index]
+			newHand := RemoveCardAtIndex(gs.Players[user].Hand, index)
+			updatedPlayer := gs.Players[user]
 
-	updatedPlayer.Hand = newHand
-	updatedPlayer.PlayArea = append(updatedPlayer.PlayArea, card)
+			updatedPlayer.Hand = newHand
+			updatedPlayer.PlayArea = append(updatedPlayer.PlayArea, card)
 
-	gs.Players[user] = updatedPlayer
+			gs.Players[user] = updatedPlayer
+			return
+		}
+	}
+
+	log.Println("error with MoveToPlayed")
 }
 
 // Moves a users cards from the PlayArea into the Discard
@@ -96,9 +103,10 @@ func PopFromDeck(player *Player) (Card, bool) {
 	return topCard, true
 }
 
-func Draw5Cards(user string, gs *Gamestate) {
+// Used to draw cards and shuffle deck if needed.
+func DrawXCards(user string, gs *Gamestate, amount int) {
 	updated := gs.Players[user]
-	for i := 0; i < 5; i++ {
+	for i := 0; i < amount; i++ {
 		card, ok := PopFromDeck(&updated)
 		if ok {
 			updated.Hand = append(updated.Hand, card)
@@ -122,4 +130,25 @@ func NextTurnInOrder(gs *Gamestate) {
 			break
 		}
 	}
+}
+
+func StartNewTurn(gameid int, gs *Gamestate) {
+	// Starting next turn actions.
+	for _, v := range gs.Villains {
+		if v.playBeforeDA {
+			for _, e := range v.Effect {
+				e.Trigger(gs)
+			}
+		}
+	}
+	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+	for _, v := range gs.Villains {
+		if !v.playBeforeDA {
+			for _, e := range v.Effect {
+				e.Trigger(gs)
+			}
+		}
+	}
+
+	SendLobbyUpdate(gameid, gs)
 }

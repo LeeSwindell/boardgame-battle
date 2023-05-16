@@ -65,3 +65,46 @@ func bertieBottsEveryFlavourBeans() Card {
 		},
 	}
 }
+
+func crystalBall() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Crystal Ball",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/crystalball.jpg",
+		CardType: "item",
+		Cost:     3,
+		Effects: []Effect{
+			DrawCards{Amount: 2},
+			SendGameUpdateEffect{},
+			ActivePlayerDiscards{Amount: 1},
+		},
+	}
+}
+
+func finite() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Finite!",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/finite.jpg",
+		CardType: "spell",
+		Cost:     3,
+		Effects:  []Effect{RemoveFromLocation{Amount: 1}},
+	}
+}
+
+func incendio() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Incendio!",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/incendio.jpg",
+		CardType: "spell",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			DrawCards{Amount: 1},
+		},
+	}
+}

@@ -25,11 +25,10 @@ func pigwidgeon() Card {
 		Effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
-					GainDamage{Amount: 1, Description: "gain 1 damage"},
-					GainHealth{Amount: 2, Description: "gain 2 health"},
+					GainDamage{Amount: 1},
+					GainHealth{Amount: 2},
 				},
-				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
-				Description: "choose one of these effects, bub",
+				Options: []string{"Gain 1 Damage", "Gain 2 Health"},
 			},
 		},
 	}
@@ -105,6 +104,58 @@ func incendio() Card {
 		Effects: []Effect{
 			GainDamage{Amount: 1},
 			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func oliverWood() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Oliver Wood",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/oliverwood.jpg",
+		CardType: "ally",
+		Cost:     3,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			HealAnyIfVillainKilled{Amount: 2, Id: id},
+		},
+	}
+}
+
+func reparo() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Reparo",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/reparo.jpg",
+		CardType: "spell",
+		Cost:     3,
+		Effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainMoney{Amount: 2},
+					DrawCards{Amount: 1},
+				},
+				Options: []string{"Gain 2 Money", "Draw 1 Card"},
+			},
+		},
+	}
+}
+
+func triwizardCup() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Triwizard Cup",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/triwizardcup.jpg",
+		CardType: "item",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			GainMoney{Amount: 1},
+			GainHealth{Amount: 1},
 		},
 	}
 }

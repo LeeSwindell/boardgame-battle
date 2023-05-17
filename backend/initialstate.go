@@ -50,6 +50,9 @@ func CreateMarketDeck() []Card {
 		crystalBall(),
 		finite(),
 		incendio(),
+		oliverWood(),
+		reparo(),
+		triwizardCup(),
 	}
 
 	return deck
@@ -61,7 +64,22 @@ func CreateMarket() []Card {
 		crystalBall(),
 		finite(),
 		incendio(),
+		oliverWood(),
+		reparo(),
+		triwizardCup(),
 	}
 
 	return market
+}
+
+func RefillMarket(cardname string) Card {
+	cards := make(map[string]func() Card)
+	cards["Crystal Ball"] = crystalBall
+	cards["Finite!"] = finite
+	cards["Incendio!"] = incendio
+	cards["Oliver Wood"] = oliverWood
+	cards["Reparo"] = reparo
+	cards["Triwizard Cup"] = triwizardCup
+
+	return cards[cardname]()
 }

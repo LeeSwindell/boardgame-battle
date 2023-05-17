@@ -296,6 +296,24 @@ func AskUserToDiscardHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(choice))
 }
 
+func AskUserToSelectPlayerHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	user, ok := vars["user"]
+	if !ok {
+		log.Println("err getting username in AskUserToSelectPlayer")
+	}
+
+	var players []string
+	json.NewDecoder(r.Body).Decode(&players)
+
+	hub.askPlayerChoice(user, players)
+
+	// If a user submits multiple inputs somehow, this will block and be offset
+	// Change to check for a submit id with each choice?
+	choice := <-userInputChan
+	w.Write([]byte(choice))
+}
+
 func SubmitUserChoiceHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Choice string `json:"choice"`

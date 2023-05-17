@@ -63,7 +63,9 @@ func (effect GainMoney) Trigger(gs *Gamestate) {
 }
 
 type ChooseOne struct {
-	Effects     []Effect
+	Effects []Effect
+
+	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
 	Options     []string `json:"options"`
 	Description string   `json:"description"`
 }
@@ -93,8 +95,7 @@ func (effect GainDamage) Trigger(gs *Gamestate) {
 }
 
 type GainHealth struct {
-	Amount      int
-	Description string
+	Amount int
 }
 
 // Gives the current player Amount of health
@@ -104,10 +105,6 @@ func (effect GainHealth) Trigger(gs *Gamestate) {
 	player.Health += effect.Amount
 	gs.Players[user] = player
 }
-
-// func (effect GainHealth) Describe() string {
-// 	return effect.Description
-// }
 
 type GainDamagePerAllyPlayed struct{}
 
@@ -262,4 +259,61 @@ type SendGameUpdateEffect struct{}
 
 func (effect SendGameUpdateEffect) Trigger(gs *Gamestate) {
 	SendLobbyUpdate(0, gs)
+}
+
+type HealAnyIfVillainKilled struct {
+	Id     int
+	Amount int
+}
+
+func (effect HealAnyIfVillainKilled) Trigger(gs *Gamestate) {
+	healAnyPlayer := HealAnyPlayer{Amount: effect.Amount}
+
+	// check if villain already killed
+	if gs.turnStats.VillainsKilled > 0 {
+		healAnyPlayer.Trigger(gs)
+	} else {
+		// Check to see if the turn has changed before this can take the lock.
+		currentTurn := gs.CurrentTurn
+
+		sub := Subscriber{
+			id:              effect.Id,
+			messageChan:     make(chan string),
+			conditionMet:    "villain killed",
+			conditionFailed: "end turn",
+			unsubChan:       eventBroker.Messages,
+		}
+
+		go func() {
+			eventBroker.Subscribe(sub)
+			res := sub.Receive()
+
+			gs.mu.Lock()
+			defer gs.mu.Unlock()
+			if res && currentTurn == gs.CurrentTurn {
+				healAnyPlayer.Trigger(gs)
+
+				// FIX lobby id
+				SendLobbyUpdate(0, gs)
+			}
+		}()
+
+	}
+}
+
+type HealAnyPlayer struct {
+	Amount int
+}
+
+func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
+	playernames := []string{}
+	for p := range gs.Players {
+		playernames = append(playernames, p)
+	}
+
+	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
+
+	player := gs.Players[choice]
+	player.Health += effect.Amount
+	gs.Players[choice] = player
 }

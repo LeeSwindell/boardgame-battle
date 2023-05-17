@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -80,6 +81,9 @@ func AskUserToDiscard(gameid int, user string, hand []Card) string {
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Println("err sending user discard POST:", err.Error())
+	}
 	client := http.Client{}
 
 	res, err := client.Do(req)
@@ -89,6 +93,46 @@ func AskUserToDiscard(gameid int, user string, hand []Card) string {
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println("err reading response body:", err.Error())
+	}
+
+	return string(body)
+}
+
+func AskUserToSelectPlayer(gameid int, user string, players []string) string {
+	endpoint := fmt.Sprintf("http://localhost:8000/game/%d/askusertoselectplayer/%s", gameid, user)
+
+	// Encode the players slice as JSON
+	playerJSON, err := json.Marshal(players)
+	if err != nil {
+		log.Println("err encoding players slice:", err)
+		return ""
+	}
+
+	// Create a new http.Request object with the POST method and the encoded values.
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(string(playerJSON)))
+	if err != nil {
+		log.Println("err creating http.request in selectplayer", err)
+	}
+
+	// Set the Content-Type header to application/x-www-form-urlencoded.
+	req.Header.Set("Content-Type", "application/json")
+
+	// Submit the request.
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("err sending request in selectplayer", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code.
+	if resp.StatusCode != 200 {
+		log.Println("status bad, select player", resp.StatusCode)
+		return ""
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("err reading response body:", err.Error())
 	}

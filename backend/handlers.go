@@ -42,7 +42,6 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 				gs.turnStats.AlliesPlayed += 1
 			}
 
-			// FIX -- doesn't work if effects change the hand, index will be invalid.
 			MoveToPlayed(user, c.Id, gs)
 		}
 	}
@@ -165,10 +164,11 @@ func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	}
 
 	player := gs.Players[user]
-	for _, c := range gs.Market {
+	for i, c := range gs.Market {
 		if c.Id == cardid && player.Money >= c.Cost {
 			player.Money -= c.Cost
 			player.Discard = append(player.Discard, c)
+			gs.Market[i] = RefillMarket(c.Name)
 		}
 	}
 

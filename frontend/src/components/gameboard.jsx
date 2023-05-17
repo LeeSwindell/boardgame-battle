@@ -22,7 +22,7 @@ function Gameboard(props) {
         <div className="flex flex-none space-x-2 justify-end">
           {/* Top Row Market */}
           {gamestate
-          && gamestate.market.map((c) => <CardContainer key={c.Id} cardId={c.Id} cardType="market" card={<MarketCard img={c.ImgPath} />} size="reg" />)}
+          && gamestate.market.slice(0, 3).map((c) => <CardContainer key={c.Id} cardId={c.Id} cardType="market" card={<MarketCard img={c.ImgPath} />} size="reg" />)}
         </div>
       </div>
 
@@ -32,9 +32,9 @@ function Gameboard(props) {
           <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<Villain img={v.ImgPath} maxHp={v.MaxHp} curDamage={v.CurDamage} />} size="wide" />
         ))}
         <div className="flex flex-none space-x-2 justify-end">
-          <CardContainer card={<MarketCard />} size="reg" />
-          <CardContainer card={<MarketCard />} size="reg" />
-          <CardContainer card={<MarketCard />} size="reg" />
+          {/* Middle Row Market */}
+          {gamestate
+          && gamestate.market.slice(3, 6).map((c) => <CardContainer key={c.Id} cardId={c.Id} cardType="market" card={<MarketCard img={c.ImgPath} />} size="reg" />)}
         </div>
       </div>
     </div>

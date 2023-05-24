@@ -14,9 +14,6 @@ function App() {
 
   // Check for existing user session
   useEffect(() => {
-    // const localSessionid = localStorage.getItem('sessionid');
-    // logger.log('session id found locally:', localSessionid);
-
     api
       .get('/sessionid')
       .then((response) => {

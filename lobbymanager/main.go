@@ -45,7 +45,8 @@ func getUniquePlayerId() uuid.UUID {
 func main() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins: []string{"http://localhost:5173", "http://localhost:80", "http://localhost", "http://192.168.1.68", "http://192.168.1.68:80", "http://192.168.1.68:5173",
+			"http://104.184.174.31", "http://104.184.174.31:80"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,

@@ -12,7 +12,7 @@ func draco() Villain {
 		CurDamage:    0,
 		MaxHp:        6,
 		Effect:       []Effect{DamageActiveIfLocationAdded{Amount: 2, Id: id}},
-		DeathEffect:  nil,
+		DeathEffect:  []Effect{RemoveFromLocation{Amount: 1}},
 		playBeforeDA: true,
 	}
 }
@@ -81,7 +81,7 @@ func crabbeAndGoyle() Villain {
 		Effect: []Effect{
 			DamageIfDiscard{Amount: 1, Id: id},
 		},
-		DeathEffect:  nil,
+		DeathEffect:  []Effect{DrawCards{Amount: 1}},
 		playBeforeDA: true,
 	}
 }

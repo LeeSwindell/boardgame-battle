@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"sync"
 
+	game "github.com/LeeSwindell/boardgame-battle/backend"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -18,7 +20,7 @@ import (
 var globalMu sync.Mutex
 var hub = newHub()
 var lobbyNumber int
-var lobbies []Lobby
+var lobbies = map[int]Lobby{}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -42,11 +44,14 @@ func getUniquePlayerId() uuid.UUID {
 	return uuid.New()
 }
 
+func getUniqueLobbyId() int {
+	return int(uuid.New().ID())
+}
+
 func main() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173", "http://localhost:80", "http://localhost", "http://192.168.1.68", "http://192.168.1.68:80", "http://192.168.1.68:5173",
-			"http://104.184.174.31", "http://104.184.174.31:80"},
+		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -70,6 +75,9 @@ func main() {
 	r.HandleFunc("/game/{id}/askusertodiscard/{user}", AskUserToDiscardHandler)
 	r.HandleFunc("/game/{id}/askusertoselectplayer/{user}", AskUserToSelectPlayerHandler)
 	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
+
+	// Start the game server
+	go game.RunGameServer()
 
 	handler := c.Handler(r)
 	log.Fatal(http.ListenAndServe(":8000", handler))

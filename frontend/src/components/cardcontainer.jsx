@@ -17,8 +17,9 @@ function CardContainer({
 
   function playCardHandler(id) {
     // logger.log('playing card:', id);
+    const gameid = localStorage.getItem('currentgameid');
     gameapi
-      .post('/0/playcard', { id })
+      .post(`/${gameid}/playcard`, { id })
       .then(() => {
         // logger.log('playcard TestCard');
       });
@@ -26,16 +27,18 @@ function CardContainer({
 
   function damageVillainHandler(id) {
     // logger.log('damaging villain: ', id);
+    const gameid = localStorage.getItem('currentgameid');
     gameapi
-      .get(`/0/damagevillain/${id}`)
+      .get(`/${gameid}/damagevillain/${id}`)
       .then(() => {
         // logger.log(`damaged villain ${id}`, )
       });
   }
 
   function buyCardHandler(id) {
+    const gameid = localStorage.getItem('currentgameid');
     gameapi
-      .get(`/0/buycard/${id}`)
+      .get(`/${gameid}/buycard/${id}`)
       .then(() => {
         // logger.log(`damaged villain ${id}`, )
       });

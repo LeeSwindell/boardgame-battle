@@ -50,8 +50,6 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 }
 
 func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
-	// id, _ := getUserAndId(r)
-
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 

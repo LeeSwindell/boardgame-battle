@@ -148,3 +148,7 @@ func stringifyCards(cards []Card) string {
 
 	return res
 }
+
+func ShutdownHandler(w http.ResponseWriter, r *http.Request, stopServer chan bool) {
+	stopServer <- true
+}

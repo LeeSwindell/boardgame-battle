@@ -13,7 +13,13 @@ import (
 )
 
 func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
-	l, err := json.Marshal(lobbies)
+	// Convert the map to a slice
+	var lobbiesSlice []Lobby
+	for _, lobby := range lobbies {
+		lobbiesSlice = append(lobbiesSlice, lobby)
+	}
+
+	l, err := json.Marshal(lobbiesSlice)
 	if err != nil {
 		log.Println("GetLobbies error: ")
 		log.Println(err)
@@ -36,7 +42,7 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, pid: pid, username: ""}
 	client.hub.register <- client
 
-	println("player ", pid.String(), " is connecting")
+	// println("player ", pid.String(), " is connecting")
 
 	go client.readPump()
 }
@@ -60,7 +66,7 @@ func AddClientWithUsernameHandler(w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, pid: pid, username: username}
 	client.hub.register <- client
 
-	println("player ", pid.String(), " is connecting")
+	// println("player ", pid.String(), " is connecting")
 
 	go client.readPump()
 }
@@ -68,8 +74,8 @@ func AddClientWithUsernameHandler(w http.ResponseWriter, r *http.Request) {
 func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
-	lobbyid := len(lobbies)
-	lobbyNumber++
+	lobbyid := getUniqueLobbyId()
+	// lobbyNumber++
 	playerid := int(getUniquePlayerId().ID())
 
 	hostname := r.Header.Get("Authorization")
@@ -86,7 +92,7 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	lobbies = append(lobbies, lobby)
+	lobbies[lobbyid] = lobby
 
 	_, err := io.WriteString(w, fmt.Sprint(lobbyid))
 	if err != nil {
@@ -105,7 +111,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	defer globalMu.Unlock()
 
 	newPlayerID := int(getUniquePlayerId().ID())
-	log.Println(newPlayerID, "<-- new player with id created")
+	// log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
 		newPlayer := Player{
@@ -113,7 +119,9 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 			Name:      username,
 			Character: "Harry",
 		}
-		lobbies[id].Players = append(lobbies[id].Players, newPlayer)
+		lobby := lobbies[id]
+		lobby.Players = append(lobby.Players, newPlayer)
+		lobbies[id] = lobby
 	} else {
 		log.Println("err joining lobby, username empty")
 	}
@@ -131,7 +139,11 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	globalMu.Lock()
 	defer globalMu.Unlock()
-	lobby := lobbies[id]
+	lobby, ok := lobbies[id]
+	if !ok {
+		http.Error(w, "Lobby not found", http.StatusNotFound)
+		return
+	}
 
 	res, err := json.Marshal(lobby)
 	if err != nil {
@@ -197,12 +209,16 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(lobbies[id].Players) <= 1 {
 		// just delete the empty lobby.
-		lobbies = append(lobbies[:id], lobbies[id+1:]...)
+		delete(lobbies, id)
+		// lobbies = append(lobbies[:id], lobbies[id+1:]...)
 	} else {
 		for i, p := range lobbies[id].Players {
 			if p.Name == user {
 				log.Println(lobbies[id].Players)
-				lobbies[id].Players = remove(lobbies[id].Players, i)
+				lobby := lobbies[id]
+				lobby.Players = remove(lobby.Players, i)
+				lobbies[id] = lobby
+				// lobbies[id].Players = remove(lobbies[id].Players, i)
 				hub.SendRefreshRequest()
 				break
 			}
@@ -235,7 +251,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		turnOrder = append(turnOrder, p.Name)
 	}
 
-	game.StartGame(startingPlayers, turnOrder)
+	game.StartGame(startingPlayers, turnOrder, id)
 	hub.SendStartGame()
 	// delete lobby info.
 }

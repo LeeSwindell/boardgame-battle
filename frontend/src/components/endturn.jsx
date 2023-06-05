@@ -2,8 +2,10 @@ import { gameapi } from '../api';
 
 function EndTurn() {
   function onClick() {
+    const gameid = localStorage.getItem('currentgameid');
+
     gameapi
-      .get('/0/endturn')
+      .get(`/${gameid}/endturn`)
       .then(() => {
         //
       });

@@ -15,38 +15,52 @@ var eventBroker = EventBroker{
 	Messages:    make(chan Event),
 }
 
-func RunGameServer(gs *Gamestate) {
+var states = map[int]*Gamestate{}
+
+func RunGameServer() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:80", "http://localhost"},
+		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	})
+	// states := map[int]*Gamestate{}
 
 	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := getIdAndUser(r)
+		gs := states[id]
 		EndTurnHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := getIdAndUser(r)
+		gs := states[id]
 		PlayCardHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := getIdAndUser(r)
+		gs := states[id]
 		GetGamestateHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := getIdAndUser(r)
+		gs := states[id]
 		DamageVillainHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
+		id, _ := getIdAndUser(r)
+		gs := states[id]
 		BuyCardHandler(w, r, gs)
 	})
 
 	handler := c.Handler(r)
-	log.Println("starting game engine on port 8080!")
+	log.Println("starting game server")
 	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Println("closing game server")
 }
 
-func StartGame(players map[string]Player, turnOrder []string) {
-	gs := Gamestate{
+func StartGame(players map[string]Player, turnOrder []string, lobbyid int) {
+	gs := &Gamestate{
 		Players:         players,
 		Villains:        CreateVillains(),
 		Locations:       CreateLocations(),
@@ -64,11 +78,14 @@ func StartGame(players map[string]Player, turnOrder []string) {
 
 	for _, p := range gs.Players {
 		user := p.Name
-		DrawXCards(user, &gs, 5)
+		DrawXCards(user, gs, 5)
 	}
 
-	go eventBroker.StartPublishing()
-	go RunGameServer(&gs)
+	states[lobbyid] = gs
+	// log.Println("**************", lobbyid)
 
-	StartNewTurn(0, &gs)
+	go eventBroker.StartPublishing()
+	// go RunGameServer(&gs)
+
+	StartNewTurn(0, gs)
 }

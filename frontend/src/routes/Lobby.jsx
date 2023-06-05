@@ -68,6 +68,7 @@ function Lobby() {
 
   useEffect(() => {
     const lobbyId = params.id;
+    localStorage.setItem('currentgameid', `${lobbyId}`);
 
     api
       .get(`/lobby/${lobbyId}/refresh`)
@@ -93,6 +94,7 @@ function Lobby() {
               });
             break;
           case 'StartGame':
+            localStorage.setItem('currentgameid', `${lobbyId}`);
             setUrl(`/game/${lobbyId}`);
             break;
           default:

@@ -14,6 +14,7 @@ import PlayerInfo from '../components/Playerinfo';
 import { api, gameapi } from '../api';
 import { logger } from '../logger/logger';
 import useLobbySocket from '../hooks/useLobbySocket';
+import EndGame from '../components/Endgame';
 
 // use react context to pass inspect around
 const InspectContext = createContext();
@@ -65,8 +66,9 @@ function GamestateProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const gameid = localStorage.getItem('currentgameid');
     gameapi
-      .get('/0/getgamestate')
+      .get(`/${gameid}/getgamestate`)
       .then((response) => {
         setGamestate(response.data);
       })
@@ -146,6 +148,7 @@ function GameWithState() {
                   .map(([username]) => (<PlayerInfo key={username} username={username} />))
               }
               <EndTurn />
+              {/* <EndGame /> */}
             </div>
             <div className="flex flex-col">
               <div className="text-center">Discard Pile</div>

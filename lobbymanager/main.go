@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"sync"
 
-	game "github.com/LeeSwindell/boardgame-battle/backend"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -19,7 +17,6 @@ import (
 // Keep global mutex or attach to types?
 var globalMu sync.Mutex
 var hub = newHub()
-var lobbyNumber int
 var lobbies = map[int]Lobby{}
 
 var upgrader = websocket.Upgrader{
@@ -28,13 +25,13 @@ var upgrader = websocket.Upgrader{
 }
 
 type Lobby struct {
-	ID      int      `json:"id"`
-	Name    string   `json:"name"`
-	Host    string   `json:"host"`
-	Players []Player `json:"players"`
+	ID      int           `json:"id"`
+	Name    string        `json:"name"`
+	Host    string        `json:"host"`
+	Players []LobbyPlayer `json:"players"`
 }
 
-type Player struct {
+type LobbyPlayer struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	Character string `json:"character"`
@@ -77,8 +74,9 @@ func main() {
 	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
 
 	// Start the game server
-	go game.RunGameServer()
+	// go game.RunGameServer()
 
 	handler := c.Handler(r)
+	log.Println("running lobby manager on port 8000")
 	log.Fatal(http.ListenAndServe(":8000", handler))
 }

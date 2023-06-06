@@ -1,4 +1,4 @@
-package game
+package main
 
 func RonStartingDeck() []Card {
 	deck := []Card{}

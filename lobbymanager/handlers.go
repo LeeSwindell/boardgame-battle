@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	game "github.com/LeeSwindell/boardgame-battle/backend"
+	// game "github.com/LeeSwindell/boardgame-battle/backend"
 	"github.com/gorilla/mux"
 )
 
@@ -83,7 +84,7 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		ID:   lobbyid,
 		Name: hostname + "'s lobby!",
 		Host: hostname,
-		Players: []Player{
+		Players: []LobbyPlayer{
 			{
 				ID:        playerid,
 				Name:      hostname,
@@ -114,7 +115,7 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
-		newPlayer := Player{
+		newPlayer := LobbyPlayer{
 			ID:        newPlayerID,
 			Name:      username,
 			Character: "Harry",
@@ -203,7 +204,7 @@ func LeaveLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
 
-	remove := func(slice []Player, s int) []Player {
+	remove := func(slice []LobbyPlayer, s int) []LobbyPlayer {
 		return append(slice[:s], slice[s+1:]...)
 	}
 
@@ -233,25 +234,63 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting id in startlobbyhandler:", err.Error())
 	}
 
-	startingPlayers := map[string]game.Player{}
+	startingPlayers := map[string]Player{}
 	turnOrder := []string{}
 	for _, p := range lobbies[id].Players {
-		startingPlayers[p.Name] = game.Player{
+		startingPlayers[p.Name] = Player{
 			Name:      p.Name,
 			Character: p.Character,
 			Health:    10,
 			Money:     0,
 			Damage:    0,
-			Deck:      game.RonStartingDeck(),
-			Hand:      []game.Card{},
-			PlayArea:  []game.Card{},
-			Discard:   []game.Card{},
+			Deck:      []Card{},
+			Hand:      []Card{},
+			PlayArea:  []Card{},
+			Discard:   []Card{},
 		}
 
 		turnOrder = append(turnOrder, p.Name)
 	}
 
-	game.StartGame(startingPlayers, turnOrder, id)
+	// turn this function call into a post request
+	// game.StartGame(startingPlayers, turnOrder, id)
+
+	// Convert startingPlayers and turnOrder to JSON
+	data := struct {
+		StartingPlayers map[string]Player `json:"startingPlayers"`
+		TurnOrder       []string          `json:"turnOrder"`
+		ID              int               `json:"id"`
+	}{
+		StartingPlayers: startingPlayers,
+		TurnOrder:       turnOrder,
+		ID:              id,
+	}
+
+	// Convert data to JSON bytes
+	payload, err := json.Marshal(data)
+	if err != nil {
+		log.Println("error marshaling data:", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Send POST request to the desired endpoint
+	baseURL := "http://localhost:8080" // Replace with your actual base URL
+	url := fmt.Sprintf("%s/startgame", baseURL)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		log.Println("error sending POST request:", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Println("received non-OK status code:", resp.StatusCode)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	hub.SendStartGame()
 	// delete lobby info.
 }
@@ -264,7 +303,7 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 	// 	log.Println("err getting id in refreshgamestatehandler:", err.Error())
 	// }
 
-	var gs game.Gamestate
+	var gs Gamestate
 	json.NewDecoder(r.Body).Decode(&gs)
 
 	hub.SendGameState(&gs)
@@ -279,7 +318,7 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting username in getuserinputhandler")
 	}
 
-	var chooseOne game.ChooseOne
+	var chooseOne ChooseOne
 	json.NewDecoder(r.Body).Decode(&chooseOne)
 
 	hub.askPlayerChoice(user, chooseOne.Options)
@@ -297,7 +336,7 @@ func AskUserToDiscardHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting username in AskUserToDiscardHandler")
 	}
 
-	var hand []game.Card
+	var hand []Card
 	json.NewDecoder(r.Body).Decode(&hand)
 	choices := []string{}
 	for _, c := range hand {

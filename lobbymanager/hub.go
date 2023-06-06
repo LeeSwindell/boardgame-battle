@@ -2,8 +2,7 @@ package main
 
 import (
 	"log"
-
-	game "github.com/LeeSwindell/boardgame-battle/backend"
+	// game "github.com/LeeSwindell/boardgame-battle/backend"
 )
 
 type Hub struct {
@@ -57,7 +56,7 @@ func (h *Hub) SendStartGame() {
 	}
 }
 
-func (h *Hub) SendGameState(gs *game.Gamestate) {
+func (h *Hub) SendGameState(gs *Gamestate) {
 	message := Message{
 		Type: "Gamestate",
 		Data: gs,

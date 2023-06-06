@@ -1,4 +1,4 @@
-package game
+package main
 
 import "sync"
 
@@ -73,14 +73,14 @@ type DarkArt struct {
 	Effects []Effect
 }
 
-// Define an effect as something that changes the gamestate.
-type Effect interface {
-	Trigger(gs *Gamestate)
-}
-
 type TurnStats struct {
 	AlliesPlayed   int
 	ItemsPlayed    int
 	SpellsPlayed   int
 	VillainsKilled int
+}
+
+// Define an effect as something that changes the gamestate.
+type Effect interface {
+	Trigger(gs *Gamestate)
 }

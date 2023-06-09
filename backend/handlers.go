@@ -46,6 +46,8 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		}
 	}
 
+	// log.Println("checking playcard gamestate for null: ", gs)
+
 	SendLobbyUpdate(gameid, gs)
 }
 

@@ -3,6 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { logger } from '../logger/logger';
 
+let socketUrl = import.meta.env.VITE_PROD_SOCKET_API;
+const prodMode = import.meta.env.VITE_PROD_MODE;
+if (prodMode === 'dev') {
+  socketUrl = import.meta.env.VITE_DEV_SOCKET_API;
+}
+
 function CharSelect({ lobbyid, characterSelection, canEdit }) {
   const [character, setCharacter] = useState(characterSelection);
 
@@ -55,7 +61,13 @@ function Lobby() {
 
   // Create the socket connection
   useEffect(() => {
-    socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    // socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    if (socketUrl === 'localhost:8000') {
+      socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    } else {
+      socket.current = new WebSocket(`wss://${socketUrl}/connectsocket`);
+    }
+
     socket.current.onopen = () => logger.log('lobby socket opened');
     socket.current.onclose = () => logger.log('lobby socket closed');
 
@@ -68,7 +80,6 @@ function Lobby() {
 
   useEffect(() => {
     const lobbyId = params.id;
-    localStorage.setItem('currentgameid', `${lobbyId}`);
 
     api
       .get(`/lobby/${lobbyId}/refresh`)
@@ -94,7 +105,6 @@ function Lobby() {
               });
             break;
           case 'StartGame':
-            localStorage.setItem('currentgameid', `${lobbyId}`);
             setUrl(`/game/${lobbyId}`);
             break;
           default:

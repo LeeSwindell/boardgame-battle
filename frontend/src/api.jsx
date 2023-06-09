@@ -1,8 +1,15 @@
 import axios from 'axios';
 
-// const baseUrl = 'http://localhost:8000';
+let lobbyUrl = import.meta.env.VITE_PROD_LOBBY_API_ENDPOINT;
+let gameUrl = import.meta.env.VITE_PROD_GAME_API_ENDPOINT;
+const prodMode = import.meta.env.VITE_PROD_MODE;
+if (prodMode === 'dev') {
+  lobbyUrl = import.meta.env.VITE_DEV_LOBBY_API_ENDPOINT;
+  gameUrl = import.meta.env.VITE_DEV_GAME_API_ENDPOINT;
+}
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: lobbyUrl,
   withCredentials: true, // Send cookies with every request
 });
 
@@ -17,7 +24,7 @@ api.interceptors.request.use((config) => {
 });
 
 const gameapi = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: gameUrl,
   withCredentials: true,
 });
 

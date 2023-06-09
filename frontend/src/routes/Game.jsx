@@ -1,7 +1,7 @@
 import {
   useState, createContext, useContext, useEffect, useRef, useMemo,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CardContainer from '../components/CardContainer';
 import DiscardPile from '../components/Discard';
 import EndTurn from '../components/Endturn';
@@ -41,6 +41,7 @@ const GamestateContext = createContext();
 function GamestateProvider({ children }) {
   const [gamestate, setGamestate] = useState();
   const [userInput, setUserInput] = useState();
+  const { gameid } = useParams();
   const socket = useLobbySocket({
     onMessage: (event) => {
       const data = JSON.parse(event.data);
@@ -50,7 +51,10 @@ function GamestateProvider({ children }) {
           break;
         case 'UserInput':
           logger.log(userInput);
-          setUserInput(data.data);
+          setUserInput({
+            inputs: data.data,
+            description: data.description,
+          });
           break;
         default:
           break;
@@ -59,14 +63,13 @@ function GamestateProvider({ children }) {
   });
   const value = useMemo(
     () => ({
-      gamestate, setGamestate, socket, userInput, setUserInput,
+      gamestate, setGamestate, socket, userInput, setUserInput, gameid,
     }),
-    [gamestate, socket, userInput],
+    [gamestate, socket, userInput, gameid],
   );
   const navigate = useNavigate();
 
   useEffect(() => {
-    const gameid = localStorage.getItem('currentgameid');
     gameapi
       .get(`/${gameid}/getgamestate`)
       .then((response) => {
@@ -100,14 +103,16 @@ function useGamestate() {
 export { useGamestate };
 
 function GameWithState() {
-  const { gamestate, userInput, setUserInput } = useGamestate();
+  const {
+    gamestate, userInput, setUserInput, gameid,
+  } = useGamestate();
 
   // FIX user game lobby id
   function SubmitUserChoice(choice) {
     return (
       () => {
         api
-          .post('/game/0/submituserchoice', { choice })
+          .post(`/game/${gameid}/submituserchoice`, { choice })
           .then(() => {
             setUserInput(null);
           })
@@ -127,8 +132,8 @@ function GameWithState() {
           <div className="fixed w-full h-full backdrop-contrast-50">
             <div className="flex w-full h-full justify-center items-center">
               <div className="border bg-white z-50 shadow-2xl">
-                <p className="p-2 w-full text-center font-bold">Choose One</p>
-                {userInput.map((option, i) => <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
+                <p className="p-2 w-full text-center font-bold">{userInput.description}</p>
+                {userInput.inputs.map((option, i) => <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
               </div>
             </div>
           </div>

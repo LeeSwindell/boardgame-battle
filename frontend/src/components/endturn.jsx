@@ -1,9 +1,9 @@
 import { gameapi } from '../api';
+import { useGamestate } from '../routes/Game';
 
 function EndTurn() {
+  const { gameid } = useGamestate();
   function onClick() {
-    const gameid = localStorage.getItem('currentgameid');
-
     gameapi
       .get(`/${gameid}/endturn`)
       .then(() => {

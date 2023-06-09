@@ -14,6 +14,8 @@ import (
 // to start the server
 // go run github.com/leeswindell/boardgame-battle/lobbymanager
 
+var appEnv string
+
 // Keep global mutex or attach to types?
 var globalMu sync.Mutex
 var hub = newHub()
@@ -48,7 +50,11 @@ func getUniqueLobbyId() int {
 func main() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+			"https://hogwartsbattle.fly.dev",
+			"https://hogwartsbackend.fly.dev",
+		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,

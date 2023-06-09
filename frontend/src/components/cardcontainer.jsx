@@ -1,4 +1,4 @@
-import { useInspect } from '../routes/Game';
+import { useGamestate, useInspect } from '../routes/Game';
 import { gameapi } from '../api';
 import { logger } from '../logger/logger';
 
@@ -14,10 +14,10 @@ function CardContainer({
   card, size, extra, cardId, cardType,
 }) {
   const { setInspectCard } = useInspect();
+  const { gameid } = useGamestate();
 
   function playCardHandler(id) {
     // logger.log('playing card:', id);
-    const gameid = localStorage.getItem('currentgameid');
     gameapi
       .post(`/${gameid}/playcard`, { id })
       .then(() => {
@@ -27,7 +27,6 @@ function CardContainer({
 
   function damageVillainHandler(id) {
     // logger.log('damaging villain: ', id);
-    const gameid = localStorage.getItem('currentgameid');
     gameapi
       .get(`/${gameid}/damagevillain/${id}`)
       .then(() => {
@@ -36,7 +35,6 @@ function CardContainer({
   }
 
   function buyCardHandler(id) {
-    const gameid = localStorage.getItem('currentgameid');
     gameapi
       .get(`/${gameid}/buycard/${id}`)
       .then(() => {

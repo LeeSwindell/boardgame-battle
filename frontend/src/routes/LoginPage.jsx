@@ -2,7 +2,12 @@ import { useState, useNavigate, useEffect } from 'react';
 import axios from 'axios';
 import { logger } from '../logger/logger';
 
-const baseUrl = 'http://localhost:8000';
+// const baseUrl = 'http://localhost:8000';
+let lobbyUrl = import.meta.env.VITE_PROD_LOBBY_API_ENDPOINT;
+const prodMode = import.meta.env.VITE_PROD_MODE;
+if (prodMode === 'dev') {
+  lobbyUrl = import.meta.env.VITE_DEV_LOBBY_API_ENDPOINT;
+}
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -10,7 +15,7 @@ function LoginPage({ onLogin }) {
   function handleSubmit(event) {
     event.preventDefault();
     axios
-      .post(`${baseUrl}/login`, {
+      .post(`${lobbyUrl}/login`, {
         username,
       })
       .then(() => {

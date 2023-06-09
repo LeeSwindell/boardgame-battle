@@ -12,8 +12,9 @@ type Hub struct {
 }
 
 type Message struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	Type        string      `json:"type"`
+	Data        interface{} `json:"data"`
+	Description string      `json:"description"`
 }
 
 func newHub() *Hub {
@@ -67,10 +68,13 @@ func (h *Hub) SendGameState(gs *Gamestate) {
 	}
 }
 
-func (h *Hub) askPlayerChoice(user string, choices []string) {
+func (h *Hub) askPlayerChoice(user string, choices []string, description string) {
+	// Include a display message field. rather than saying "choose one" for everything.
+
 	message := Message{
-		Type: "UserInput",
-		Data: choices,
+		Type:        "UserInput",
+		Data:        choices,
+		Description: description,
 	}
 
 	for c := range h.clients {

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	// game "github.com/LeeSwindell/boardgame-battle/backend"
@@ -266,6 +267,8 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		ID:              id,
 	}
 
+	log.Println("start game data: ", data)
+
 	// Convert data to JSON bytes
 	payload, err := json.Marshal(data)
 	if err != nil {
@@ -275,7 +278,10 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send POST request to the desired endpoint
-	baseURL := "http://localhost:8080" // Replace with your actual base URL
+	baseURL := "http://localhost:8080"
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		baseURL = "https://hogwartsbackend.fly.dev"
+	}
 	url := fmt.Sprintf("%s/startgame", baseURL)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
@@ -321,7 +327,7 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	var chooseOne ChooseOne
 	json.NewDecoder(r.Body).Decode(&chooseOne)
 
-	hub.askPlayerChoice(user, chooseOne.Options)
+	hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
 
 	// If a user submits multiple inputs somehow, this will block and be offset
 	// Change to check for a submit id with each choice?
@@ -343,7 +349,7 @@ func AskUserToDiscardHandler(w http.ResponseWriter, r *http.Request) {
 		choices = append(choices, c.Name)
 	}
 
-	hub.askPlayerChoice(user, choices)
+	hub.askPlayerChoice(user, choices, "Discard a card")
 
 	// If a user submits multiple inputs somehow, this will block and be offset
 	// Change to check for a submit id with each choice?
@@ -361,7 +367,7 @@ func AskUserToSelectPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	var players []string
 	json.NewDecoder(r.Body).Decode(&players)
 
-	hub.askPlayerChoice(user, players)
+	hub.askPlayerChoice(user, players, "Select a player")
 
 	// If a user submits multiple inputs somehow, this will block and be offset
 	// Change to check for a submit id with each choice?

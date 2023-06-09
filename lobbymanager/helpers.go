@@ -1,30 +1,19 @@
 package main
 
-import "sync"
-
-func getIndexValue(slice []Lobby, index int) (Lobby, bool) {
-	if index < 0 || index >= len(slice) {
-		return Lobby{}, false
-	}
-	return slice[index], true
-}
-
 // types for handlers.
 
 type Gamestate struct {
-	Players         map[string]LobbyPlayer `json:"players"`
-	Villains        []Villain              `json:"villains"`
-	Locations       []Location             `json:"locations"`
-	DarkArts        []DarkArt              `json:"darkarts"`
-	MarketDeck      []Card                 `json:"marketdeck"`
-	Market          []Card                 `json:"market"`
-	CurrentTurn     string                 `json:"currentturn"`
-	TurnOrder       []string               `json:"turnorder"`
-	CurrentDarkArt  int                    `json:"currentdarkart"`
-	CurrentLocation int                    `json:"currentlocation"`
-	DarkArtsPlayed  []DarkArt              `json:"darkartsplayed"`
-	turnStats       TurnStats
-	mu              sync.Mutex
+	Players         map[string]Player `json:"players"`
+	Villains        []Villain         `json:"villains"`
+	Locations       []Location        `json:"locations"`
+	DarkArts        []DarkArt         `json:"darkarts"`
+	MarketDeck      []Card            `json:"marketdeck"`
+	Market          []Card            `json:"market"`
+	CurrentTurn     string            `json:"currentturn"`
+	TurnOrder       []string          `json:"turnorder"`
+	CurrentDarkArt  int               `json:"currentdarkart"`
+	CurrentLocation int               `json:"currentlocation"`
+	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
 }
 
 type Player struct {

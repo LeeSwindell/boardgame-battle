@@ -12,12 +12,15 @@ import (
 
 // go run ./backend
 
+var appEnv string
+
 var eventBroker = EventBroker{
 	mu:          sync.Mutex{},
 	Subscribers: map[int]Subscriber{},
 	Messages:    make(chan Event),
 }
 
+var globalMu = sync.Mutex{}
 var states = map[int]*Gamestate{}
 
 func main() {
@@ -28,37 +31,50 @@ func main() {
 func RunGameServer() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+			"https://hogwartsbattle.fly.dev",
+			"https://lobbymanager.fly.dev",
+		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	})
-	// states := map[int]*Gamestate{}
 
 	r.HandleFunc("/startgame", StartGameHandler)
 	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
-		id, _ := getIdAndUser(r)
-		gs := states[id]
+		gs, ok := getGsForGameID(r)
+		if !ok {
+			return
+		}
 		EndTurnHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
-		id, _ := getIdAndUser(r)
-		gs := states[id]
+		gs, ok := getGsForGameID(r)
+		if !ok {
+			return
+		}
 		PlayCardHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
-		id, _ := getIdAndUser(r)
-		gs := states[id]
+		gs, ok := getGsForGameID(r)
+		if !ok {
+			return
+		}
 		GetGamestateHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
-		id, _ := getIdAndUser(r)
-		gs := states[id]
+		gs, ok := getGsForGameID(r)
+		if !ok {
+			return
+		}
 		DamageVillainHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
-		id, _ := getIdAndUser(r)
-		gs := states[id]
+		gs, ok := getGsForGameID(r)
+		if !ok {
+			return
+		}
 		BuyCardHandler(w, r, gs)
 	})
 
@@ -68,38 +84,38 @@ func RunGameServer() {
 	log.Println("closing game server")
 }
 
-func StartGame(players map[string]Player, turnOrder []string, lobbyid int) {
-	gs := &Gamestate{
-		Players:         players,
-		Villains:        CreateVillains(),
-		Locations:       CreateLocations(),
-		DarkArts:        CreateDarkArtDeck(),
-		MarketDeck:      CreateMarketDeck(),
-		Market:          CreateMarket(),
-		CurrentDarkArt:  0,
-		CurrentLocation: 0,
-		DarkArtsPlayed:  []DarkArt{},
-		CurrentTurn:     turnOrder[0],
-		TurnOrder:       turnOrder,
-		turnStats:       TurnStats{},
-		mu:              sync.Mutex{},
-	}
+// func StartGame(players map[string]Player, turnOrder []string, lobbyid int) {
+// 	gs := &Gamestate{
+// 		Players:         players,
+// 		Villains:        CreateVillains(),
+// 		Locations:       CreateLocations(),
+// 		DarkArts:        CreateDarkArtDeck(),
+// 		MarketDeck:      CreateMarketDeck(),
+// 		Market:          CreateMarket(),
+// 		CurrentDarkArt:  0,
+// 		CurrentLocation: 0,
+// 		DarkArtsPlayed:  []DarkArt{},
+// 		CurrentTurn:     turnOrder[0],
+// 		TurnOrder:       turnOrder,
+// 		turnStats:       TurnStats{},
+// 		mu:              sync.Mutex{},
+// 	}
 
-	for user, p := range gs.Players {
-		// user := p.Name
-		p.Deck = RonStartingDeck()
-		gs.Players[user] = p
-		DrawXCards(user, gs, 5)
-	}
+// 	for user, p := range gs.Players {
+// 		// user := p.Name
+// 		p.Deck = RonStartingDeck()
+// 		gs.Players[user] = p
+// 		DrawXCards(user, gs, 5)
+// 	}
 
-	states[lobbyid] = gs
-	// log.Println("**************", lobbyid)
+// 	states[lobbyid] = gs
+// 	// log.Println("**************", lobbyid)
 
-	go eventBroker.StartPublishing()
-	// go RunGameServer(&gs)
+// 	go eventBroker.StartPublishing()
+// 	// go RunGameServer(&gs)
 
-	StartNewTurn(0, gs)
-}
+// 	StartNewTurn(0, gs)
+// }
 
 func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
@@ -108,12 +124,20 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		ID              int               `json:"id"`
 	}
 
+	if r.Body == nil {
+		log.Println("request body is empty")
+		http.Error(w, "Empty request body", http.StatusBadRequest)
+		return
+	}
+
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		log.Println("error decoding JSON:", err.Error())
+		log.Println("error decoding JSON:", err.Error(), "body:", r.Body)
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
+
+	// log.Println("id:", data.ID, "***turn order:", data.TurnOrder, "****players:", data.StartingPlayers)
 
 	gs := &Gamestate{
 		Players:         data.StartingPlayers,
@@ -134,11 +158,16 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	for user, p := range gs.Players {
 		// user := p.Name
 		p.Deck = RonStartingDeck()
+		p.Hand = []Card{}
+		p.PlayArea = []Card{}
+		p.Discard = []Card{}
 		gs.Players[user] = p
 		DrawXCards(user, gs, 5)
 	}
 	// go eventBroker.StartPublishing()
 
+	globalMu.Lock()
+	defer globalMu.Unlock()
 	states[data.ID] = gs
 	StartNewTurn(0, gs)
 }

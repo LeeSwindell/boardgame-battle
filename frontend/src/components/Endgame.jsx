@@ -1,8 +1,10 @@
 import { gameapi } from '../api';
+import { useGamestate } from '../routes/Game';
 
 function EndGame() {
+  const { gameid } = useGamestate();
+
   function onClick() {
-    const gameid = localStorage.getItem('currentgameid');
     gameapi
       .get(`/${gameid}/shutdown`)
       .then(() => {

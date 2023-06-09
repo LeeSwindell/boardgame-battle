@@ -1,11 +1,9 @@
 # boardgame-battle
-Online multiplayer board game platform. Soon to be self-hosted
-
-Sure! Here's a basic README file for your React and Go board game platform project:
+Online multiplayer board game platform. Hosted on Fly.io
 
 # Board Game Platform
 
-Welcome to my Board Game Platform! This project is a web-based platform built using React (Vite) and Go, designed to host and facilitate online board games.
+Welcome to my Board Game Platform! This project is a web-based platform built using React (ViteJS) and Go, designed to host and facilitate online board games.
 
 ## Table of Contents
 
@@ -52,7 +50,5 @@ The Board Game Platform currently supports the following features:
 
 ## Upcoming
 
-- A self-hosted version of the site available at www.gamewithyourfriends.dev
-- Graceful shutdown of completed or abandoned games.
 - A complete and playable game - currently it's just playable
 - A better Readme with some pictures. 

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,10 @@ func getIdAndUser(r *http.Request) (int, string) {
 
 func SendLobbyUpdate(id int, gs *Gamestate) {
 	url := fmt.Sprintf("http://localhost:8000/game/%d/refreshgamestate", id)
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/refreshgamestate", id)
+	}
+
 	data, err := json.Marshal(gs)
 	if err != nil {
 		log.Println("err marshaling gamestate:", err.Error())
@@ -47,6 +52,9 @@ func SendLobbyUpdate(id int, gs *Gamestate) {
 func getUserInput(id int, user string, effect Effect) string {
 	// pass result to card effect.
 	url := fmt.Sprintf("http://localhost:8000/game/%d/getuserinput/%s", id, user)
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/getuserinput/%s", id, user)
+	}
 	data, err := json.Marshal(effect)
 	if err != nil {
 		log.Println("err marshaling options:", err.Error())
@@ -75,6 +83,9 @@ func getUserInput(id int, user string, effect Effect) string {
 // Sends a request to lobby manager for the cardId to discard from a users hand.
 func AskUserToDiscard(gameid int, user string, hand []Card) string {
 	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertodiscard/%s", gameid, user)
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertodiscard/%s", gameid, user)
+	}
 	data, err := json.Marshal(hand)
 	if err != nil {
 		log.Println("err marshaling options:", err)
@@ -102,6 +113,9 @@ func AskUserToDiscard(gameid int, user string, hand []Card) string {
 
 func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	endpoint := fmt.Sprintf("http://localhost:8000/game/%d/askusertoselectplayer/%s", gameid, user)
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		endpoint = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectplayer/%s", gameid, user)
+	}
 
 	// Encode the players slice as JSON
 	playerJSON, err := json.Marshal(players)
@@ -149,6 +163,20 @@ func stringifyCards(cards []Card) string {
 	return res
 }
 
-func ShutdownHandler(w http.ResponseWriter, r *http.Request, stopServer chan bool) {
-	stopServer <- true
+func getGsForGameID(r *http.Request) (*Gamestate, bool) {
+	id, _ := getIdAndUser(r)
+	globalMu.Lock()
+	defer globalMu.Unlock()
+	gs, ok := states[id]
+	if !ok {
+		// log.Println("error getting gs from id for handler")
+		keys := []int{}
+		for k := range states {
+			keys = append(keys, k)
+		}
+		log.Println("error getting gs from id ** id: ", id, "** states keys: ", keys)
+		return nil, false
+	}
+
+	return gs, true
 }

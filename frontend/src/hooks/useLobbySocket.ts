@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { logger } from '../logger/logger';
 
+let socketUrl = import.meta.env.VITE_PROD_SOCKET_API;
+const prodMode = import.meta.env.VITE_PROD_MODE;
+if (prodMode === 'dev') {
+  socketUrl = import.meta.env.VITE_DEV_SOCKET_API;
+}
+
 interface UseLobbySocketProps {
     onOpen?: () => void,
     onClose?: () => void,
@@ -12,7 +18,13 @@ function useLobbySocket({onOpen, onClose, onMessage}) {
 
     useEffect(() => {
         const username = localStorage.getItem('sessionid');
-        socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
+        // socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
+        if (socketUrl === 'localhost:8000') {
+          socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
+        } else {
+          socket.current = new WebSocket(`wss://${socketUrl}/connectsocket/${username}`);
+        }
+
         socket.current.onopen = () => {
             logger.log('lobby socket opened');
             onOpen && onOpen();

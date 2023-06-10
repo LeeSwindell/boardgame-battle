@@ -1,4 +1,5 @@
 import { useGamestate, useInspect } from '../routes/Game';
+import Card from './Card';
 
 function DarkArtCard() {
   const { gamestate } = useGamestate();
@@ -12,9 +13,9 @@ function DarkArtCard() {
   };
 
   return (
-    <button className="flex w-32 h-32 rounded m-4 border items-center justify-center hover:shadow-lg" type="button" onClick={onClick} onContextMenu={onClick}>
+    <button className="flex w-32 h-32 rounded m-2 border items-center justify-center hover:shadow-lg" type="button" onClick={onClick} onContextMenu={onClick}>
       {gamestate.darkartsplayed.length > 0
-       && <img src={gamestate.darkartsplayed[gamestate.darkartsplayed.length - 1].ImgPath} alt="dark art" />}
+       && <Card src={gamestate.darkartsplayed[gamestate.darkartsplayed.length - 1].ImgPath} alt="Dark Art" />}
       {gamestate.darkartsplayed.length <= 0
        && <div>Dark Art</div>}
     </button>

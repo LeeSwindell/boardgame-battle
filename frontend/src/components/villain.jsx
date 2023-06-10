@@ -1,13 +1,10 @@
+import Card from './Card';
+
 function Villain({ maxHp, curDamage, img }) {
   return (
-    <div className="">
-      <p>
-        Health:
-        {maxHp - curDamage}
-        /
-        {maxHp}
-      </p>
-      <img src={img} alt="cornish pixies" />
+    <div className="relative">
+      <Card src={img} alt="Cornish Pixies" />
+      <div className="absolute text-white text-lg font-bold bottom-2 right-2 w-6 h-6 bg-red-700">{maxHp - curDamage}</div>
     </div>
   );
 }

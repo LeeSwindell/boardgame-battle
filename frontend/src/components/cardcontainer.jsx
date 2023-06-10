@@ -59,7 +59,7 @@ function CardContainer({
   };
 
   return (
-    <button className={`flex items-center justify-center hover:shadow-lg ${Sizes[size]} ${extra} rounded`} onClick={onClick} onContextMenu={onClick} type="button">
+    <button className={`flex items-center justify-center hover:shadow-lg hover:z-20 ${cardType === 'hand' && 'hover:-translate-y-4'} ${Sizes[size]} ${extra}`} onClick={onClick} onContextMenu={onClick} type="button">
       {card}
     </button>
   );

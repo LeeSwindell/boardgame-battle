@@ -10,9 +10,9 @@ function PlayArea() {
   if (gamestate) {
     logger.log(gamestate);
     return (
-      <div className="flex flex-row space-x-2 justify-center border h-40">
+      <div className="flex flex-row space-x-1 items-start border h-40">
         {gamestate.players[username].PlayArea.map((card) => (
-          <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
+          <CardContainer key={card.Id} cardId={card.Id} card={<MarketCard img={card.ImgPath} />} size="reg" />
         ))}
       </div>
     );

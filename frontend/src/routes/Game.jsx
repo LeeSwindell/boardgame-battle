@@ -141,12 +141,14 @@ function GameWithState() {
         }
         <InspectCard />
         <div className="flex flex-row justify-between">
-          <div className="flex flex-col space-y-1 p-1 w-auto h-auto">
+          <div>
             <Gameboard />
-            <PlayArea />
+            <div className="fixed ml-4 top-64 left-72 border w-[49rem] -z-10">
+              <PlayArea />
+            </div>
             <Hand />
           </div>
-          <div className="flex flex-col border justify-between items-center">
+          <div className="border justify-between items-center fixed top-0 right-0">
             <div>
               {
                 Object.entries(gamestate.players)

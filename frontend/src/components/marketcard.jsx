@@ -1,6 +1,8 @@
+import Card from './Card';
+
 function MarketCard({ img }) {
   return (
-    <img src={img} alt="detention" className="object-contain" />
+    <Card src={img} alt="Cornish Pixies" className="object-contain" />
   );
 }
 

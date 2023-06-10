@@ -1,13 +1,10 @@
+import Card from './Card';
+
 function Location({ curControl, maxControl, imgPath }) {
   return (
-    <div>
-      <p>
-        Control:
-        {curControl}
-        /
-        {maxControl}
-      </p>
-      <img src={imgPath} alt="great hall" />
+    <div className="relative">
+      <Card src={imgPath} alt="Location" />
+      <div className="absolute text-white text-lg font-bold bottom-2 right-2 w-6 h-6 bg-teal-800">{curControl}</div>
     </div>
   );
 }

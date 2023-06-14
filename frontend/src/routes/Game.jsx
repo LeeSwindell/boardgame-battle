@@ -136,6 +136,12 @@ function GameWithState() {
             // } else {
             //   logger.log('user input changed, error');
             // }
+            setUserInput((currentInput) => {
+              if (currentInput.messageID === id) {
+                return null;
+              }
+              return currentInput;
+            });
             HandleUserChoiceResponse(id);
           })
           .catch((res) => {

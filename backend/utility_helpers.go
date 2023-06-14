@@ -81,12 +81,18 @@ func getUserInput(id int, user string, effect Effect) string {
 }
 
 // Sends a request to lobby manager for the cardId to discard from a users hand.
-func AskUserToDiscard(gameid int, user string, hand []Card) string {
+func AskUserToDiscard(gameid int, user string, hand []Card, promptString string) string {
 	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertodiscard/%s", gameid, user)
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertodiscard/%s", gameid, user)
 	}
-	data, err := json.Marshal(hand)
+
+	var dataToSend = struct {
+		Hand   []Card `json:"hand"`
+		Prompt string `json:"prompt"`
+	}{Hand: hand, Prompt: promptString}
+
+	data, err := json.Marshal(dataToSend)
 	if err != nil {
 		log.Println("err marshaling options:", err)
 	}

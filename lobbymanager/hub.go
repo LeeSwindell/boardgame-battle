@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+
+	"github.com/google/uuid"
 	// game "github.com/LeeSwindell/boardgame-battle/backend"
 )
 
@@ -15,6 +17,7 @@ type Message struct {
 	Type        string      `json:"type"`
 	Data        interface{} `json:"data"`
 	Description string      `json:"description"`
+	ID          int         `json:"id"`
 }
 
 func newHub() *Hub {
@@ -68,20 +71,25 @@ func (h *Hub) SendGameState(gs *Gamestate) {
 	}
 }
 
-func (h *Hub) askPlayerChoice(user string, choices []string, description string) {
+func (h *Hub) askPlayerChoice(user string, choices []string, description string) int {
 	// Include a display message field. rather than saying "choose one" for everything.
 
+	id := int(uuid.New().ID())
 	message := Message{
 		Type:        "UserInput",
 		Data:        choices,
 		Description: description,
+		ID:          id,
 	}
 
 	for c := range h.clients {
 		if c.username == user {
 			c.conn.WriteJSON(message)
+			log.Println("asking for input: ", message.ID)
 		}
 	}
+
+	return id
 }
 
 func (h *Hub) run() {

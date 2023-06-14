@@ -66,9 +66,9 @@ func (s *Subscriber) Receive() bool {
 		case s.conditionMet:
 			res = true
 			// send unsub request in go routine to avoid blocking.
-			go func() {
-				s.unsubChan <- Event{senderId: s.id, message: "unsub"}
-			}()
+			// go func() {
+			// 	s.unsubChan <- Event{senderId: s.id, message: "unsub"}
+			// }()
 		case s.conditionFailed:
 			// send unsub request in go routine to avoid blocking.
 			go func() {

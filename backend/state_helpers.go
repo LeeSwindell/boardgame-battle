@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -151,4 +152,63 @@ func StartNewTurn(gameid int, gs *Gamestate) {
 	}
 
 	SendLobbyUpdate(gameid, gs)
+}
+
+// return true if player stunned, limit health between 0 and 10.
+func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
+	player := gs.Players[user]
+
+	// Do nothing if player already has no health.
+	if player.Health <= 0 {
+		return false
+	}
+
+	player.Health += change
+
+	if player.Health <= 0 {
+		player.Health = 0
+		gs.Players[user] = player
+		return true
+	} else if player.Health > 10 {
+		player.Health = 10
+	}
+
+	gs.Players[user] = player
+	return false
+}
+
+// change it so that players at 0 life go to 10 at start of turn.
+func StunPlayer(user string, gs *Gamestate) {
+	player := gs.Players[user]
+	discardAmount := len(player.Hand) / 2
+	for i := 0; i < discardAmount; i++ {
+		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
+		log.Println("stunned - asking user to discard")
+		cardName := AskUserToDiscard(gs.gameid, user, player.Hand, desc)
+
+		for i, c := range player.Hand {
+			if c.Name == cardName {
+				player.Hand = RemoveCardAtIndex(player.Hand, i)
+				player.Discard = append(player.Discard, c)
+				break
+			}
+		}
+
+		gs.Players[user] = player
+
+		event := Event{senderId: -1, message: "player discarded", data: user}
+		log.Println("stunned: blocking???")
+		eventBroker.Messages <- event
+		log.Println("stunned: Not blocking!! :):):)")
+	}
+}
+
+func HealStunned(gs *Gamestate) {
+	for user := range gs.Players {
+		if gs.Players[user].Health <= 0 {
+			player := gs.Players[user]
+			player.Health = 10
+			gs.Players[user] = player
+		}
+	}
 }

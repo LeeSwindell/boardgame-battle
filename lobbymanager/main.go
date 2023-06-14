@@ -61,6 +61,7 @@ func main() {
 	})
 
 	go hub.run()
+	go messageBroadcaster.Broadcast()
 
 	r.HandleFunc("/sessionid", sessionidHandler)
 	r.HandleFunc("/login", loginHandler)

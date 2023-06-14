@@ -69,14 +69,8 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		return
 	}
 
-	//
-	// Potentially refactor into 2 separate events, end turn and start turn.
-	// Release lock between these two events to any ongoing effects like villains
-	// Let them trigger things that may have happened during an end or start turn event
-	// Label Villains to get played before dark arts or after - depending on type ?
-	//
-
 	eventBroker.Messages <- EndTurnEvent
+	HealStunned(gs)
 	MovePlayedToDiscard(user, gs)
 	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)

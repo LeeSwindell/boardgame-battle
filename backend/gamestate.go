@@ -16,6 +16,7 @@ type Gamestate struct {
 	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
 	turnStats       TurnStats
 	mu              sync.Mutex
+	gameid          int
 }
 
 type Player struct {

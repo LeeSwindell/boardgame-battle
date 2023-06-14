@@ -315,7 +315,8 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 	hub.SendGameState(&gs)
 }
 
-var userInputChan = make(chan string)
+// var userInputChan = make(chan int)
+// var messageBoard = make(map[int]string)
 
 func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -327,11 +328,13 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	var chooseOne ChooseOne
 	json.NewDecoder(r.Body).Decode(&chooseOne)
 
-	hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
+	listenID := hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
+	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	// If a user submits multiple inputs somehow, this will block and be offset
-	// Change to check for a submit id with each choice?
-	choice := <-userInputChan
+	log.Println("user input blocking?")
+	choice := <-listenChan
+	log.Println("user input NOT blocking?")
+
 	w.Write([]byte(choice))
 }
 
@@ -342,18 +345,28 @@ func AskUserToDiscardHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting username in AskUserToDiscardHandler")
 	}
 
-	var hand []Card
-	json.NewDecoder(r.Body).Decode(&hand)
+	var data struct {
+		Hand   []Card `json:"hand"`
+		Prompt string `json:"prompt"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+
 	choices := []string{}
-	for _, c := range hand {
+	for _, c := range data.Hand {
 		choices = append(choices, c.Name)
 	}
+	if data.Prompt == "" {
+		data.Prompt = "Discard a card"
+	}
 
-	hub.askPlayerChoice(user, choices, "Discard a card")
+	listenID := hub.askPlayerChoice(user, choices, data.Prompt)
+	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	// If a user submits multiple inputs somehow, this will block and be offset
-	// Change to check for a submit id with each choice?
-	choice := <-userInputChan
+	// BLOCKING!!!!
+	log.Println("user discard blocking?", listenID, messageBroadcaster.Listeners)
+	choice := <-listenChan
+	log.Println("user discard NOT blocking?")
+
 	w.Write([]byte(choice))
 }
 
@@ -367,19 +380,19 @@ func AskUserToSelectPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	var players []string
 	json.NewDecoder(r.Body).Decode(&players)
 
-	hub.askPlayerChoice(user, players, "Select a player")
+	listenID := hub.askPlayerChoice(user, players, "Select a player")
+	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	// If a user submits multiple inputs somehow, this will block and be offset
-	// Change to check for a submit id with each choice?
-	choice := <-userInputChan
+	log.Println("select player blocking?")
+	choice := <-listenChan
+	log.Println("select player NOT blocking?")
+
 	w.Write([]byte(choice))
 }
 
 func SubmitUserChoiceHandler(w http.ResponseWriter, r *http.Request) {
-	var data struct {
-		Choice string `json:"choice"`
-	}
-	json.NewDecoder(r.Body).Decode(&data)
+	var choice ChoiceMessage
+	json.NewDecoder(r.Body).Decode(&choice)
 
-	userInputChan <- data.Choice
+	messageBroadcaster.InputChan <- choice
 }

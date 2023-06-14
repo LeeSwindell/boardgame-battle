@@ -50,11 +50,12 @@ function GamestateProvider({ children }) {
           setGamestate(data.data);
           break;
         case 'UserInput':
-          logger.log(userInput);
           setUserInput({
             inputs: data.data,
             description: data.description,
+            messageID: data.id,
           });
+          logger.log('user input:::::', data);
           break;
         default:
           break;
@@ -107,14 +108,35 @@ function GameWithState() {
     gamestate, userInput, setUserInput, gameid,
   } = useGamestate();
 
-  // FIX user game lobby id
+  let HandleUserChoiceResponse = () => {};
+
+  useEffect(() => {
+    HandleUserChoiceResponse = (messageId) => {
+      if (messageId === userInput.messageID) {
+        logger.log('setting user input to null, sentID/currID', messageId, userInput.messageID);
+        setUserInput(null);
+      } else {
+        logger.log('user input changed');
+      }
+    };
+  }, userInput);
+
   function SubmitUserChoice(choice) {
     return (
       () => {
+        const id = userInput.messageID;
+        logger.log('sending user choice: ', id);
         api
-          .post(`/game/${gameid}/submituserchoice`, { choice })
+          .post(`/game/${gameid}/submituserchoice`, { choice, id })
           .then(() => {
-            setUserInput(null);
+            // logger.log('userinput in submit choice response: input/id', userInput, id);
+            // if (userInput.messageID === id) {
+            //   logger.log('setting input to null:', userInput.messageID, id);
+            //   setUserInput(null);
+            // } else {
+            //   logger.log('user input changed, error');
+            // }
+            HandleUserChoiceResponse(id);
           })
           .catch((res) => {
             logger.error(res);
@@ -132,7 +154,9 @@ function GameWithState() {
           <div className="fixed w-full h-full backdrop-contrast-50">
             <div className="flex w-full h-full justify-center items-center">
               <div className="border bg-white z-50 shadow-2xl">
-                <p className="p-2 w-full text-center font-bold">{userInput.description}</p>
+                <p className="p-2 w-full text-center font-bold">
+                  {userInput.description}
+                </p>
                 {userInput.inputs.map((option, i) => <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
               </div>
             </div>
@@ -157,7 +181,7 @@ function GameWithState() {
               <EndTurn />
               {/* <EndGame /> */}
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center">
               <div className="text-center">Discard Pile</div>
               <DiscardPile />
             </div>

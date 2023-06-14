@@ -84,39 +84,6 @@ func RunGameServer() {
 	log.Println("closing game server")
 }
 
-// func StartGame(players map[string]Player, turnOrder []string, lobbyid int) {
-// 	gs := &Gamestate{
-// 		Players:         players,
-// 		Villains:        CreateVillains(),
-// 		Locations:       CreateLocations(),
-// 		DarkArts:        CreateDarkArtDeck(),
-// 		MarketDeck:      CreateMarketDeck(),
-// 		Market:          CreateMarket(),
-// 		CurrentDarkArt:  0,
-// 		CurrentLocation: 0,
-// 		DarkArtsPlayed:  []DarkArt{},
-// 		CurrentTurn:     turnOrder[0],
-// 		TurnOrder:       turnOrder,
-// 		turnStats:       TurnStats{},
-// 		mu:              sync.Mutex{},
-// 	}
-
-// 	for user, p := range gs.Players {
-// 		// user := p.Name
-// 		p.Deck = RonStartingDeck()
-// 		gs.Players[user] = p
-// 		DrawXCards(user, gs, 5)
-// 	}
-
-// 	states[lobbyid] = gs
-// 	// log.Println("**************", lobbyid)
-
-// 	go eventBroker.StartPublishing()
-// 	// go RunGameServer(&gs)
-
-// 	StartNewTurn(0, gs)
-// }
-
 func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		StartingPlayers map[string]Player `json:"startingPlayers"`
@@ -153,6 +120,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		TurnOrder:       data.TurnOrder,
 		turnStats:       TurnStats{},
 		mu:              sync.Mutex{},
+		gameid:          data.ID,
 	}
 
 	for user, p := range gs.Players {

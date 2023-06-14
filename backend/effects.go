@@ -9,14 +9,18 @@ type DamageAllPlayers struct {
 }
 
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
-	for name := range gs.Players {
-		player, ok := gs.Players[name]
-		if !ok {
-			log.Println("error getting player in DamageAllPlayers effect")
-			return
+	for user := range gs.Players {
+		// player, ok := gs.Players[user]
+		// if !ok {
+		// 	log.Println("error getting player in DamageAllPlayers effect")
+		// 	return
+		// }
+		// player.Health -= effect.Amount
+		// gs.Players[user] = player
+		stunned := ChangePlayerHealth(user, -effect.Amount, gs)
+		if stunned {
+			StunPlayer(user, gs)
 		}
-		player.Health -= effect.Amount
-		gs.Players[name] = player
 	}
 }
 
@@ -26,9 +30,13 @@ type DamageCurrentPlayer struct {
 
 func (effect DamageCurrentPlayer) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
-	player := gs.Players[user]
-	player.Health -= effect.Amount
-	gs.Players[user] = player
+	// player := gs.Players[user]
+	// player.Health -= effect.Amount
+	// gs.Players[user] = player
+	stunned := ChangePlayerHealth(user, -effect.Amount, gs)
+	if stunned {
+		StunPlayer(user, gs)
+	}
 }
 
 type DamageAllPlayersButCurrent struct {
@@ -36,15 +44,19 @@ type DamageAllPlayersButCurrent struct {
 }
 
 func (effect DamageAllPlayersButCurrent) Trigger(gs *Gamestate) {
-	for name := range gs.Players {
-		if name != gs.CurrentTurn {
-			player, ok := gs.Players[name]
-			if !ok {
-				log.Println("error getting player in DamageAllPlayers effect")
-				return
+	for user := range gs.Players {
+		if user != gs.CurrentTurn {
+			// player, ok := gs.Players[name]
+			// if !ok {
+			// 	log.Println("error getting player in DamageAllPlayers effect")
+			// 	return
+			// }
+			// player.Health -= effect.Amount
+			// gs.Players[name] = player
+			stunned := ChangePlayerHealth(user, -effect.Amount, gs)
+			if stunned {
+				StunPlayer(user, gs)
 			}
-			player.Health -= effect.Amount
-			gs.Players[name] = player
 		}
 	}
 }
@@ -101,9 +113,10 @@ type GainHealth struct {
 // Gives the current player Amount of health
 func (effect GainHealth) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
-	player := gs.Players[user]
-	player.Health += effect.Amount
-	gs.Players[user] = player
+	ChangePlayerHealth(user, effect.Amount, gs)
+	// player := gs.Players[user]
+	// player.Health += effect.Amount
+	// gs.Players[user] = player
 }
 
 type GainDamagePerAllyPlayed struct{}
@@ -194,9 +207,10 @@ type ActivePlayerDiscards struct {
 }
 
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
+	log.Println("why is it not logging things at the bottom?")
 	user := gs.CurrentTurn
 	player := gs.Players[user]
-	cardName := AskUserToDiscard(0, user, player.Hand)
+	cardName := AskUserToDiscard(gs.gameid, user, player.Hand, "")
 
 	for i, c := range player.Hand {
 		if c.Name == cardName {
@@ -209,7 +223,10 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 	gs.Players[user] = player
 
 	event := Event{senderId: -1, message: "player discarded", data: user}
+	log.Println("sending discard event, blocking?")
 	eventBroker.Messages <- event
+	log.Println("sent discard event, not blocking! :)")
+
 	// update turnstats
 }
 
@@ -252,7 +269,7 @@ type DrawCards struct {
 
 func (effect DrawCards) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
-	DrawXCards(user, gs, 2)
+	DrawXCards(user, gs, effect.Amount)
 }
 
 type SendGameUpdateEffect struct{}
@@ -312,8 +329,9 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 	}
 
 	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
+	ChangePlayerHealth(choice, effect.Amount, gs)
 
-	player := gs.Players[choice]
-	player.Health += effect.Amount
-	gs.Players[choice] = player
+	// player := gs.Players[choice]
+	// player.Health += effect.Amount
+	// gs.Players[choice] = player
 }

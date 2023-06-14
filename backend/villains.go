@@ -36,18 +36,28 @@ func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
 
 	go func() {
 		eventBroker.Subscribe(sub)
-		res := sub.Receive()
+		for {
+			res := sub.Receive()
+			if !res {
+				break
+			}
 
-		gs.mu.Lock()
-		defer gs.mu.Unlock()
-		if res && currentTurn == gs.CurrentTurn {
-			user := gs.CurrentTurn
-			player := gs.Players[user]
-			player.Health -= effect.Amount
-			gs.Players[user] = player
+			gs.mu.Lock()
+			if res && currentTurn == gs.CurrentTurn {
+				user := gs.CurrentTurn
 
-			// FIX lobby id
-			SendLobbyUpdate(0, gs)
+				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
+				if stunned {
+					StunPlayer(user, gs)
+				}
+				// player := gs.Players[user]
+				// player.Health -= effect.Amount
+				// gs.Players[user] = player
+
+				// FIX lobby id
+				SendLobbyUpdate(0, gs)
+			}
+			gs.mu.Unlock()
 		}
 	}()
 }
@@ -91,7 +101,7 @@ type DamageIfDiscard struct {
 	Id     int
 }
 
-// Currently this will only trigger once per turn, not even for multiple characters.
+// only damages active player. not player who discarded?
 func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
@@ -106,18 +116,29 @@ func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 
 	go func() {
 		eventBroker.Subscribe(sub)
-		res := sub.Receive()
 
-		gs.mu.Lock()
-		defer gs.mu.Unlock()
-		if res && currentTurn == gs.CurrentTurn {
-			user := gs.CurrentTurn
-			player := gs.Players[user]
-			player.Health -= effect.Amount
-			gs.Players[user] = player
+		for {
+			res := sub.Receive()
+			if !res {
+				break
+			}
 
-			// FIX lobby id
-			SendLobbyUpdate(0, gs)
+			gs.mu.Lock()
+			if res && currentTurn == gs.CurrentTurn {
+				user := gs.CurrentTurn
+				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
+				if stunned {
+					StunPlayer(user, gs)
+				}
+				// player := gs.Players[user]
+				// player.Health -= effect.Amount
+				// gs.Players[user] = player
+
+				// FIX lobby id
+				SendLobbyUpdate(0, gs)
+			}
+			gs.mu.Unlock()
 		}
+		// res := sub.Receive()
 	}()
 }

@@ -1,5 +1,10 @@
 package main
 
+import (
+	"log"
+	"sync"
+)
+
 // types for handlers.
 
 type Gamestate struct {
@@ -89,4 +94,49 @@ type ChooseOne struct {
 	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
 	Options     []string `json:"options"`
 	Description string   `json:"description"`
+}
+
+//
+// Broadcasting for user inputs.
+//
+
+var messageBroadcaster = MessageBroadcaster{
+	InputChan: make(chan ChoiceMessage),
+	Listeners: make(map[int]chan string),
+	mu:        sync.Mutex{},
+}
+
+type ChoiceMessage struct {
+	Choice string `json:"choice"`
+	ID     int    `json:"id"`
+}
+
+type MessageBroadcaster struct {
+	InputChan chan ChoiceMessage
+	Listeners map[int]chan string
+	mu        sync.Mutex
+}
+
+func (mb *MessageBroadcaster) Broadcast() {
+	for {
+		choice := <-mb.InputChan
+		outputChan, ok := mb.Listeners[choice.ID]
+		log.Println("broadcasting", choice.ID)
+		if ok {
+			outputChan <- choice.Choice
+			mb.mu.Lock()
+			delete(mb.Listeners, choice.ID)
+			mb.mu.Unlock()
+		}
+	}
+}
+
+func (mb *MessageBroadcaster) RegisterListener(ListenID int) chan string {
+	mb.mu.Lock()
+	defer mb.mu.Unlock()
+
+	listenChan := make(chan string)
+	mb.Listeners[ListenID] = listenChan
+
+	return listenChan
 }

@@ -11,6 +11,7 @@ function Gameboard(props) {
 
   return (
     <>
+      {/* Sidebar with Villains/Location */}
       <div className="inset-y-0 left-0 top-4 w-16 fixed -z-10">
         <div className="flex flex-col space-y-2">
           {gamestate

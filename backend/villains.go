@@ -1,6 +1,10 @@
 package main
 
-import "github.com/google/uuid"
+import (
+	"log"
+
+	"github.com/google/uuid"
+)
 
 func draco() Villain {
 	id := int(uuid.New().ID())
@@ -23,6 +27,7 @@ type DamageActiveIfLocationAdded struct {
 }
 
 func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
+	log.Println("calling damageactiveiflocationadded")
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
 
@@ -36,28 +41,28 @@ func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
 
 	go func() {
 		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
 		for {
-			res := sub.Receive()
+			res := <-resChan
 			if !res {
 				break
 			}
 
+			Logger("draco wants lock")
 			gs.mu.Lock()
-			if res && currentTurn == gs.CurrentTurn {
+			Logger("draco gets lock")
+			if currentTurn == gs.CurrentTurn {
 				user := gs.CurrentTurn
-
 				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 				if stunned {
 					StunPlayer(user, gs)
 				}
-				// player := gs.Players[user]
-				// player.Health -= effect.Amount
-				// gs.Players[user] = player
 
-				// FIX lobby id
-				SendLobbyUpdate(0, gs)
+				SendLobbyUpdate(gs.gameid, gs)
 			}
 			gs.mu.Unlock()
+			Logger("draco releases lock")
 		}
 	}()
 }
@@ -91,7 +96,7 @@ func crabbeAndGoyle() Villain {
 		Effect: []Effect{
 			DamageIfDiscard{Amount: 1, Id: id},
 		},
-		DeathEffect:  []Effect{DrawCards{Amount: 1}},
+		DeathEffect:  []Effect{AllDrawCards{Amount: 1}},
 		playBeforeDA: true,
 	}
 }
@@ -101,7 +106,7 @@ type DamageIfDiscard struct {
 	Id     int
 }
 
-// only damages active player. not player who discarded?
+// only damages active player. not player who discarded
 func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
@@ -116,29 +121,32 @@ func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 
 	go func() {
 		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
 
 		for {
-			res := sub.Receive()
+			res := <-resChan
 			if !res {
 				break
 			}
 
+			Logger("c&g want lock")
 			gs.mu.Lock()
+			Logger("c&g gets lock")
 			if res && currentTurn == gs.CurrentTurn {
 				user := gs.CurrentTurn
+				// log.Println("c&g deal 1 dmg")
+				Logger("cg calling stunned")
 				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 				if stunned {
 					StunPlayer(user, gs)
 				}
-				// player := gs.Players[user]
-				// player.Health -= effect.Amount
-				// gs.Players[user] = player
+				Logger("cg sending lobby update ")
 
-				// FIX lobby id
-				SendLobbyUpdate(0, gs)
+				SendLobbyUpdate(gs.gameid, gs)
 			}
 			gs.mu.Unlock()
+			Logger("c&g release lock")
 		}
-		// res := sub.Receive()
 	}()
 }

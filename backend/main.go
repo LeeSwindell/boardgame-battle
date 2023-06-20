@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/gorilla/mux"
@@ -24,6 +25,8 @@ var globalMu = sync.Mutex{}
 var states = map[int]*Gamestate{}
 
 func main() {
+	os.Setenv("LOG_LEVEL", "debug")
+
 	go eventBroker.StartPublishing()
 	RunGameServer()
 }

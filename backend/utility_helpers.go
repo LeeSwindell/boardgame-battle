@@ -136,7 +136,6 @@ func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 		log.Println("err creating http.request in selectplayer", err)
 	}
 
-	// Set the Content-Type header to application/x-www-form-urlencoded.
 	req.Header.Set("Content-Type", "application/json")
 
 	// Submit the request.
@@ -175,7 +174,6 @@ func getGsForGameID(r *http.Request) (*Gamestate, bool) {
 	defer globalMu.Unlock()
 	gs, ok := states[id]
 	if !ok {
-		// log.Println("error getting gs from id for handler")
 		keys := []int{}
 		for k := range states {
 			keys = append(keys, k)
@@ -185,4 +183,10 @@ func getGsForGameID(r *http.Request) (*Gamestate, bool) {
 	}
 
 	return gs, true
+}
+
+func Logger(s string) {
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		log.Println(s)
+	}
 }

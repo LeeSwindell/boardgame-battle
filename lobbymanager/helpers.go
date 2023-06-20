@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"sync"
 )
 
@@ -121,7 +120,6 @@ func (mb *MessageBroadcaster) Broadcast() {
 	for {
 		choice := <-mb.InputChan
 		outputChan, ok := mb.Listeners[choice.ID]
-		log.Println("broadcasting", choice.ID)
 		if ok {
 			outputChan <- choice.Choice
 			mb.mu.Lock()

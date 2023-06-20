@@ -331,10 +331,7 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	listenID := hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
 	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	log.Println("user input blocking?")
 	choice := <-listenChan
-	log.Println("user input NOT blocking?")
-
 	w.Write([]byte(choice))
 }
 
@@ -362,11 +359,7 @@ func AskUserToDiscardHandler(w http.ResponseWriter, r *http.Request) {
 	listenID := hub.askPlayerChoice(user, choices, data.Prompt)
 	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	// BLOCKING!!!!
-	log.Println("user discard blocking?", listenID, messageBroadcaster.Listeners)
 	choice := <-listenChan
-	log.Println("user discard NOT blocking?")
-
 	w.Write([]byte(choice))
 }
 
@@ -383,10 +376,7 @@ func AskUserToSelectPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	listenID := hub.askPlayerChoice(user, players, "Select a player")
 	listenChan := messageBroadcaster.RegisterListener(listenID)
 
-	log.Println("select player blocking?")
 	choice := <-listenChan
-	log.Println("select player NOT blocking?")
-
 	w.Write([]byte(choice))
 }
 

@@ -183,7 +183,6 @@ func StunPlayer(user string, gs *Gamestate) {
 	discardAmount := len(player.Hand) / 2
 	for i := 0; i < discardAmount; i++ {
 		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
-		log.Println("stunned - asking user to discard")
 		cardName := AskUserToDiscard(gs.gameid, user, player.Hand, desc)
 
 		for i, c := range player.Hand {
@@ -197,10 +196,14 @@ func StunPlayer(user string, gs *Gamestate) {
 		gs.Players[user] = player
 
 		event := Event{senderId: -1, message: "player discarded", data: user}
-		log.Println("stunned: blocking???")
+		Logger("stunned, sending event")
 		eventBroker.Messages <- event
-		log.Println("stunned: Not blocking!! :):):)")
+		Logger("stunned, sent event")
 	}
+
+	Logger("adding to location")
+	AddToLocation{Amount: 1}.Trigger(gs)
+	Logger("ending stun")
 }
 
 func HealStunned(gs *Gamestate) {
@@ -211,4 +214,11 @@ func HealStunned(gs *Gamestate) {
 			gs.Players[user] = player
 		}
 	}
+}
+
+// Removes a card from an array at given index, returns a new array of villains
+func RemoveVillainAtIndex(vs []Villain, index int) []Villain {
+	ret := make([]Villain, 0)
+	ret = append(ret, vs[:index]...)
+	return append(ret, vs[index+1:]...)
 }

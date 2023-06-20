@@ -61,6 +61,7 @@ func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) 
 func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gameid, user := getIdAndUser(r)
 
+	Logger("end turn wants lock")
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -69,7 +70,9 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		return
 	}
 
+	Logger("end turn sending event")
 	eventBroker.Messages <- EndTurnEvent
+	Logger("end turn sent event")
 	HealStunned(gs)
 	MovePlayedToDiscard(user, gs)
 	MoveHandToDiscard(user, gs)
@@ -82,6 +85,8 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	SendLobbyUpdate(gameid, gs)
 
 	// Starting next turn actions.
+	Logger("new turn")
+	Logger("Before DA villains")
 	for _, v := range gs.Villains {
 		if v.playBeforeDA {
 			for _, e := range v.Effect {
@@ -89,17 +94,21 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			}
 		}
 	}
+	Logger("triggering locations")
 	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+
+	Logger("After DA villains")
 	for _, v := range gs.Villains {
 		if !v.playBeforeDA {
 			for _, e := range v.Effect {
+				Logger("triggering " + v.Name)
 				e.Trigger(gs)
 			}
 		}
 	}
 
 	SendLobbyUpdate(gameid, gs)
-
+	Logger("end turn releases lock")
 }
 
 func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
@@ -121,7 +130,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 
 	for i, v := range gs.Villains {
 		if v.Id == villainid {
-			if gs.Villains[i].CurDamage == v.MaxHp {
+			if gs.Villains[i].CurDamage >= v.MaxHp {
 				// do nothing if villain is already dead.
 				return
 			}
@@ -131,10 +140,18 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			gs.Players[user] = updatedPlayer
 
 			// check if villain is now dead.
-			if gs.Villains[i].CurDamage == v.MaxHp {
+			if gs.Villains[i].CurDamage >= v.MaxHp {
+				// trigger villain death effect.
+				for _, effect := range gs.Villains[i].DeathEffect {
+					effect.Trigger(gs)
+				}
+
 				// remove villain, get new one
+				newVillains := RemoveVillainAtIndex(gs.Villains, i)
+				gs.Villains = newVillains
 				eventBroker.Messages <- Event{senderId: -1, message: "villain killed"}
 			}
+			break
 		}
 	}
 

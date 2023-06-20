@@ -10,13 +10,6 @@ type DamageAllPlayers struct {
 
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
-		// player, ok := gs.Players[user]
-		// if !ok {
-		// 	log.Println("error getting player in DamageAllPlayers effect")
-		// 	return
-		// }
-		// player.Health -= effect.Amount
-		// gs.Players[user] = player
 		stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 		if stunned {
 			StunPlayer(user, gs)
@@ -30,9 +23,6 @@ type DamageCurrentPlayer struct {
 
 func (effect DamageCurrentPlayer) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
-	// player := gs.Players[user]
-	// player.Health -= effect.Amount
-	// gs.Players[user] = player
 	stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 	if stunned {
 		StunPlayer(user, gs)
@@ -46,13 +36,6 @@ type DamageAllPlayersButCurrent struct {
 func (effect DamageAllPlayersButCurrent) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		if user != gs.CurrentTurn {
-			// player, ok := gs.Players[name]
-			// if !ok {
-			// 	log.Println("error getting player in DamageAllPlayers effect")
-			// 	return
-			// }
-			// player.Health -= effect.Amount
-			// gs.Players[name] = player
 			stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 			if stunned {
 				StunPlayer(user, gs)
@@ -82,9 +65,8 @@ type ChooseOne struct {
 	Description string   `json:"description"`
 }
 
-// FIX Lobbyid!
 func (effect ChooseOne) Trigger(gs *Gamestate) {
-	choice := getUserInput(0, gs.CurrentTurn, effect)
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect)
 
 	for i, option := range effect.Options {
 		if choice == option {
@@ -162,18 +144,27 @@ func (effect MoneyIfVillainKilled) Trigger(gs *Gamestate) {
 
 		go func() {
 			eventBroker.Subscribe(sub)
-			res := sub.Receive()
+			resChan := make(chan bool)
+			go sub.Receive(resChan)
 
-			gs.mu.Lock()
-			defer gs.mu.Unlock()
-			if res && currentTurn == gs.CurrentTurn {
-				user := gs.CurrentTurn
-				player := gs.Players[user]
-				player.Money += effect.Amount
-				gs.Players[user] = player
+			for {
+				res := <-resChan
+				if !res {
+					break
+				}
 
-				// FIX lobby id
-				SendLobbyUpdate(0, gs)
+				Logger("money if villain killed wants lock")
+				gs.mu.Lock()
+				if currentTurn == gs.CurrentTurn {
+					user := gs.CurrentTurn
+					player := gs.Players[user]
+					player.Money += effect.Amount
+					gs.Players[user] = player
+
+					SendLobbyUpdate(gs.gameid, gs)
+				}
+				gs.mu.Unlock()
+				Logger("money if villain killed releases lock")
 			}
 		}()
 
@@ -207,7 +198,6 @@ type ActivePlayerDiscards struct {
 }
 
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
-	log.Println("why is it not logging things at the bottom?")
 	user := gs.CurrentTurn
 	player := gs.Players[user]
 	cardName := AskUserToDiscard(gs.gameid, user, player.Hand, "")
@@ -223,9 +213,7 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 	gs.Players[user] = player
 
 	event := Event{senderId: -1, message: "player discarded", data: user}
-	log.Println("sending discard event, blocking?")
 	eventBroker.Messages <- event
-	log.Println("sent discard event, not blocking! :)")
 
 	// update turnstats
 }
@@ -238,7 +226,10 @@ func (effect AddToLocation) Trigger(gs *Gamestate) {
 	loc := gs.Locations[gs.CurrentLocation]
 	loc.CurControl += effect.Amount
 	gs.Locations[gs.CurrentLocation] = loc
+	Logger("sending location added event")
+	// This is blocking! no one currently listening for event?
 	eventBroker.Messages <- LocationAddedEvent
+	Logger("sent location added event")
 
 	if loc.CurControl >= loc.MaxControl {
 		switch gs.CurrentLocation {
@@ -272,10 +263,20 @@ func (effect DrawCards) Trigger(gs *Gamestate) {
 	DrawXCards(user, gs, effect.Amount)
 }
 
+type AllDrawCards struct {
+	Amount int
+}
+
+func (effect AllDrawCards) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		DrawXCards(user, gs, effect.Amount)
+	}
+}
+
 type SendGameUpdateEffect struct{}
 
 func (effect SendGameUpdateEffect) Trigger(gs *Gamestate) {
-	SendLobbyUpdate(0, gs)
+	SendLobbyUpdate(gs.gameid, gs)
 }
 
 type HealAnyIfVillainKilled struct {
@@ -303,18 +304,26 @@ func (effect HealAnyIfVillainKilled) Trigger(gs *Gamestate) {
 
 		go func() {
 			eventBroker.Subscribe(sub)
-			res := sub.Receive()
+			resChan := make(chan bool)
+			go sub.Receive(resChan)
 
-			gs.mu.Lock()
-			defer gs.mu.Unlock()
-			if res && currentTurn == gs.CurrentTurn {
-				healAnyPlayer.Trigger(gs)
+			for {
+				res := <-resChan
+				if !res {
+					break
+				}
 
-				// FIX lobby id
-				SendLobbyUpdate(0, gs)
+				Logger("heal if villain killed wants lock")
+				gs.mu.Lock()
+				if res && currentTurn == gs.CurrentTurn {
+					healAnyPlayer.Trigger(gs)
+
+					SendLobbyUpdate(gs.gameid, gs)
+				}
+				gs.mu.Unlock()
+				Logger("heal if villain killed releases lock")
 			}
 		}()
-
 	}
 }
 

@@ -85,7 +85,6 @@ func (h *Hub) askPlayerChoice(user string, choices []string, description string)
 	for c := range h.clients {
 		if c.username == user {
 			c.conn.WriteJSON(message)
-			log.Println("asking for input: ", message.ID)
 		}
 	}
 

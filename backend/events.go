@@ -21,7 +21,7 @@ type Subscriber struct {
 }
 
 type Event struct {
-	// for unsubscribing to changes. not really needed for publishin them atm.
+	// for unsubscribing to changes. not really needed for publishing them atm.
 	senderId int
 	message  string
 	// for things like the user info and turn ordering. to prevent issues with locks.
@@ -36,7 +36,9 @@ func (eb *EventBroker) StartPublishing() {
 			eb.Unsubscribe(m.senderId)
 		} else {
 			for _, s := range eb.Subscribers {
+				Logger("MESSAGE OUT " + m.message)
 				s.messageChan <- m.message
+				Logger("MESSAGE SENT" + m.message)
 			}
 		}
 	}
@@ -54,8 +56,8 @@ func (eb *EventBroker) Subscribe(sub Subscriber) {
 	eb.Subscribers[sub.id] = sub
 }
 
-func (s *Subscriber) Receive() bool {
-	res := false
+// change to have a result chan instead of returning a value.
+func (s *Subscriber) Receive(resChan chan bool) {
 	exit := false
 	for {
 		m, ok := <-s.messageChan
@@ -64,11 +66,9 @@ func (s *Subscriber) Receive() bool {
 		}
 		switch m {
 		case s.conditionMet:
-			res = true
-			// send unsub request in go routine to avoid blocking.
-			// go func() {
-			// 	s.unsubChan <- Event{senderId: s.id, message: "unsub"}
-			// }()
+			go func() {
+				resChan <- true
+			}()
 		case s.conditionFailed:
 			// send unsub request in go routine to avoid blocking.
 			go func() {
@@ -85,7 +85,7 @@ func (s *Subscriber) Receive() bool {
 		}
 	}
 
-	return res
+	resChan <- false
 }
 
 // *****************************************************

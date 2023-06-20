@@ -108,19 +108,6 @@ function GameWithState() {
     gamestate, userInput, setUserInput, gameid,
   } = useGamestate();
 
-  let HandleUserChoiceResponse = () => {};
-
-  useEffect(() => {
-    HandleUserChoiceResponse = (messageId) => {
-      if (messageId === userInput.messageID) {
-        logger.log('setting user input to null, sentID/currID', messageId, userInput.messageID);
-        setUserInput(null);
-      } else {
-        logger.log('user input changed');
-      }
-    };
-  }, userInput);
-
   function SubmitUserChoice(choice) {
     return (
       () => {
@@ -129,20 +116,12 @@ function GameWithState() {
         api
           .post(`/game/${gameid}/submituserchoice`, { choice, id })
           .then(() => {
-            // logger.log('userinput in submit choice response: input/id', userInput, id);
-            // if (userInput.messageID === id) {
-            //   logger.log('setting input to null:', userInput.messageID, id);
-            //   setUserInput(null);
-            // } else {
-            //   logger.log('user input changed, error');
-            // }
             setUserInput((currentInput) => {
               if (currentInput.messageID === id) {
                 return null;
               }
               return currentInput;
             });
-            HandleUserChoiceResponse(id);
           })
           .catch((res) => {
             logger.error(res);

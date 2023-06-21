@@ -152,7 +152,39 @@ func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 }
 
 func bartyCrouchJr() Villain {
-	v := Villain{}
+	return Villain{
+		Name:      "Barty Crouch Jr.",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/bartycrouchjr.jpg",
+		SetId:     "Game 4",
+		CurDamage: 0,
+		MaxHp:     7,
+		// Set Barty Crouch to Active=false before triggering death effect.
+		Active: false,
+		// This hero just prevents location from being removed, build into
+		// remove from location handler.
+		Effect:       []Effect{},
+		DeathEffect:  []Effect{RemoveFromLocation{2}},
+		playBeforeDA: true,
+	}
+}
 
-	return v
+func basilisk() Villain {
+	return Villain{
+		Name:      "Basilisk",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/basilisk.jpg",
+		SetId:     "Game 2",
+		CurDamage: 0,
+		MaxHp:     8,
+		Active:    false,
+		// This hero just prevents players from drawing, build into
+		// remove from draw handler.
+		Effect: []Effect{},
+		DeathEffect: []Effect{
+			AllDrawCards{Amount: 1},
+			RemoveFromLocation{1},
+		},
+		playBeforeDA: true,
+	}
 }

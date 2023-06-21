@@ -89,6 +89,23 @@ func ShuffleDarkArts(da []DarkArt) []DarkArt {
 	return shuffledDA
 }
 
+// Shuffles a slice of cards, and returns the new ordering.
+func ShuffleVillains(villains []Villain) []Villain {
+	rand.Seed(time.Now().UnixNano())
+
+	// Create a new slice to store the shuffled cards
+	shuffledVillains := make([]Villain, len(villains))
+	copy(shuffledVillains, villains)
+
+	// Shuffle the cards
+	for i := range shuffledVillains {
+		j := rand.Intn(i + 1)
+		shuffledVillains[i], shuffledVillains[j] = shuffledVillains[j], shuffledVillains[i]
+	}
+
+	return shuffledVillains
+}
+
 // Removes the top card of a players deck, returns the card.
 func PopFromDeck(player *Player) (Card, bool) {
 	if len(player.Deck) == 0 {
@@ -106,8 +123,28 @@ func PopFromDeck(player *Player) (Card, bool) {
 
 // Used to draw cards and shuffle deck if needed.
 func DrawXCards(user string, gs *Gamestate, amount int) {
+	// Basilisk prevents players from drawing extra cards.
+	for _, v := range gs.Villains {
+		if v.Name == "Basilisk" && v.Active {
+			return
+		}
+	}
+
 	updated := gs.Players[user]
 	for i := 0; i < amount; i++ {
+		card, ok := PopFromDeck(&updated)
+		if ok {
+			updated.Hand = append(updated.Hand, card)
+		}
+	}
+
+	gs.Players[user] = updated
+}
+
+// Used to draw 5 cards at end of turn, shuffle deck if needed.
+func RefillHand(user string, gs *Gamestate) {
+	updated := gs.Players[user]
+	for i := 0; i < 5; i++ {
 		card, ok := PopFromDeck(&updated)
 		if ok {
 			updated.Hand = append(updated.Hand, card)
@@ -221,4 +258,19 @@ func RemoveVillainAtIndex(vs []Villain, index int) []Villain {
 	ret := make([]Villain, 0)
 	ret = append(ret, vs[:index]...)
 	return append(ret, vs[index+1:]...)
+}
+
+func AddNewActiveVillain(villains []Villain, gs *Gamestate) []Villain {
+	// Get new villain
+	if len(gs.villainDeck) == 0 {
+		return villains
+	} else if len(gs.villainDeck) == 1 {
+		newVillain := gs.villainDeck[0]
+		gs.villainDeck = []Villain{}
+		return append(villains, newVillain)
+	} else {
+		newVillain := gs.villainDeck[0]
+		gs.villainDeck = gs.villainDeck[1:]
+		return append(villains, newVillain)
+	}
 }

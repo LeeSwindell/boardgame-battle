@@ -246,6 +246,13 @@ type RemoveFromLocation struct {
 }
 
 func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
+	// Barty Crouch prevents removal of locations.
+	for _, v := range gs.Villains {
+		if v.Name == "Barty Crouch Jr." && v.Active {
+			return
+		}
+	}
+
 	loc := gs.Locations[gs.CurrentLocation]
 	loc.CurControl -= effect.Amount
 	if loc.CurControl < 0 {

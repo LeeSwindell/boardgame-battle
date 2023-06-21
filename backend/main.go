@@ -109,9 +109,10 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 
 	// log.Println("id:", data.ID, "***turn order:", data.TurnOrder, "****players:", data.StartingPlayers)
 
+	villains, villainDeck := CreateVillains()
 	gs := &Gamestate{
 		Players:         data.StartingPlayers,
-		Villains:        CreateVillains(),
+		Villains:        villains,
 		Locations:       CreateLocations(),
 		DarkArts:        CreateDarkArtDeck(),
 		MarketDeck:      CreateMarketDeck(),
@@ -121,6 +122,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		DarkArtsPlayed:  []DarkArt{},
 		CurrentTurn:     data.TurnOrder[0],
 		TurnOrder:       data.TurnOrder,
+		villainDeck:     villainDeck,
 		turnStats:       TurnStats{},
 		mu:              sync.Mutex{},
 		gameid:          data.ID,
@@ -133,12 +135,11 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		p.PlayArea = []Card{}
 		p.Discard = []Card{}
 		gs.Players[user] = p
-		DrawXCards(user, gs, 5)
+		RefillHand(user, gs)
 	}
-	// go eventBroker.StartPublishing()
 
 	globalMu.Lock()
 	defer globalMu.Unlock()
 	states[data.ID] = gs
-	StartNewTurn(0, gs)
+	StartNewTurn(gs.gameid, gs)
 }

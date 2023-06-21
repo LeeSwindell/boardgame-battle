@@ -78,7 +78,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	MoveHandToDiscard(user, gs)
 	MoneyDamageToZero(user, gs)
 	gs.DarkArtsPlayed = []DarkArt{}
-	DrawXCards(user, gs, 5)
+	RefillHand(user, gs)
 	NextTurnInOrder(gs)
 	gs.turnStats = TurnStats{}
 
@@ -87,7 +87,10 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	// Starting next turn actions.
 	Logger("new turn")
 	Logger("Before DA villains")
-	for _, v := range gs.Villains {
+	for i, v := range gs.Villains {
+		if !v.Active {
+			gs.Villains[i].Active = true
+		}
 		if v.playBeforeDA {
 			for _, e := range v.Effect {
 				e.Trigger(gs)
@@ -141,6 +144,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 
 			// check if villain is now dead.
 			if gs.Villains[i].CurDamage >= v.MaxHp {
+				gs.Villains[i].Active = false
 				// trigger villain death effect.
 				for _, effect := range gs.Villains[i].DeathEffect {
 					effect.Trigger(gs)
@@ -148,6 +152,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 
 				// remove villain, get new one
 				newVillains := RemoveVillainAtIndex(gs.Villains, i)
+				newVillains = AddNewActiveVillain(newVillains, gs)
 				gs.Villains = newVillains
 				eventBroker.Messages <- Event{senderId: -1, message: "villain killed"}
 			}

@@ -15,14 +15,25 @@ func RonStartingDeck() []Card {
 	return deck
 }
 
-func CreateVillains() []Villain {
-	villains := []Villain{
+// Returns array of active villains, array of villain deck
+func CreateVillains() ([]Villain, []Villain) {
+	villainDeck := []Villain{
 		draco(),
 		quirrell(),
 		crabbeAndGoyle(),
+		bartyCrouchJr(),
+		basilisk(),
 	}
 
-	return villains
+	villainDeck = ShuffleVillains(villainDeck)
+	villains := villainDeck[:3]
+	villainDeck = villainDeck[3:]
+
+	for i := range villains {
+		villains[i].Active = true
+	}
+
+	return villains, villainDeck
 }
 
 func CreateLocations() []Location {
@@ -58,7 +69,6 @@ func CreateMarketDeck() []Card {
 	return deck
 }
 
-// IDs cause render errors with react currently since market cards aren't unique.
 func CreateMarket() []Card {
 	market := []Card{
 		crystalBall(),

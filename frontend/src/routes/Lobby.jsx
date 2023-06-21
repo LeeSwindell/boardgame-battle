@@ -121,7 +121,7 @@ function Lobby() {
 
   return (
     <div className="flex flex-col justify-center items-center">
-      <h3 className="text-4xl text-transparent bg-clip-text font-extrabold bg-gradient-to-r from-blue-600 to-red-600 m-4">Wooooooooooooooooooo</h3>
+      <h3 className="text-4xl text-transparent bg-clip-text font-extrabold bg-gradient-to-r from-blue-600 to-red-600 m-4">Hogwarts Battle: A Deck-building Game</h3>
       <div className="relative w-auto overflow-x-auto border shadow-md sm:rounded-lg m-4">
         <table className="table-auto text-left shadow-sm">
           <thead className="bg-blue-500 text-white">

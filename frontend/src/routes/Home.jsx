@@ -34,6 +34,7 @@ function Home() {
         <button type="submit" className="bg-blue-500 rounded p-4 m-4 text-white hover:bg-blue-700 hover:shadow-lg font-bold" onClick={createLobbyHandler}>Create Lobby</button>
         <Link to="/lobbies" className="bg-red-500 rounded p-4 m-4 text-white hover:bg-red-700 hover:shadow-lg font-bold">Join Lobby</Link>
       </div>
+      <div className="text-center py-16">Currently, I'm trying to fix the deployment, as the backend shuts down periodically while deployed on Fly.io. Stay tuned, or check out the github repo located at github.com/leeswindell</div>
     </div>
   );
 }

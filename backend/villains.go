@@ -150,3 +150,9 @@ func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 		}
 	}()
 }
+
+func bartyCrouchJr() Villain {
+	v := Villain{}
+
+	return v
+}

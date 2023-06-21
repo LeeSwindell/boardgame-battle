@@ -212,6 +212,14 @@ func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
 		return false
 	}
 
+	// Check if Fenrir is active
+	for _, v := range gs.Villains {
+		if v.Name == "Fenrir Greyback" && v.Active && change >= 0 {
+			// Do nothing, they won't be stunned so return false.
+			return false
+		}
+	}
+
 	player.Health += change
 
 	if player.Health <= 0 {

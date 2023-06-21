@@ -205,6 +205,83 @@ func bellatrixLestrange() Villain {
 			AllSearchDiscardPileForItem{},
 			RemoveFromLocation{Amount: 2},
 		},
-		playBeforeDA: true,
+		playBeforeDA: false,
+	}
+}
+
+func cornishPixies() Villain {
+	return Villain{
+		Name:      "Cornish Pixies",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/cornishpixies.jpg",
+		SetId:     "Box 1",
+		CurDamage: 0,
+		MaxHp:     6,
+		Active:    false,
+		Effect: []Effect{
+			DamageActiveForEachEvenInHand{Amount: 2},
+		},
+		DeathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 2},
+			AllPlayersGainMoney{Amount: 1},
+		},
+		playBeforeDA: false,
+	}
+}
+
+type DamageActiveForEachEvenInHand struct {
+	Amount int
+}
+
+func (effect DamageActiveForEachEvenInHand) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+
+	numEvens := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.Cost%2 == 0 && c.Cost != 0 {
+			numEvens++
+		}
+	}
+
+	damage := -1 * numEvens * effect.Amount
+	ChangePlayerHealth(user, damage, gs)
+}
+
+func dementor() Villain {
+	return Villain{
+		Name:      "Dementor",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/dementor.jpg",
+		SetId:     "Game 3",
+		CurDamage: 0,
+		MaxHp:     8,
+		Active:    false,
+		Effect: []Effect{
+			DamageCurrentPlayer{Amount: 2},
+		},
+		DeathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 2},
+			RemoveFromLocation{Amount: 1},
+		},
+		playBeforeDA: false,
+	}
+}
+
+func fenrirGreyback() Villain {
+	return Villain{
+		Name:      "Fenrir Greyback",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/fenrirgreyback.jpg",
+		SetId:     "Game 6",
+		CurDamage: 0,
+		MaxHp:     8,
+		Active:    false,
+		// Makes players unable to gain health, add a check in changeHealth
+		Effect: []Effect{},
+		DeathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 3},
+			RemoveFromLocation{Amount: 2},
+		},
+		playBeforeDA: false,
 	}
 }

@@ -24,10 +24,14 @@ func CreateVillains() ([]Villain, []Villain) {
 		bartyCrouchJr(),
 		basilisk(),
 		bellatrixLestrange(),
+		cornishPixies(),
+		dementor(),
+		fenrirGreyback(),
 	}
+	villains := villainDeck[len(villainDeck)-3:]
 
 	villainDeck = ShuffleVillains(villainDeck)
-	villains := villainDeck[:3]
+	// villains := villainDeck[:3]
 	villainDeck = villainDeck[3:]
 
 	for i := range villains {

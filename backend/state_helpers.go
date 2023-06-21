@@ -49,6 +49,18 @@ func MoveHandToDiscard(user string, gs *Gamestate) {
 	gs.Players[user] = updatedPlayer
 }
 
+// Moves the card with cardId from the users discard to their hand.
+func MoveCardDiscardToHand(user string, cardId int, gs *Gamestate) {
+	player := gs.Players[user]
+	for i, c := range player.Discard {
+		if c.Id == cardId {
+			player.Discard = RemoveCardAtIndex(player.Discard, i)
+			player.Hand = append(player.Hand, c)
+			gs.Players[user] = player
+		}
+	}
+}
+
 // updates values of a player - shuffling discard pile into their deck
 func ShuffleDiscardToDeck(player *Player) {
 	addToDeck := ShuffleCards(player.Discard)

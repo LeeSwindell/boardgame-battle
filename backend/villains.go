@@ -188,3 +188,23 @@ func basilisk() Villain {
 		playBeforeDA: true,
 	}
 }
+
+func bellatrixLestrange() Villain {
+	return Villain{
+		Name:      "Bellatrix Lestrange",
+		Id:        int(uuid.New().ID()),
+		ImgPath:   "/images/villains/bellatrixlestrange.jpg",
+		SetId:     "Game 6",
+		CurDamage: 0,
+		MaxHp:     9,
+		Active:    false,
+		Effect: []Effect{
+			RevealDarkArts{Amount: 1},
+		},
+		DeathEffect: []Effect{
+			AllSearchDiscardPileForItem{},
+			RemoveFromLocation{Amount: 2},
+		},
+		playBeforeDA: true,
+	}
+}

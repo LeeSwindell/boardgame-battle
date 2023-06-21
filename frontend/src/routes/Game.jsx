@@ -10,6 +10,7 @@ import Hand from '../components/Hand';
 import InspectCard from '../components/Inspectcard';
 import PlayArea from '../components/Playarea';
 import PlayerInfo from '../components/Playerinfo';
+import MarketCard from '../components/Marketcard';
 // import { Route, Link, BrowserRouter as Router } from "react-router-dom"
 import { api, gameapi } from '../api';
 import { logger } from '../logger/logger';
@@ -112,9 +113,9 @@ function GameWithState() {
     return (
       () => {
         const id = userInput.messageID;
-        logger.log('sending user choice: ', id);
+        logger.log('sending user choice: ', id, String(choice));
         api
-          .post(`/game/${gameid}/submituserchoice`, { choice, id })
+          .post(`/game/${gameid}/submituserchoice`, { choice: String(choice), id })
           .then(() => {
             setUserInput((currentInput) => {
               if (currentInput.messageID === id) {
@@ -138,11 +139,28 @@ function GameWithState() {
           && (
           <div className="fixed w-full h-full backdrop-contrast-50">
             <div className="flex w-full h-full justify-center items-center">
-              <div className="border bg-white z-50 shadow-2xl">
+              <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl">
                 <p className="p-2 w-full text-center font-bold">
                   {userInput.description}
                 </p>
-                {userInput.inputs.map((option, i) => <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>{option}</button>)}
+                {userInput.inputs.map((option, i) => {
+                  console.log('options', option);
+                  if (typeof option === 'string') {
+                    return (
+                      <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>
+                        {option}
+                      </button>
+                    );
+                  }
+                  if (typeof option === 'object') {
+                    console.log('inside market card option');
+                    return (
+                      <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
+                        <MarketCard img={option.ImgPath} />
+                      </button>
+                    );
+                  }
+                })}
               </div>
             </div>
           </div>

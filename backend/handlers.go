@@ -30,6 +30,9 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	for _, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			card := c
+
+			MoveToPlayed(user, c.Id, gs)
+
 			for _, e := range card.Effects {
 				e.Trigger(gs)
 			}
@@ -41,8 +44,6 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			case "ally":
 				gs.turnStats.AlliesPlayed += 1
 			}
-
-			MoveToPlayed(user, c.Id, gs)
 		}
 	}
 

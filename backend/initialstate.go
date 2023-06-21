@@ -23,6 +23,7 @@ func CreateVillains() ([]Villain, []Villain) {
 		crabbeAndGoyle(),
 		bartyCrouchJr(),
 		basilisk(),
+		bellatrixLestrange(),
 	}
 
 	villainDeck = ShuffleVillains(villainDeck)

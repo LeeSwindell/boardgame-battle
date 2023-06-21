@@ -44,7 +44,7 @@ func cleansweep() Card {
 		CardType: "item",
 		Cost:     0,
 		Effects: []Effect{
-			GainDamage{Amount: 1},
+			GainDamage{Amount: 10},
 			MoneyIfVillainKilled{Id: id, Amount: 1},
 		},
 	}

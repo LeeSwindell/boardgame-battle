@@ -159,6 +159,50 @@ func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	return string(body)
 }
 
+func AskUserToSelectCard(user string, gameid int, choices []Card, prompt string) int {
+	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertoselectcard/%s", gameid, user)
+	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
+		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectcard/%s", gameid, user)
+	}
+
+	var dataToSend = struct {
+		Cards  []Card `json:"cards"`
+		Prompt string `json:"prompt"`
+	}{Cards: choices, Prompt: prompt}
+
+	data, err := json.Marshal(dataToSend)
+	if err != nil {
+		log.Println("err marshaling options:", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Println("err sending AskUserToSelectCard POST:", err.Error())
+	}
+	client := http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	defer res.Body.Close()
+
+	// Should receive a CardId of with a selection in response.
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println("err reading response body:", err.Error())
+	}
+
+	Logger(string(body))
+
+	selectionId, err := strconv.Atoi(string(body))
+	if err != nil {
+		log.Println("err, didn't receive cardId properly", err.Error())
+	}
+
+	return selectionId
+}
+
 func stringifyCards(cards []Card) string {
 	res := ""
 	for _, c := range cards {

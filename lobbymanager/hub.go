@@ -72,13 +72,33 @@ func (h *Hub) SendGameState(gs *Gamestate) {
 }
 
 func (h *Hub) askPlayerChoice(user string, choices []string, description string) int {
-	// Include a display message field. rather than saying "choose one" for everything.
-
+	// The id is a number to subscribe for the users choice once it comes in - used by the
+	// function calling askPlayerChoice
 	id := int(uuid.New().ID())
 	message := Message{
 		Type:        "UserInput",
 		Data:        choices,
 		Description: description,
+		ID:          id,
+	}
+
+	for c := range h.clients {
+		if c.username == user {
+			c.conn.WriteJSON(message)
+		}
+	}
+
+	return id
+}
+
+func (h *Hub) askPlayerToSelectCard(user string, choices []Card, prompt string) int {
+	// The id is a number to subscribe for the users choice once it comes in - used by the
+	// function calling askPlayerToSelectCard
+	id := int(uuid.New().ID())
+	message := Message{
+		Type:        "UserInput",
+		Data:        choices,
+		Description: prompt,
 		ID:          id,
 	}
 

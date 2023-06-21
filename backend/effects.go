@@ -200,21 +200,25 @@ type ActivePlayerDiscards struct {
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	player := gs.Players[user]
-	cardName := AskUserToDiscard(gs.gameid, user, player.Hand, "")
 
-	for i, c := range player.Hand {
-		if c.Name == cardName {
-			player.Hand = RemoveCardAtIndex(player.Hand, i)
+	cards := player.Hand
+	if len(cards) == 0 {
+		return
+	}
+
+	discardCardId := AskUserToSelectCard(user, gs.gameid, cards, "Discard a card")
+	for i, c := range cards {
+		if c.Id == discardCardId {
+			cards = RemoveCardAtIndex(cards, i)
 			player.Discard = append(player.Discard, c)
-			break
 		}
 	}
 
+	player.Hand = cards
 	gs.Players[user] = player
 
 	event := Event{senderId: -1, message: "player discarded", data: user}
 	eventBroker.Messages <- event
-
 	// update turnstats
 }
 
@@ -346,8 +350,23 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 
 	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
 	ChangePlayerHealth(choice, effect.Amount, gs)
+}
 
-	// player := gs.Players[choice]
-	// player.Health += effect.Amount
-	// gs.Players[choice] = player
+type AllSearchDiscardPileForItem struct{}
+
+func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		choices := []Card{}
+		for _, c := range gs.Players[user].Discard {
+			if c.CardType == "item" {
+				choices = append(choices, c)
+			}
+		}
+
+		if len(choices) != 0 {
+			prompt := "Choose an item from your discard to gain to your hand!"
+			cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
+			MoveCardDiscardToHand(user, cardId, gs)
+		}
+	}
 }

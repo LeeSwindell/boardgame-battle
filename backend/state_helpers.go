@@ -50,7 +50,7 @@ func MoveHandToDiscard(user string, gs *Gamestate) {
 }
 
 // Moves the card with cardId from the users discard to their hand.
-func MoveCardDiscardToHand(user string, cardId int, gs *Gamestate) {
+func MoveCardFromDiscardToHand(user string, cardId int, gs *Gamestate) {
 	player := gs.Players[user]
 	for i, c := range player.Discard {
 		if c.Id == cardId {

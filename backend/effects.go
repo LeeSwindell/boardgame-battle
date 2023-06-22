@@ -96,9 +96,6 @@ type GainHealth struct {
 func (effect GainHealth) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	ChangePlayerHealth(user, effect.Amount, gs)
-	// player := gs.Players[user]
-	// player.Health += effect.Amount
-	// gs.Players[user] = player
 }
 
 type GainDamagePerAllyPlayed struct{}
@@ -376,7 +373,7 @@ func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
 		if len(choices) != 0 {
 			prompt := "Choose an item from your discard to gain to your hand!"
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
-			MoveCardDiscardToHand(user, cardId, gs)
+			MoveCardFromDiscardToHand(user, cardId, gs)
 		}
 	}
 }
@@ -395,4 +392,53 @@ func (effect HealAllVillains) Trigger(gs *Gamestate) {
 			}
 		}
 	}
+}
+
+type AllChooseOne struct {
+	Effects []Effect
+
+	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
+	Options     []string `json:"options"`
+	Description string   `json:"description"`
+}
+
+func (effect AllChooseOne) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		choice := getUserInput(gs.gameid, user, effect)
+
+		for i, option := range effect.Options {
+			if choice == option {
+				effect.Effects[i].Trigger(gs)
+			}
+		}
+	}
+}
+
+type ChosenPlayerSearchesDiscardForX struct {
+	SearchType string
+	Playername string
+}
+
+func (effect ChosenPlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
+	choices := []Card{}
+	for _, c := range gs.Players[effect.Playername].Discard {
+		if c.CardType == effect.SearchType {
+			choices = append(choices, c)
+		}
+	}
+
+	if len(choices) != 0 {
+		prompt := "Choose one to gain to your hand (from discard)"
+		cardId := AskUserToSelectCard(effect.Playername, gs.gameid, choices, prompt)
+		MoveCardFromDiscardToHand(effect.Playername, cardId, gs)
+	}
+}
+
+type ChosenPlayerGainsHealth struct {
+	Playername string
+	Amount     int
+}
+
+func (effect ChosenPlayerGainsHealth) Trigger(gs *Gamestate) {
+	ChangePlayerHealth(effect.Playername, effect.Amount, gs)
 }

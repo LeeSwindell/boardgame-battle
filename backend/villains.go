@@ -394,7 +394,7 @@ func (effect FluffyEffect) Trigger(gs *Gamestate) {
 func luciusMalfoy() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Lucius Malfor",
+		Name:      "Lucius Malfoy",
 		Id:        id,
 		ImgPath:   "/images/villains/luciusmalfoy.jpg",
 		SetId:     "Game 2",
@@ -442,4 +442,116 @@ func (effect LuciusEffect) Trigger(gs *Gamestate) {
 			gs.mu.Unlock()
 		}
 	}()
+}
+
+func tomRiddle() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:         "Tom Riddle",
+		Id:           id,
+		ImgPath:      "/images/villains/tomriddle.jpg",
+		SetId:        "Game 2",
+		CurDamage:    0,
+		MaxHp:        6,
+		Active:       false,
+		Effect:       []Effect{TomRiddleEffect{}},
+		DeathEffect:  []Effect{TomRiddleDeathEffect{}},
+		playBeforeDA: false,
+	}
+}
+
+type TomRiddleEffect struct{}
+
+// For each ally, choose one: lose 2 life or discard.
+func (effect TomRiddleEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	numItems := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.CardType == "ally" {
+			numItems++
+		}
+	}
+
+	for i := 0; i < numItems; i++ {
+		desc := fmt.Sprintf("Tom Riddle! Choose one: (%d of %d)", i+1, numItems)
+		ChooseOne{
+			Effects: []Effect{
+				DamageCurrentPlayer{Amount: 2},
+				ActivePlayerDiscards{Amount: 1},
+			},
+			Options:     []string{"Lose 2 life", "Discard a card"},
+			Description: desc,
+		}.Trigger(gs)
+	}
+}
+
+type TomRiddleDeathEffect struct{}
+
+func (effect TomRiddleDeathEffect) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		choice := ChooseOne{
+			Effects: []Effect{
+				ChosenPlayerGainsHealth{Amount: 2, Playername: user},
+				ChosenPlayerSearchesDiscardForX{Playername: user, SearchType: "ally"},
+			},
+			Options:     []string{"Gain 2 health", "Search Discard Pile for Ally"},
+			Description: "You killed Tom Riddle! Choose one:",
+		}
+
+		choice.Trigger(gs)
+	}
+}
+
+func peterPettigrew() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Peter Pettigrew",
+		Id:        id,
+		ImgPath:   "/images/villains/peterpettigrew.jpg",
+		SetId:     "Game 3",
+		CurDamage: 0,
+		MaxHp:     7,
+		Active:    false,
+		Effect:    []Effect{PeterPettigrewEffect{}},
+		DeathEffect: []Effect{
+			PeterPettigrewDeathEffect{},
+			RemoveFromLocation{Amount: 1},
+		},
+		playBeforeDA: false,
+	}
+}
+
+type PeterPettigrewEffect struct{}
+
+// Don't "Reveal" the card for now, just discard it if it matches.
+func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+
+	if len(player.Deck) == 0 {
+		ShuffleDiscardToDeck(&player)
+		if len(player.Deck) == 0 {
+			log.Println("deck is completely empty mate")
+			return
+		}
+	}
+
+	topCard := player.Deck[len(player.Deck)-1]
+	// If cost > 1, discard it and add 1 to location.
+	if topCard.Cost >= 1 {
+		Logger("Triggering pettigrews effect")
+		player.Discard = append(player.Discard, topCard)
+		player.Deck = player.Deck[:len(player.Deck)-1]
+		AddToLocation{Amount: 1}.Trigger(gs)
+	}
+
+	gs.Players[user] = player
+}
+
+type PeterPettigrewDeathEffect struct{}
+
+func (effect PeterPettigrewDeathEffect) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		ChosenPlayerSearchesDiscardForX{Playername: user, SearchType: "spell"}.Trigger(gs)
+	}
 }

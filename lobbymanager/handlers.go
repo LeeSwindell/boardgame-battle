@@ -283,6 +283,8 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		baseURL = "https://hogwartsbackend.fly.dev"
 	}
 	url := fmt.Sprintf("%s/startgame", baseURL)
+
+	log.Println("sending start game post")
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		log.Println("error sending POST request:", err.Error())
@@ -290,6 +292,8 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+
+	log.Println("wating for response to start game?")
 
 	if resp.StatusCode != http.StatusOK {
 		log.Println("received non-OK status code:", resp.StatusCode)
@@ -312,11 +316,10 @@ func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 	var gs Gamestate
 	json.NewDecoder(r.Body).Decode(&gs)
 
+	log.Println("sending game state refresh?")
 	hub.SendGameState(&gs)
+	log.Println("sent game state refresh")
 }
-
-// var userInputChan = make(chan int)
-// var messageBoard = make(map[int]string)
 
 func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -328,7 +331,13 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 	var chooseOne ChooseOne
 	json.NewDecoder(r.Body).Decode(&chooseOne)
 
-	listenID := hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
+	listenID := 0
+	if chooseOne.Description != "" {
+		listenID = hub.askPlayerChoice(user, chooseOne.Options, chooseOne.Description)
+	} else {
+		listenID = hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
+	}
+
 	listenChan := messageBroadcaster.RegisterListener(listenID)
 
 	choice := <-listenChan

@@ -45,16 +45,27 @@ func RunGameServer() {
 	})
 
 	r.HandleFunc("/startgame", StartGameHandler)
-	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/{id}/firstturn", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok {
+			return
+		}
+		gs.mu.Lock()
+		defer gs.mu.Unlock()
+		if !gs.started {
+			StartNewTurn(gs.gameid, gs)
+		}
+	})
+	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
+		gs, ok := getGsForGameID(r)
+		if !ok || !gs.started {
 			return
 		}
 		EndTurnHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
-		if !ok {
+		if !ok || !gs.started {
 			return
 		}
 		PlayCardHandler(w, r, gs)
@@ -68,14 +79,14 @@ func RunGameServer() {
 	})
 	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
-		if !ok {
+		if !ok || !gs.started {
 			return
 		}
 		DamageVillainHandler(w, r, gs)
 	})
 	r.HandleFunc("/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
-		if !ok {
+		if !ok || !gs.started {
 			return
 		}
 		BuyCardHandler(w, r, gs)
@@ -129,7 +140,6 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for user, p := range gs.Players {
-		// user := p.Name
 		p.Deck = RonStartingDeck()
 		p.Hand = []Card{}
 		p.PlayArea = []Card{}
@@ -140,6 +150,10 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 
 	globalMu.Lock()
 	defer globalMu.Unlock()
+
 	states[data.ID] = gs
-	StartNewTurn(gs.gameid, gs)
+
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	SendLobbyUpdate(gs.gameid, gs)
 }

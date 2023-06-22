@@ -93,4 +93,6 @@ func (s *Subscriber) Receive(resChan chan bool) {
 
 var EndTurnEvent = Event{senderId: -1, message: "end turn"}
 var LocationAddedEvent = Event{senderId: -1, message: "location added"}
+var LocationRemovedEvent = Event{senderId: -1, message: "location removed"}
 var PlayerDiscarded = Event{senderId: -1, message: "player discarded"}
+var DoloresUmbridgeTrigger = Event{senderId: -1, message: "umbridge condition"}

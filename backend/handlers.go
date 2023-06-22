@@ -47,8 +47,6 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		}
 	}
 
-	// log.Println("checking playcard gamestate for null: ", gs)
-
 	SendLobbyUpdate(gameid, gs)
 }
 
@@ -185,6 +183,9 @@ func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		if c.Id == cardid && player.Money >= c.Cost {
 			player.Money -= c.Cost
 			player.Discard = append(player.Discard, c)
+			if c.Cost >= 4 {
+				eventBroker.Messages <- DoloresUmbridgeTrigger
+			}
 			gs.Market[i] = RefillMarket(c.Name)
 		}
 	}

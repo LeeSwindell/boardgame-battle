@@ -76,6 +76,7 @@ function GamestateProvider({ children }) {
       .get(`/${gameid}/getgamestate`)
       .then((response) => {
         setGamestate(response.data);
+        gameapi.get(`/${gameid}/firstturn`);
       })
       .catch(() => {
         navigate('/');
@@ -170,7 +171,7 @@ function GameWithState() {
         <div className="flex flex-row justify-between">
           <div>
             <Gameboard />
-            <div className="fixed ml-4 top-64 left-72 border w-[49rem] -z-10">
+            <div className="fixed ml-4 top-64 left-72 w-[49rem] -z-10">
               <PlayArea />
             </div>
             <Hand />

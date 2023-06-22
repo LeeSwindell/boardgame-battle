@@ -258,10 +258,20 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 	}
 
 	loc := gs.Locations[gs.CurrentLocation]
+	if loc.CurControl == 0 {
+		return
+	}
+
 	loc.CurControl -= effect.Amount
 	if loc.CurControl < 0 {
 		loc.CurControl = 0
 	}
+
+	// For Lucius effect - happens only when location control Actually changes.
+	for i := 0; i < gs.Locations[gs.CurrentLocation].CurControl-loc.CurControl; i++ {
+		eventBroker.Messages <- LocationRemovedEvent
+	}
+
 	gs.Locations[gs.CurrentLocation] = loc
 }
 
@@ -367,6 +377,22 @@ func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
 			prompt := "Choose an item from your discard to gain to your hand!"
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 			MoveCardDiscardToHand(user, cardId, gs)
+		}
+	}
+}
+
+type HealAllVillains struct {
+	Amount int
+}
+
+func (effect HealAllVillains) Trigger(gs *Gamestate) {
+	for i, v := range gs.Villains {
+		// check active to avoid healing dead heroes with their own death effect
+		if v.Active && v.CurDamage > 0 {
+			gs.Villains[i].CurDamage -= effect.Amount
+			if gs.Villains[i].CurDamage < 0 {
+				gs.Villains[i].CurDamage = 0
+			}
 		}
 	}
 }

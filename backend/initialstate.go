@@ -27,6 +27,9 @@ func CreateVillains() ([]Villain, []Villain) {
 		cornishPixies(),
 		dementor(),
 		fenrirGreyback(),
+		doloresUmbridge(),
+		fluffy(),
+		luciusMalfoy(),
 	}
 	villains := villainDeck[len(villainDeck)-3:]
 

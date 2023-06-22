@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/google/uuid"
@@ -282,6 +283,163 @@ func fenrirGreyback() Villain {
 			AllPlayersGainHealth{Amount: 3},
 			RemoveFromLocation{Amount: 2},
 		},
+		playBeforeDA: true,
+	}
+}
+
+func doloresUmbridge() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Dolores Umbridge",
+		Id:        id,
+		ImgPath:   "/images/villains/doloresumbridge.jpg",
+		SetId:     "Game 5",
+		CurDamage: 0,
+		MaxHp:     7,
+		Active:    false,
+		Effect:    []Effect{DoloresEffect{id}},
+		DeathEffect: []Effect{
+			AllPlayersGainMoney{Amount: 1},
+			AllPlayersGainHealth{Amount: 2},
+		},
+		playBeforeDA: true,
+	}
+}
+
+type DoloresEffect struct {
+	id int
+}
+
+func (effect DoloresEffect) Trigger(gs *Gamestate) {
+	// find player who was active when location got added.
+	currentTurn := gs.CurrentTurn
+
+	sub := Subscriber{
+		id:              effect.id,
+		messageChan:     make(chan string),
+		conditionMet:    "umbridge condition",
+		conditionFailed: "end turn",
+		unsubChan:       eventBroker.Messages,
+	}
+
+	go func() {
+		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
+
+		for {
+			res := <-resChan
+			if !res {
+				break
+			}
+			gs.mu.Lock()
+			if res && currentTurn == gs.CurrentTurn {
+				user := gs.CurrentTurn
+				stunned := ChangePlayerHealth(user, -1, gs)
+				if stunned {
+					StunPlayer(user, gs)
+				}
+
+				SendLobbyUpdate(gs.gameid, gs)
+			}
+			gs.mu.Unlock()
+		}
+	}()
+}
+
+func fluffy() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Fluffy",
+		Id:        id,
+		ImgPath:   "/images/villains/fluffy.jpg",
+		SetId:     "Box 1",
+		CurDamage: 0,
+		MaxHp:     8,
+		Active:    false,
+		Effect:    []Effect{FluffyEffect{}},
+		DeathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 1},
+			AllDrawCards{Amount: 1},
+		},
 		playBeforeDA: false,
 	}
+}
+
+type FluffyEffect struct{}
+
+// For each item, choose one: lose a life or discard.
+func (effect FluffyEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	numItems := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.CardType == "item" {
+			numItems++
+		}
+	}
+
+	for i := 0; i < numItems; i++ {
+		desc := fmt.Sprintf("Fluffy!!! Choose one: (%d of %d)", i+1, numItems)
+		ChooseOne{
+			Effects: []Effect{
+				DamageCurrentPlayer{Amount: 1},
+				ActivePlayerDiscards{Amount: 1},
+			},
+			Options:     []string{"Lose a life", "Discard a card"},
+			Description: desc,
+		}.Trigger(gs)
+	}
+}
+
+func luciusMalfoy() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Lucius Malfor",
+		Id:        id,
+		ImgPath:   "/images/villains/luciusmalfoy.jpg",
+		SetId:     "Game 2",
+		CurDamage: 0,
+		MaxHp:     7,
+		Active:    false,
+		Effect:    []Effect{LuciusEffect{id: id}},
+		DeathEffect: []Effect{
+			AllPlayersGainMoney{Amount: 1},
+			RemoveFromLocation{Amount: 1},
+		},
+		playBeforeDA: true,
+	}
+}
+
+type LuciusEffect struct {
+	id int
+}
+
+// CHECK IF THIS GETS TRIGGERED WHEN HE DIES -  CHECK IF VILLAIN STILL ACTIVE WHEN TRIGGERING.
+func (effect LuciusEffect) Trigger(gs *Gamestate) {
+	sub := Subscriber{
+		id:              effect.id,
+		messageChan:     make(chan string),
+		conditionMet:    "location removed",
+		conditionFailed: "end turn",
+		unsubChan:       eventBroker.Messages,
+	}
+
+	go func() {
+		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
+
+		for {
+			res := <-resChan
+			if !res {
+				break
+			}
+			gs.mu.Lock()
+			if res {
+				HealAllVillains{Amount: 1}.Trigger(gs)
+				SendLobbyUpdate(gs.gameid, gs)
+			}
+			gs.mu.Unlock()
+		}
+	}()
 }

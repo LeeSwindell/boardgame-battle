@@ -184,6 +184,7 @@ func NextTurnInOrder(gs *Gamestate) {
 
 func StartNewTurn(gameid int, gs *Gamestate) {
 	// Starting next turn actions.
+	Logger("stuck at 1")
 	for _, v := range gs.Villains {
 		if v.playBeforeDA {
 			for _, e := range v.Effect {
@@ -191,15 +192,20 @@ func StartNewTurn(gameid int, gs *Gamestate) {
 			}
 		}
 	}
+	Logger("stuck at 2")
 	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+	Logger("stuck at 3")
 	for _, v := range gs.Villains {
 		if !v.playBeforeDA {
+			Logger(v.Name)
 			for _, e := range v.Effect {
 				e.Trigger(gs)
 			}
 		}
 	}
+	Logger("stuck at 4")
 
+	gs.started = true
 	SendLobbyUpdate(gameid, gs)
 }
 

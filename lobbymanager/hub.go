@@ -50,6 +50,7 @@ func (h *Hub) SendRefreshRequest() {
 }
 
 func (h *Hub) SendStartGame() {
+	log.Println("hub sending start game")
 	message := Message{
 		Type: "StartGame",
 		Data: "",

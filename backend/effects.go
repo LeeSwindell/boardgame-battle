@@ -434,6 +434,32 @@ func (effect ChosenPlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 	}
 }
 
+type AllSearchHandOrDiscardForX struct {
+	SearchType string
+	prompt     string
+}
+
+func (effect AllSearchHandOrDiscardForX) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+		choices := []Card{}
+		for _, c := range player.Hand {
+			if c.CardType == effect.SearchType {
+				choices = append(choices, c)
+			}
+		}
+		for _, c := range player.Discard {
+			if c.CardType == effect.SearchType {
+				choices = append(choices, c)
+			}
+		}
+		if len(choices) != 0 {
+			cardId := AskUserToSelectCard(user, gs.gameid, choices, effect.prompt)
+			MoveCardFromDiscardToHand(user, cardId, gs)
+		}
+	}
+}
+
 type ChosenPlayerGainsHealth struct {
 	Playername string
 	Amount     int
@@ -441,4 +467,73 @@ type ChosenPlayerGainsHealth struct {
 
 func (effect ChosenPlayerGainsHealth) Trigger(gs *Gamestate) {
 	ChangePlayerHealth(effect.Playername, effect.Amount, gs)
+}
+
+type GainDetentionToDiscard struct {
+	// whether to give the active player the detention, or not.
+	Active bool
+}
+
+func (effect GainDetentionToDiscard) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+	player.Discard = append(player.Discard, detention())
+	gs.Players[user] = player
+}
+
+type AllBanishItem struct{}
+
+func (effect AllBanishItem) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+		choices := []Card{}
+		for _, c := range player.Hand {
+			if c.CardType == "item" {
+				choices = append(choices, c)
+			}
+		}
+		for _, c := range player.Discard {
+			if c.CardType == "item" {
+				choices = append(choices, c)
+			}
+		}
+		if len(choices) != 0 {
+			cardId := AskUserToSelectCard(user, gs.gameid, choices, "Choose a card to banish")
+			BanishCard(user, cardId, gs)
+		}
+	}
+}
+
+type AllBanishCard struct{}
+
+func (effect AllBanishCard) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+		choices := append(player.Hand, player.Discard...)
+
+		if len(choices) != 0 {
+			cardId := AskUserToSelectCard(user, gs.gameid, choices, "Choose a card to banish")
+			BanishCard(user, cardId, gs)
+		}
+	}
+}
+
+type DamageActivePerDetention struct {
+	Amount int
+}
+
+func (effect DamageActivePerDetention) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	damage := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.Name == "Detention!" {
+			damage--
+		}
+	}
+	if damage > 0 {
+		stunned := ChangePlayerHealth(user, damage, gs)
+		if stunned {
+			StunPlayer(user, gs)
+		}
+	}
 }

@@ -166,6 +166,28 @@ func RefillHand(user string, gs *Gamestate) {
 	gs.Players[user] = updated
 }
 
+func BanishCard(user string, cardId int, gs *Gamestate) {
+	// Find card in hand/discard/played
+	player := gs.Players[user]
+	for i, c := range player.Hand {
+		if c.Id == cardId {
+			player.Hand = RemoveCardAtIndex(player.Hand, i)
+		}
+	}
+	for i, c := range player.Discard {
+		if c.Id == cardId {
+			player.Discard = RemoveCardAtIndex(player.Discard, i)
+		}
+	}
+	for i, c := range player.PlayArea {
+		if c.Id == cardId {
+			player.PlayArea = RemoveCardAtIndex(player.Discard, i)
+		}
+	}
+
+	gs.Players[user] = player
+}
+
 func MoneyDamageToZero(user string, gs *Gamestate) {
 	updated := gs.Players[user]
 	updated.Damage = 0

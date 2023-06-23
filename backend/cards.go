@@ -159,3 +159,15 @@ func triwizardCup() Card {
 		},
 	}
 }
+
+func detention() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Detention!",
+		SetId:    "Box 1",
+		ImgPath:  "/images/marketcards/detention.jpg",
+		CardType: "item",
+		Cost:     0,
+		Effects:  []Effect{},
+	}
+}

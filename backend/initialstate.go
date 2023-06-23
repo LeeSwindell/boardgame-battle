@@ -18,6 +18,7 @@ func RonStartingDeck() []Card {
 // Returns array of active villains, array of villain deck
 func CreateVillains() ([]Villain, []Villain) {
 	villainDeck := []Villain{
+		voledmortFive(),
 		draco(),
 		quirrell(),
 		crabbeAndGoyle(),
@@ -32,6 +33,8 @@ func CreateVillains() ([]Villain, []Villain) {
 		luciusMalfoy(),
 		tomRiddle(),
 		peterPettigrew(),
+		troll(),
+		norbert(),
 	}
 	villains := villainDeck[len(villainDeck)-3:]
 

@@ -555,3 +555,74 @@ func (effect PeterPettigrewDeathEffect) Trigger(gs *Gamestate) {
 		ChosenPlayerSearchesDiscardForX{Playername: user, SearchType: "spell"}.Trigger(gs)
 	}
 }
+
+func voledmortFive() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Voldemort",
+		Id:        id,
+		ImgPath:   "/images/villains/voldemort5.jpg",
+		SetId:     "Game 5",
+		CurDamage: 0,
+		MaxHp:     10,
+		Active:    true,
+		Effect: []Effect{
+			DamageCurrentPlayer{Amount: 1},
+			ActivePlayerDiscards{Amount: 1},
+		},
+		DeathEffect:  []Effect{},
+		playBeforeDA: false,
+	}
+}
+
+func troll() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Troll",
+		Id:        id,
+		ImgPath:   "/images/villains/troll.jpg",
+		SetId:     "Box 1",
+		CurDamage: 0,
+		MaxHp:     7,
+		Active:    false,
+		Effect: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					DamageCurrentPlayer{Amount: 2},
+					GainDetentionToDiscard{Active: true},
+				},
+				Options: []string{
+					"Lose 2 Life",
+					"Gain a detention",
+				},
+				Description: "Troll attack!",
+			},
+		},
+		DeathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 1},
+			AllBanishItem{},
+		},
+		playBeforeDA: false,
+	}
+}
+
+func norbert() Villain {
+	id := int(uuid.New().ID())
+	return Villain{
+		Name:      "Norbert",
+		Id:        id,
+		ImgPath:   "/images/villains/norbert.jpg",
+		SetId:     "Box 1",
+		CurDamage: 0,
+		MaxHp:     6,
+		Active:    false,
+		Effect: []Effect{
+			DamageCurrentPlayer{Amount: 1},
+			DamageActivePerDetention{Amount: 1},
+		},
+		DeathEffect: []Effect{
+			AllBanishCard{},
+		},
+		playBeforeDA: false,
+	}
+}

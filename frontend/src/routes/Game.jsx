@@ -72,6 +72,7 @@ function GamestateProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log(gameid);
     gameapi
       .get(`/${gameid}/getgamestate`)
       .then((response) => {
@@ -176,7 +177,7 @@ function GameWithState() {
             </div>
             <Hand />
           </div>
-          <div className="border justify-between items-center fixed top-0 right-0">
+          <div className="border justify-between items-center fixed top-0 right-0 bg-white">
             <div>
               {
                 Object.entries(gamestate.players)

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env VITE_PROD_MODE=dev vite",
-    "build": "vite build",
+    "build": "cross-env VITE_PROD_MODE=run vite build",
+    "testbuild": "cross-env VITE_PROD_MODE=dev vite build",
     "preview": "vite preview --port 5173 --host"
   },
   "dependencies": {

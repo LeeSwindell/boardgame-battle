@@ -8,6 +8,9 @@ const prodMode = import.meta.env.VITE_PROD_MODE;
 if (prodMode === 'dev') {
   socketUrl = import.meta.env.VITE_DEV_SOCKET_API;
 }
+if (prodMode === 'run') {
+  socketUrl = import.meta.env.VITE_SOCKET_URL;
+}
 
 function CharSelect({ lobbyid, characterSelection, canEdit }) {
   const [character, setCharacter] = useState(characterSelection);
@@ -61,6 +64,7 @@ function Lobby() {
 
   // Create the socket connection
   useEffect(() => {
+    console.log('useeffect socket hook - Lobby route');
     // socket.current = new WebSocket('ws://localhost:8000/connectsocket');
     if (socketUrl === 'localhost:8000') {
       socket.current = new WebSocket('ws://localhost:8000/connectsocket');
@@ -68,7 +72,12 @@ function Lobby() {
       socket.current = new WebSocket(`wss://${socketUrl}/connectsocket`);
     }
 
-    socket.current.onopen = () => logger.log('lobby socket opened');
+    console.log('trying to open socket for lobby');
+    console.log(`wss://${socketUrl}/connectsocket`);
+    socket.current.onopen = () => {
+      console.log('lobby socket opened');
+      // logger.log('lobby socket opened');
+    };
     socket.current.onclose = () => logger.log('lobby socket closed');
 
     // cleanup socket connection and send a request to backend when leaving page.

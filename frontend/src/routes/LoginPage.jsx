@@ -8,6 +8,9 @@ const prodMode = import.meta.env.VITE_PROD_MODE;
 if (prodMode === 'dev') {
   lobbyUrl = import.meta.env.VITE_DEV_LOBBY_API_ENDPOINT;
 }
+if (prodMode === 'run') {
+  lobbyUrl = import.meta.env.VITE_LOBBY_URL;
+}
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');

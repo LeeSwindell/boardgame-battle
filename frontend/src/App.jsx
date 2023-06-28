@@ -7,6 +7,7 @@ import Lobbies from './routes/Lobbies';
 import LoginPage from './routes/LoginPage';
 import { api } from './api';
 import { logger } from './logger/logger';
+import TestServer from './components/TestServer';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -41,7 +42,7 @@ function App() {
       <Route path="lobby/:id" loader={({ params }) => logger.log(params[':id'])} element={<Lobby />} />
       <Route path="lobbies" element={<Lobbies />} />
       <Route path="game/:gameid" element={<Game />} />
-      {/* <Route path="game/:id" loader={({ params }) => logger.log(params[':id'])} element={<Game />} /> */}
+      <Route path="testserver" element={<TestServer />} />
     </Routes>
   );
 }

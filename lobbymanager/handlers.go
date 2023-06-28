@@ -31,6 +31,7 @@ func GetLobbiesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddClientHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("received connect socket request")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	pid := getUniquePlayerId()
 
@@ -253,9 +254,6 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		turnOrder = append(turnOrder, p.Name)
 	}
 
-	// turn this function call into a post request
-	// game.StartGame(startingPlayers, turnOrder, id)
-
 	// Convert startingPlayers and turnOrder to JSON
 	data := struct {
 		StartingPlayers map[string]Player `json:"startingPlayers"`
@@ -266,8 +264,6 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		TurnOrder:       turnOrder,
 		ID:              id,
 	}
-
-	log.Println("start game data: ", data)
 
 	// Convert data to JSON bytes
 	payload, err := json.Marshal(data)
@@ -282,9 +278,11 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		baseURL = "https://hogwartsbackend.fly.dev"
 	}
+	// API UPDATE
+	baseURL = config.BackendURL
 	url := fmt.Sprintf("%s/startgame", baseURL)
 
-	log.Println("sending start game post")
+	log.Println("sending start game post to:", url)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		log.Println("error sending POST request:", err.Error())

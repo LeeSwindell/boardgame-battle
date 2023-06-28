@@ -6,6 +6,9 @@ const prodMode = import.meta.env.VITE_PROD_MODE;
 if (prodMode === 'dev') {
   socketUrl = import.meta.env.VITE_DEV_SOCKET_API;
 }
+if (prodMode === 'run') {
+  socketUrl = import.meta.env.VITE_SOCKET_URL;
+}
 
 interface UseLobbySocketProps {
     onOpen?: () => void,

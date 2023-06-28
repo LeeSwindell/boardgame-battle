@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -27,6 +28,9 @@ var states = map[int]*Gamestate{}
 func main() {
 	os.Setenv("LOG_LEVEL", "debug")
 
+	config = NewConfiguration()
+	println(appEnv)
+
 	go eventBroker.StartPublishing()
 	RunGameServer()
 }
@@ -36,16 +40,20 @@ func RunGameServer() {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:5173",
+			"http://localhost",
+			"https://localhost",
 			"https://hogwartsbattle.fly.dev",
 			"https://lobbymanager.fly.dev",
+			"https://www.gamewithyourfriends.dev",
+			"https://lobby.gamewithyourfriends.dev",
 		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	})
 
-	r.HandleFunc("/startgame", StartGameHandler)
-	r.HandleFunc("/{id}/firstturn", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/startgame", StartGameHandler)
+	r.HandleFunc("/game/{id}/firstturn", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok {
 			return
@@ -56,40 +64,44 @@ func RunGameServer() {
 			StartNewTurn(gs.gameid, gs)
 		}
 	})
-	r.HandleFunc("/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/{id}/endturn", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok || !gs.started {
 			return
 		}
 		EndTurnHandler(w, r, gs)
 	})
-	r.HandleFunc("/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/{id}/playcard", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok || !gs.started {
 			return
 		}
 		PlayCardHandler(w, r, gs)
 	})
-	r.HandleFunc("/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/{id}/getgamestate", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok {
 			return
 		}
 		GetGamestateHandler(w, r, gs)
 	})
-	r.HandleFunc("/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/{id}/damagevillain/{villainid}", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok || !gs.started {
 			return
 		}
 		DamageVillainHandler(w, r, gs)
 	})
-	r.HandleFunc("/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/game/{id}/buycard/{cardid}", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok || !gs.started {
 			return
 		}
 		BuyCardHandler(w, r, gs)
+	})
+	r.HandleFunc("/game/testserver", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "hello, world!")
+		log.Println("hello world?")
 	})
 
 	handler := c.Handler(r)

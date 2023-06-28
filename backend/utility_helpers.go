@@ -14,6 +14,30 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var config = NewConfiguration()
+
+type Configuration struct {
+	LobbyManagerURL string
+}
+
+func NewConfiguration() *Configuration {
+	mode := appEnv
+	switch mode {
+	case "dev":
+		return &Configuration{
+			LobbyManagerURL: "http://localhost:8000/lm",
+		}
+	case "prod":
+		println("setting env to prod")
+		return &Configuration{
+			LobbyManagerURL: "https://www.gamewithyourfriends.dev/lm",
+		}
+	default:
+		println("************* NO APP ENV PROVIDED ***********")
+		return nil
+	}
+}
+
 // returns the lobbyid and username associated with a request
 func getIdAndUser(r *http.Request) (int, string) {
 	vars := mux.Vars(r)
@@ -34,6 +58,10 @@ func SendLobbyUpdate(id int, gs *Gamestate) {
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/refreshgamestate", id)
 	}
+	// API UPDATE
+	url = fmt.Sprintf("%s/game/%d/refreshgamestate", config.LobbyManagerURL, id)
+
+	log.Println("game sending refreshgamestate to url: ", url)
 
 	data, err := json.Marshal(gs)
 	if err != nil {
@@ -55,6 +83,10 @@ func getUserInput(id int, user string, effect Effect) string {
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/getuserinput/%s", id, user)
 	}
+	// API UPDATE
+	url = fmt.Sprintf("%s/game/%d/getuserinput/%s", config.LobbyManagerURL, id, user)
+	log.Println("check url:", url)
+
 	data, err := json.Marshal(effect)
 	if err != nil {
 		log.Println("err marshaling options:", err.Error())
@@ -86,6 +118,8 @@ func AskUserToDiscard(gameid int, user string, hand []Card, promptString string)
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertodiscard/%s", gameid, user)
 	}
+	// API UPDATE
+	url = fmt.Sprintf("%s/game/%d/askusertodiscard/%s", config.LobbyManagerURL, gameid, user)
 
 	var dataToSend = struct {
 		Hand   []Card `json:"hand"`
@@ -122,6 +156,8 @@ func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		endpoint = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectplayer/%s", gameid, user)
 	}
+	// API UPDATE
+	endpoint = fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)
 
 	// Encode the players slice as JSON
 	playerJSON, err := json.Marshal(players)
@@ -164,6 +200,8 @@ func AskUserToSelectCard(user string, gameid int, choices []Card, prompt string)
 	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
 		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectcard/%s", gameid, user)
 	}
+	// API UPDATE
+	url = fmt.Sprintf("%s/game/%d/askusertoselectcard/%s", config.LobbyManagerURL, gameid, user)
 
 	var dataToSend = struct {
 		Cards  []Card `json:"cards"`

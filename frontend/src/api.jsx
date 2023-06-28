@@ -7,6 +7,10 @@ if (prodMode === 'dev') {
   lobbyUrl = import.meta.env.VITE_DEV_LOBBY_API_ENDPOINT;
   gameUrl = import.meta.env.VITE_DEV_GAME_API_ENDPOINT;
 }
+if (prodMode === 'run') {
+  lobbyUrl = import.meta.env.VITE_LOBBY_URL;
+  gameUrl = import.meta.env.VITE_GAME_URL;
+}
 
 const api = axios.create({
   baseURL: lobbyUrl,

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -13,6 +14,32 @@ import (
 
 // to start the server
 // go run github.com/leeswindell/boardgame-battle/lobbymanager
+
+var config = NewConfiguration()
+
+type Configuration struct {
+	BackendURL  string
+	FrontendURL string
+}
+
+func NewConfiguration() *Configuration {
+	mode := appEnv
+	switch mode {
+	case "dev":
+		return &Configuration{
+			BackendURL:  "http://localhost:8080/game",
+			FrontendURL: "http://localhost:5173",
+		}
+	case "prod":
+		return &Configuration{
+			BackendURL:  "https://www.gamewithyourfriends.dev/game",
+			FrontendURL: "https://www.gamewithyourfriends.dev",
+		}
+	default:
+		log.Println("************* NO APP ENV PROVIDED ***********")
+		return nil
+	}
+}
 
 var appEnv string
 
@@ -52,8 +79,12 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:5173",
+			"http://localhost",
+			"https://localhost",
 			"https://hogwartsbattle.fly.dev",
 			"https://hogwartsbackend.fly.dev",
+			"https://www.gamewithyourfriends.dev",
+			"https://game.gamewithyourfriends.dev",
 		},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
@@ -63,23 +94,27 @@ func main() {
 	go hub.run()
 	go messageBroadcaster.Broadcast()
 
-	r.HandleFunc("/sessionid", sessionidHandler)
-	r.HandleFunc("/login", loginHandler)
-	r.HandleFunc("/lobbies", GetLobbiesHandler)
-	r.HandleFunc("/connectsocket", AddClientHandler)
-	r.HandleFunc("/connectsocket/{username}", AddClientWithUsernameHandler)
-	r.HandleFunc("/lobby/create", CreateLobbyHandler)
-	r.HandleFunc("/lobby/{id}/join", JoinLobbyHandler)
-	r.HandleFunc("/lobby/{id}/refresh", RefreshLobbyHandler)
-	r.HandleFunc("/lobby/{id}/setchar", SetCharHandler)
-	r.HandleFunc("/lobby/{id}/leave", LeaveLobbyHandler)
-	r.HandleFunc("/lobby/{id}/startgame", StartGameHandler)
-	r.HandleFunc("/game/{id}/refreshgamestate", RefreshGamestateHandler)
-	r.HandleFunc("/game/{id}/getuserinput/{user}", GetUserInputHandler)
-	r.HandleFunc("/game/{id}/askusertodiscard/{user}", AskUserToDiscardHandler)
-	r.HandleFunc("/game/{id}/askusertoselectplayer/{user}", AskUserToSelectPlayerHandler)
-	r.HandleFunc("/game/{id}/askusertoselectcard/{user}", AskUserToSelectCardHandler)
-	r.HandleFunc("/game/{id}/submituserchoice", SubmitUserChoiceHandler)
+	r.HandleFunc("/lm/login", loginHandler)
+	r.HandleFunc("/lm/sessionid", sessionidHandler)
+	r.HandleFunc("/lm/lobbies", GetLobbiesHandler)
+	r.HandleFunc("/lm/connectsocket", AddClientHandler)
+	r.HandleFunc("/lm/connectsocket/{username}", AddClientWithUsernameHandler)
+	r.HandleFunc("/lm/lobby/create", CreateLobbyHandler)
+	r.HandleFunc("/lm/lobby/{id}/join", JoinLobbyHandler)
+	r.HandleFunc("/lm/lobby/{id}/refresh", RefreshLobbyHandler)
+	r.HandleFunc("/lm/lobby/{id}/setchar", SetCharHandler)
+	r.HandleFunc("/lm/lobby/{id}/leave", LeaveLobbyHandler)
+	r.HandleFunc("/lm/lobby/{id}/startgame", StartGameHandler)
+	r.HandleFunc("/lm/game/{id}/refreshgamestate", RefreshGamestateHandler)
+	r.HandleFunc("/lm/game/{id}/getuserinput/{user}", GetUserInputHandler)
+	r.HandleFunc("/lm/game/{id}/askusertodiscard/{user}", AskUserToDiscardHandler)
+	r.HandleFunc("/lm/game/{id}/askusertoselectplayer/{user}", AskUserToSelectPlayerHandler)
+	r.HandleFunc("/lm/game/{id}/askusertoselectcard/{user}", AskUserToSelectCardHandler)
+	r.HandleFunc("/lm/game/{id}/submituserchoice", SubmitUserChoiceHandler)
+	r.HandleFunc("/lm/testserver", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello from the lobby manager!")
+		log.Println("working!")
+	})
 
 	// Start the game server
 	// go game.RunGameServer()

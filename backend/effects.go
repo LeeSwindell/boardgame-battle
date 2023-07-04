@@ -481,6 +481,18 @@ func (effect GainDetentionToDiscard) Trigger(gs *Gamestate) {
 	gs.Players[user] = player
 }
 
+type GainDetentionToHand struct {
+	// whether to give the active player the detention, or not.
+	Active bool
+}
+
+func (effect GainDetentionToHand) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+	player.Hand = append(player.Hand, detention())
+	gs.Players[user] = player
+}
+
 type AllBanishItem struct{}
 
 func (effect AllBanishItem) Trigger(gs *Gamestate) {
@@ -534,6 +546,79 @@ func (effect DamageActivePerDetention) Trigger(gs *Gamestate) {
 		stunned := ChangePlayerHealth(user, damage, gs)
 		if stunned {
 			StunPlayer(user, gs)
+		}
+	}
+}
+
+type DamageAllPerDetention struct {
+	Amount int
+}
+
+func (effect DamageAllPerDetention) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		damage := 0
+		for _, c := range gs.Players[user].Hand {
+			if c.Name == "Detention!" {
+				damage--
+			}
+		}
+		if damage > 0 {
+			stunned := ChangePlayerHealth(user, damage, gs)
+			if stunned {
+				StunPlayer(user, gs)
+			}
+		}
+	}
+}
+
+type AllDiscard struct {
+	Amount int
+	Prompt string
+}
+
+func (effect AllDiscard) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+
+		cards := player.Hand
+		if len(cards) == 0 {
+			return
+		}
+
+		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
+		for i, c := range cards {
+			if c.Id == discardCardId {
+				cards = RemoveCardAtIndex(cards, i)
+				player.Discard = append(player.Discard, c)
+			}
+		}
+
+		player.Hand = cards
+		gs.Players[user] = player
+
+		event := Event{senderId: -1, message: "player discarded", data: user}
+		eventBroker.Messages <- event
+	}
+}
+
+type DamageAllPerMatchingCost struct {
+	Cost   int
+	Amount int
+}
+
+func (effect DamageAllPerMatchingCost) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		damage := 0
+		for _, c := range gs.Players[user].Hand {
+			if c.Cost == effect.Cost {
+				damage += effect.Amount
+			}
+		}
+		if damage > 0 {
+			stunned := ChangePlayerHealth(user, -damage, gs)
+			if stunned {
+				StunPlayer(user, gs)
+			}
 		}
 	}
 }

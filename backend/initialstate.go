@@ -18,7 +18,6 @@ func RonStartingDeck() []Card {
 // Returns array of active villains, array of villain deck
 func CreateVillains() ([]Villain, []Villain) {
 	villainDeck := []Villain{
-		voledmortFive(),
 		draco(),
 		quirrell(),
 		crabbeAndGoyle(),
@@ -36,11 +35,13 @@ func CreateVillains() ([]Villain, []Villain) {
 		troll(),
 		norbert(),
 	}
-	villains := villainDeck[len(villainDeck)-3:]
+	// for testing the latest villains.
+	// villains := villainDeck[len(villainDeck)-3:]
 
 	villainDeck = ShuffleVillains(villainDeck)
-	// villains := villainDeck[:3]
+	villains := villainDeck[:3]
 	villainDeck = villainDeck[3:]
+	villainDeck = append(villainDeck, voledmortFive())
 
 	for i := range villains {
 		villains[i].Active = true
@@ -64,6 +65,13 @@ func CreateDarkArtDeck() []DarkArt {
 		dementorsKiss(),
 		heWhoMustNotBeNamed(),
 		flipendo(),
+		avadaKedavra(),
+		expulso(),
+		handOfGlory(),
+		heirOfSlytherin(),
+		inquisitorialSquad(),
+		menacingGrowl(),
+		regeneration(),
 	}
 
 	return darkArts

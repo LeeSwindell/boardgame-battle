@@ -22,8 +22,8 @@ function useLobbySocket({onOpen, onClose, onMessage}) {
     useEffect(() => {
         const username = localStorage.getItem('sessionid');
         // socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
-        if (socketUrl === 'localhost:8000') {
-          socket.current = new WebSocket(`ws://localhost:8000/connectsocket/${username}`);
+        if (socketUrl === 'localhost:8000/lm') {
+          socket.current = new WebSocket(`ws://${socketUrl}/connectsocket/${username}`);
         } else {
           socket.current = new WebSocket(`wss://${socketUrl}/connectsocket/${username}`);
         }

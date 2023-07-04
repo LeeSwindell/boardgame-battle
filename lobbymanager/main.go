@@ -37,7 +37,11 @@ func NewConfiguration() *Configuration {
 		}
 	default:
 		log.Println("************* NO APP ENV PROVIDED ***********")
-		return nil
+		// use dev env by default.
+		return &Configuration{
+			BackendURL:  "http://localhost:8080/game",
+			FrontendURL: "http://localhost:5173",
+		}
 	}
 }
 

@@ -41,7 +41,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="lobby/:id" loader={({ params }) => logger.log(params[':id'])} element={<Lobby />} />
       <Route path="lobbies" element={<Lobbies />} />
-      <Route path="game/:gameid" element={<Game />} />
+      <Route path="gamepage/:gameid" element={<Game />} />
       <Route path="testserver" element={<TestServer />} />
     </Routes>
   );

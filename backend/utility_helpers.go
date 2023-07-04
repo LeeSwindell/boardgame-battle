@@ -34,7 +34,10 @@ func NewConfiguration() *Configuration {
 		}
 	default:
 		println("************* NO APP ENV PROVIDED ***********")
-		return nil
+		// use dev env by default.
+		return &Configuration{
+			LobbyManagerURL: "http://localhost:8000/lm",
+		}
 	}
 }
 

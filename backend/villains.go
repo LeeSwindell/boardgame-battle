@@ -245,7 +245,10 @@ func (effect DamageActiveForEachEvenInHand) Trigger(gs *Gamestate) {
 	}
 
 	damage := -1 * numEvens * effect.Amount
-	ChangePlayerHealth(user, damage, gs)
+	stunned := ChangePlayerHealth(user, damage, gs)
+	if stunned {
+		StunPlayer(user, gs)
+	}
 }
 
 func dementor() Villain {

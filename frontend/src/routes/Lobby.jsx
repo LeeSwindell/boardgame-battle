@@ -66,8 +66,8 @@ function Lobby() {
   useEffect(() => {
     console.log('useeffect socket hook - Lobby route');
     // socket.current = new WebSocket('ws://localhost:8000/connectsocket');
-    if (socketUrl === 'localhost:8000') {
-      socket.current = new WebSocket('ws://localhost:8000/connectsocket');
+    if (socketUrl === 'localhost:8000/lm') {
+      socket.current = new WebSocket(`ws://${socketUrl}/connectsocket`);
     } else {
       socket.current = new WebSocket(`wss://${socketUrl}/connectsocket`);
     }
@@ -114,7 +114,7 @@ function Lobby() {
               });
             break;
           case 'StartGame':
-            setUrl(`/game/${lobbyId}`);
+            setUrl(`/gamepage/${lobbyId}`);
             break;
           default:
             break;

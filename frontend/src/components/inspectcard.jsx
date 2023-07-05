@@ -30,12 +30,12 @@ function InspectCard() {
   if (Array.isArray(inspectCard)) {
     logger.log('array of inspects: ', inspectCard);
     return (
-      <div className="fixed w-full h-full backdrop-contrast-50" ref={ref}>
+      <div className="fixed w-full h-full z-40 backdrop-contrast-50" ref={ref}>
         <div className="flex w-full h-full justify-center items-center">
           <div className="border bg-white z-50 shadow-2xl">
             <div className="grid grid-cols-8">
               {inspectCard.map((card) => (
-                <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" />
+                <CardContainer key={card.Id} cardId={card.Id} cardType="hand" card={<MarketCard img={card.ImgPath} />} size="reg" extra="w-48 h-48" />
               ))}
             </div>
           </div>
@@ -45,7 +45,7 @@ function InspectCard() {
   }
 
   return (
-    <div className="fixed w-full h-full backdrop-contrast-50" ref={ref}>
+    <div className="fixed w-full h-full z-40 backdrop-contrast-50" ref={ref}>
       <div className="flex w-full h-full justify-center items-center">
         <div className="border bg-white z-50 shadow-2xl">
           <CardContainer extra="w-80 h-80" card={inspectCard} />

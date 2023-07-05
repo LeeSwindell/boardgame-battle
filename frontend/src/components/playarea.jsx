@@ -11,7 +11,7 @@ function PlayArea() {
     logger.log(gamestate);
     return (
       <div className="flex flex-row space-x-1 items-start border h-40">
-        {gamestate.players[username].PlayArea.map((card) => (
+        {gamestate.players[gamestate.currentturn].PlayArea.map((card) => (
           <CardContainer key={card.Id} cardId={card.Id} card={<MarketCard img={card.ImgPath} />} size="reg" />
         ))}
       </div>

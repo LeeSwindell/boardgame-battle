@@ -68,6 +68,7 @@ func (effect AvadaKedavraEffect) Trigger(gs *Gamestate) {
 		StunPlayer(user, gs)
 		AddToLocation{Amount: 1}.Trigger(gs)
 	}
+	LoadNewDarkArt(gs)
 }
 
 func expulso() DarkArt {

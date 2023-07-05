@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 )
 
 type DamageAllPlayers struct {
@@ -203,20 +204,23 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 		return
 	}
 
-	discardCardId := AskUserToSelectCard(user, gs.gameid, cards, "Discard a card")
-	for i, c := range cards {
-		if c.Id == discardCardId {
-			cards = RemoveCardAtIndex(cards, i)
-			player.Discard = append(player.Discard, c)
+	for i := 0; i < effect.Amount; i++ {
+		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, "Discard a card")
+		for i, c := range cards {
+			if c.Id == discardCardId {
+				cards = RemoveCardAtIndex(cards, i)
+				player.Discard = append(player.Discard, c)
+			}
 		}
+
+		player.Hand = cards
+		gs.Players[user] = player
+
+		event := Event{senderId: -1, message: "player discarded", data: user}
+		eventBroker.Messages <- event
+		// update turnstats
 	}
 
-	player.Hand = cards
-	gs.Players[user] = player
-
-	event := Event{senderId: -1, message: "player discarded", data: user}
-	eventBroker.Messages <- event
-	// update turnstats
 }
 
 type AddToLocation struct {
@@ -619,6 +623,113 @@ func (effect DamageAllPerMatchingCost) Trigger(gs *Gamestate) {
 			if stunned {
 				StunPlayer(user, gs)
 			}
+		}
+	}
+}
+
+type AllPlayersGainDamage struct {
+	Amount int
+}
+
+func (effect AllPlayersGainDamage) Trigger(gs *Gamestate) {
+	for _, p := range gs.Players {
+		p.Damage += effect.Amount
+		gs.Players[p.Name] = p
+	}
+}
+
+type RavenclawDice struct{}
+
+func (effect RavenclawDice) Trigger(gs *Gamestate) {
+	n := rand.Intn(6)
+	switch n {
+	case 0:
+		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+	case 1:
+		AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+	case 2:
+		AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+	default:
+		AllDrawCards{Amount: 1}.Trigger(gs)
+	}
+}
+
+type SlytherinDice struct{}
+
+func (effect SlytherinDice) Trigger(gs *Gamestate) {
+	n := rand.Intn(6)
+	switch n {
+	case 0:
+		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+	case 1:
+		AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+	case 2:
+		AllDrawCards{Amount: 1}.Trigger(gs)
+	default:
+		AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+	}
+}
+
+type GryffindorDice struct{}
+
+func (effect GryffindorDice) Trigger(gs *Gamestate) {
+	n := rand.Intn(6)
+	switch n {
+	case 0:
+		AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+	case 1:
+		AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+	case 2:
+		AllDrawCards{Amount: 1}.Trigger(gs)
+	default:
+		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+	}
+}
+
+type HufflepuffDice struct{}
+
+func (effect HufflepuffDice) Trigger(gs *Gamestate) {
+	n := rand.Intn(6)
+	switch n {
+	case 0:
+		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+	case 1:
+		AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+	case 2:
+		AllDrawCards{Amount: 1}.Trigger(gs)
+	default:
+		AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+	}
+}
+
+type ChooseTwo struct {
+	Exclusive bool
+	Effects   []Effect
+	Options   []string
+	Prompt    string
+}
+
+func (effect ChooseTwo) Trigger(gs *Gamestate) {
+	firstChoice := ChooseOne{
+		Effects:     effect.Effects,
+		Options:     effect.Options,
+		Description: effect.Prompt + "(1 of 2)",
+	}
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice)
+
+	secondChoice := ChooseOne{}
+	for i, option := range firstChoice.Options {
+		if choice == option {
+			firstChoice.Effects[i].Trigger(gs)
+			secondChoice.Effects = append(firstChoice.Effects[:i], firstChoice.Effects[i+1:]...)
+			secondChoice.Options = append(firstChoice.Options[:i], firstChoice.Options[i+1:]...)
+			secondChoice.Description = effect.Prompt + "(2 of 2)"
+		}
+	}
+	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice)
+	for i, option := range firstChoice.Options {
+		if choice == option {
+			secondChoice.Effects[i].Trigger(gs)
 		}
 	}
 }

@@ -21,13 +21,24 @@ func (effect RevealDarkArts) Trigger(gs *Gamestate) {
 		}
 
 		// Load next
-		newIndex := (curDarkArtIndex + 1) % len(gs.DarkArts)
-		if newIndex == 0 {
-			gs.DarkArts = ShuffleDarkArts(gs.DarkArts)
-		}
+		// newIndex := (curDarkArtIndex + 1) % len(gs.DarkArts)
+		// if newIndex == 0 {
+		// 	gs.DarkArts = ShuffleDarkArts(gs.DarkArts)
+		// }
 
-		gs.CurrentDarkArt = newIndex
+		// gs.CurrentDarkArt = newIndex
+		LoadNewDarkArt(gs)
 	}
+}
+
+func LoadNewDarkArt(gs *Gamestate) {
+	curDarkArtIndex := gs.CurrentDarkArt
+	newIndex := (curDarkArtIndex + 1) % len(gs.DarkArts)
+	if newIndex == 0 {
+		gs.DarkArts = ShuffleDarkArts(gs.DarkArts)
+	}
+
+	gs.CurrentDarkArt = newIndex
 }
 
 func greatHall() Location {

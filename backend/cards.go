@@ -10,7 +10,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		Effects:  []Effect{GainMoney{Amount: 1}},
+		Effects:  []Effect{GainMoney{Amount: 10}},
 	}
 }
 
@@ -164,10 +164,274 @@ func detention() Card {
 	return Card{
 		Id:       int(uuid.New().ID()),
 		Name:     "Detention!",
-		SetId:    "Box 1",
+		SetId:    "box 1",
 		ImgPath:  "/images/marketcards/detention.jpg",
 		CardType: "item",
 		Cost:     0,
 		Effects:  []Effect{},
 	}
+}
+
+func albusDumbledore() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Albus Dumbledore",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/albusdumbledore.jpg",
+		CardType: "ally",
+		Cost:     8,
+		Effects: []Effect{
+			AllPlayersGainMoney{Amount: 1},
+			AllPlayersGainHealth{Amount: 1},
+			AllPlayersGainDamage{Amount: 1},
+			AllDrawCards{Amount: 1},
+		},
+	}
+}
+
+func arthurWeasley() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Arthur Weasley",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/arthurweasley.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			AllPlayersGainMoney{Amount: 2},
+		},
+	}
+}
+
+func bezoar() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Bezoar",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/bezoar.jpg",
+		CardType: "item",
+		Cost:     4,
+		Effects: []Effect{
+			HealAnyPlayer{Amount: 3},
+			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func choChang() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Cho Chang",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/chochang.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			DrawCards{Amount: 3},
+			ActivePlayerDiscards{Amount: 2},
+			RavenclawDice{},
+		},
+	}
+}
+
+func deluminator() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Deluminator",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/deluminator.jpg",
+		CardType: "item",
+		Cost:     6,
+		Effects: []Effect{
+			RemoveFromLocation{Amount: 2},
+		},
+	}
+}
+
+func expectoPatronum() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Expecto Patronum",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/expectopatronum.jpg",
+		CardType: "spell",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			RemoveFromLocation{Amount: 1},
+		},
+	}
+}
+
+func felixFelicis() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Felix Felicis",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/felixfelicis.jpg",
+		CardType: "item",
+		Cost:     7,
+		Effects: []Effect{
+			ChooseTwo{
+				Exclusive: true,
+				Effects: []Effect{
+					GainDamage{Amount: 2},
+					GainMoney{Amount: 2},
+					GainHealth{Amount: 2},
+					DrawCards{Amount: 2},
+				},
+				Options: []string{
+					"Gain 2 Damage", "Gain 2 Money", "Gain 2 Health", "Draw 2 Cards",
+				},
+				Prompt: "Felix Felicis: Choose One",
+			},
+		},
+	}
+}
+
+func filiusFlitwick() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Filius Flitwick",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/filiusflitwick.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			DrawCards{Amount: 1},
+			RavenclawDice{},
+		},
+	}
+}
+
+func hogwartsAHistory() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Hogwarts: A History",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/hogwartsahistory.jpg",
+		CardType: "item",
+		Cost:     4,
+		Effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					RavenclawDice{},
+					SlytherinDice{},
+					GryffindorDice{},
+					HufflepuffDice{},
+				},
+				Options: []string{
+					"Ravenclaw", "Slytherin", "Gryffindor", "Hufflepuff",
+				},
+				Description: "Choose a House dice to roll",
+			},
+		},
+	}
+}
+
+func mollyWeasley() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Molly Weasley",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/mollyweasley.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			AllPlayersGainMoney{Amount: 1},
+			AllPlayersGainHealth{Amount: 2},
+		},
+	}
+}
+
+func quidditchGear() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Quidditch Gear",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/quidditchgear.jpg",
+		CardType: "item",
+		Cost:     3,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			GainHealth{Amount: 1},
+		},
+	}
+}
+
+func siriusBlack() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Sirius Black",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/siriusblack.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			GainMoney{Amount: 1},
+		},
+	}
+}
+
+func stupefy() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Stupefy!",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/filiusflitwick.jpg",
+		CardType: "spell",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			RemoveFromLocation{Amount: 1},
+			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func sybillTrelawney() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Sybill Trelawney",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/sybilltrelawney.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			DrawCards{Amount: 2},
+			SybillDiscard{},
+		},
+	}
+}
+
+type SybillDiscard struct{}
+
+func (effect SybillDiscard) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+
+	cards := player.Hand
+	if len(cards) == 0 {
+		return
+	}
+
+	discardCardId := AskUserToSelectCard(user, gs.gameid, cards, "Discard a card (+2 money if it's a spell)")
+	for i, c := range cards {
+		if c.Id == discardCardId {
+			if c.CardType == "spell" {
+				player.Money += 2
+			}
+			cards = RemoveCardAtIndex(cards, i)
+			player.Discard = append(player.Discard, c)
+		}
+	}
+
+	player.Hand = cards
+	gs.Players[user] = player
+
+	event := Event{senderId: -1, message: "player discarded", data: user}
+	eventBroker.Messages <- event
+	// update turnstats
 }

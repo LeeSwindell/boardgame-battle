@@ -146,6 +146,8 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			// spend money to damage norbert.
 			if v.Name == "Norbert" && updatedPlayer.Money > 0 {
 				updatedPlayer.Money -= 1
+			} else if v.Name == "Norbert" && updatedPlayer.Money <= 0 {
+				return
 			} else {
 				updatedPlayer.Damage -= 1
 			}
@@ -198,7 +200,7 @@ func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			if c.Cost >= 4 {
 				eventBroker.Messages <- DoloresUmbridgeTrigger
 			}
-			gs.Market[i] = RefillMarket(c.Name)
+			RefillMarket(i, gs)
 		}
 	}
 

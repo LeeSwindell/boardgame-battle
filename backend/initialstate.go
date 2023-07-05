@@ -85,32 +85,46 @@ func CreateMarketDeck() []Card {
 		oliverWood(),
 		reparo(),
 		triwizardCup(),
+		albusDumbledore(),
+		arthurWeasley(),
+		bezoar(),
+		choChang(),
+		deluminator(),
+		expectoPatronum(),
+		felixFelicis(),
+		filiusFlitwick(),
+		hogwartsAHistory(),
+		mollyWeasley(),
+		quidditchGear(),
+		siriusBlack(),
+		stupefy(),
+		sybillTrelawney(),
 	}
+
+	deck = ShuffleCards(deck)
 
 	return deck
 }
 
 func CreateMarket() []Card {
 	market := []Card{
-		crystalBall(),
-		finite(),
-		incendio(),
-		oliverWood(),
-		reparo(),
-		triwizardCup(),
+		sybillTrelawney(),
+		bezoar(),
+		choChang(),
+		deluminator(),
+		hogwartsAHistory(),
+		felixFelicis(),
 	}
 
 	return market
 }
 
-func RefillMarket(cardname string) Card {
-	cards := make(map[string]func() Card)
-	cards["Crystal Ball"] = crystalBall
-	cards["Finite!"] = finite
-	cards["Incendio!"] = incendio
-	cards["Oliver Wood"] = oliverWood
-	cards["Reparo"] = reparo
-	cards["Triwizard Cup"] = triwizardCup
+func RefillMarket(index int, gs *Gamestate) {
+	// refill deck if empty
+	if len(gs.MarketDeck) == 0 {
+		gs.MarketDeck = CreateMarketDeck()
+	}
 
-	return cards[cardname]()
+	gs.Market[index] = gs.MarketDeck[0]
+	gs.MarketDeck = gs.MarketDeck[1:]
 }

@@ -394,6 +394,7 @@ func (effect FluffyEffect) Trigger(gs *Gamestate) {
 	}
 }
 
+// FIX!!! NOT WORKING!
 func luciusMalfoy() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
@@ -488,6 +489,7 @@ func (effect TomRiddleEffect) Trigger(gs *Gamestate) {
 	}
 }
 
+// player that kills tom gets to choose it all
 type TomRiddleDeathEffect struct{}
 
 func (effect TomRiddleDeathEffect) Trigger(gs *Gamestate) {
@@ -571,7 +573,7 @@ func voledmortFive() Villain {
 		Active:    true,
 		Effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
-			ActivePlayerDiscards{Amount: 1},
+			ActivePlayerDiscards{Amount: 1, Prompt: "Voldemort attacks! Discard a card"},
 		},
 		DeathEffect:  []Effect{},
 		playBeforeDA: false,

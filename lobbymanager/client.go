@@ -10,10 +10,11 @@ import (
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub      *Hub
-	conn     *websocket.Conn
-	pid      uuid.UUID
-	username string
+	hub        *Hub
+	conn       *websocket.Conn
+	pid        uuid.UUID
+	username   string
+	lobbygroup int
 }
 
 func (c *Client) readPump() {

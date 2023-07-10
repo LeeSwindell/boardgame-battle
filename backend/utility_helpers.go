@@ -57,12 +57,7 @@ func getIdAndUser(r *http.Request) (int, string) {
 }
 
 func SendLobbyUpdate(id int, gs *Gamestate) {
-	url := fmt.Sprintf("http://localhost:8000/game/%d/refreshgamestate", id)
-	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
-		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/refreshgamestate", id)
-	}
-	// API UPDATE
-	url = fmt.Sprintf("%s/game/%d/refreshgamestate", config.LobbyManagerURL, id)
+	url := fmt.Sprintf("%s/game/%d/refreshgamestate", config.LobbyManagerURL, id)
 
 	log.Println("game sending refreshgamestate to url: ", url)
 
@@ -80,17 +75,16 @@ func SendLobbyUpdate(id int, gs *Gamestate) {
 	client.Do(req)
 }
 
-func getUserInput(id int, user string, effect Effect) string {
+func getUserInput(id int, user string, effect Effect, prompt string) string {
 	// pass result to card effect.
-	url := fmt.Sprintf("http://localhost:8000/game/%d/getuserinput/%s", id, user)
-	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
-		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/getuserinput/%s", id, user)
-	}
-	// API UPDATE
-	url = fmt.Sprintf("%s/game/%d/getuserinput/%s", config.LobbyManagerURL, id, user)
-	log.Println("check url:", url)
+	url := fmt.Sprintf("%s/game/%d/getuserinput/%s", config.LobbyManagerURL, id, user)
 
-	data, err := json.Marshal(effect)
+	var dataToSend = struct {
+		Effect Effect `json:"effect"`
+		Prompt string `json:"prompt"`
+	}{Effect: effect, Prompt: prompt}
+
+	data, err := json.Marshal(dataToSend)
 	if err != nil {
 		log.Println("err marshaling options:", err.Error())
 	}
@@ -117,12 +111,7 @@ func getUserInput(id int, user string, effect Effect) string {
 
 // Sends a request to lobby manager for the cardId to discard from a users hand.
 func AskUserToDiscard(gameid int, user string, hand []Card, promptString string) string {
-	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertodiscard/%s", gameid, user)
-	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
-		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertodiscard/%s", gameid, user)
-	}
-	// API UPDATE
-	url = fmt.Sprintf("%s/game/%d/askusertodiscard/%s", config.LobbyManagerURL, gameid, user)
+	url := fmt.Sprintf("%s/game/%d/askusertodiscard/%s", config.LobbyManagerURL, gameid, user)
 
 	var dataToSend = struct {
 		Hand   []Card `json:"hand"`
@@ -155,12 +144,7 @@ func AskUserToDiscard(gameid int, user string, hand []Card, promptString string)
 }
 
 func AskUserToSelectPlayer(gameid int, user string, players []string) string {
-	endpoint := fmt.Sprintf("http://localhost:8000/game/%d/askusertoselectplayer/%s", gameid, user)
-	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
-		endpoint = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectplayer/%s", gameid, user)
-	}
-	// API UPDATE
-	endpoint = fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)
+	url := fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)
 
 	// Encode the players slice as JSON
 	playerJSON, err := json.Marshal(players)
@@ -170,7 +154,7 @@ func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	}
 
 	// Create a new http.Request object with the POST method and the encoded values.
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(string(playerJSON)))
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(playerJSON)))
 	if err != nil {
 		log.Println("err creating http.request in selectplayer", err)
 	}
@@ -199,12 +183,7 @@ func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 }
 
 func AskUserToSelectCard(user string, gameid int, choices []Card, prompt string) int {
-	url := fmt.Sprintf("http://localhost:8000/game/%d/askusertoselectcard/%s", gameid, user)
-	if appEnv == "prod" || os.Getenv("APP_ENV") == "prod" {
-		url = fmt.Sprintf("https://lobbymanager.fly.dev/game/%d/askusertoselectcard/%s", gameid, user)
-	}
-	// API UPDATE
-	url = fmt.Sprintf("%s/game/%d/askusertoselectcard/%s", config.LobbyManagerURL, gameid, user)
+	url := fmt.Sprintf("%s/game/%d/askusertoselectcard/%s", config.LobbyManagerURL, gameid, user)
 
 	var dataToSend = struct {
 		Cards  []Card `json:"cards"`
@@ -242,15 +221,6 @@ func AskUserToSelectCard(user string, gameid int, choices []Card, prompt string)
 	}
 
 	return selectionId
-}
-
-func stringifyCards(cards []Card) string {
-	res := ""
-	for _, c := range cards {
-		res += c.Name + " "
-	}
-
-	return res
 }
 
 func getGsForGameID(r *http.Request) (*Gamestate, bool) {

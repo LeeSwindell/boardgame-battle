@@ -99,6 +99,14 @@ func CreateMarketDeck() []Card {
 		siriusBlack(),
 		stupefy(),
 		sybillTrelawney(),
+		butterbeer(),
+		dobbyTheHouseElf(),
+		essenceOfDittany(),
+		fang(),
+		fleurDelacour(),
+		goldenSnitch(),
+		pensieve(),
+		rubeusHagrid(),
 	}
 
 	deck = ShuffleCards(deck)
@@ -108,12 +116,12 @@ func CreateMarketDeck() []Card {
 
 func CreateMarket() []Card {
 	market := []Card{
-		sybillTrelawney(),
-		bezoar(),
-		choChang(),
-		deluminator(),
-		hogwartsAHistory(),
-		felixFelicis(),
+		butterbeer(),
+		dobbyTheHouseElf(),
+		essenceOfDittany(),
+		fang(),
+		fleurDelacour(),
+		goldenSnitch(),
 	}
 
 	return market

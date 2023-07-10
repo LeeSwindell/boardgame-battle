@@ -7,6 +7,8 @@ function Hand() {
   const username = localStorage.getItem('sessionid');
 
   if (gamestate) {
+    console.log(gamestate);
+    console.log(username);
     return (
       <div className="flex flex-row space-x-2 justify-center h-40 fixed inset-x-0 z-20 -bottom-4 mx-40">
         {gamestate.players[username].Hand.map((card) => (

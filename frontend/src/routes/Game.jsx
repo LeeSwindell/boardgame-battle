@@ -76,6 +76,7 @@ function GamestateProvider({ children }) {
     gameapi
       .get(`/${gameid}/getgamestate`)
       .then((response) => {
+        console.log(response.data);
         setGamestate(response.data);
         gameapi.get(`/${gameid}/firstturn`);
       })

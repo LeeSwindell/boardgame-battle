@@ -45,8 +45,6 @@ func AddClientHandler(w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, pid: pid, username: ""}
 	client.hub.register <- client
 
-	// println("player ", pid.String(), " is connecting")
-
 	go client.readPump()
 }
 
@@ -114,7 +112,6 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	defer globalMu.Unlock()
 
 	newPlayerID := int(getUniquePlayerId().ID())
-	// log.Println(newPlayerID, "<-- new player with id created")
 
 	if username != "" {
 		newPlayer := LobbyPlayer{
@@ -326,14 +323,19 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("err getting username in getuserinputhandler")
 	}
 
-	var chooseOne ChooseOne
-	json.NewDecoder(r.Body).Decode(&chooseOne)
+	// var chooseOne ChooseOne
+	var data struct {
+		Effect ChooseOne `json:"effect"`
+		Prompt string    `json:"prompt"`
+	}
+
+	json.NewDecoder(r.Body).Decode(&data)
 
 	listenID := 0
-	if chooseOne.Description != "" {
-		listenID = hub.askPlayerChoice(user, chooseOne.Options, chooseOne.Description)
+	if data.Prompt != "" {
+		listenID = hub.askPlayerChoice(user, data.Effect.Options, data.Prompt)
 	} else {
-		listenID = hub.askPlayerChoice(user, chooseOne.Options, "Choose One")
+		listenID = hub.askPlayerChoice(user, data.Effect.Options, "Choose One")
 	}
 
 	listenChan := messageBroadcaster.RegisterListener(listenID)

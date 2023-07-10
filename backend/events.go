@@ -96,3 +96,6 @@ var LocationAddedEvent = Event{senderId: -1, message: "location added"}
 var LocationRemovedEvent = Event{senderId: -1, message: "location removed"}
 var PlayerDiscarded = Event{senderId: -1, message: "player discarded"}
 var DoloresUmbridgeTrigger = Event{senderId: -1, message: "umbridge condition"}
+var AllyPlayed = Event{senderId: -1, message: "ally played"}
+var ItemPlayed = Event{senderId: -1, message: "item played"}
+var SpellPlayed = Event{senderId: -1, message: "spell played"}

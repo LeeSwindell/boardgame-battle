@@ -142,6 +142,10 @@ func DrawXCards(user string, gs *Gamestate, amount int) {
 		}
 	}
 
+	if amount <= 0 {
+		return
+	}
+
 	updated := gs.Players[user]
 	for i := 0; i < amount; i++ {
 		card, ok := PopFromDeck(&updated)
@@ -268,10 +272,10 @@ func StunPlayer(user string, gs *Gamestate) {
 	discardAmount := len(player.Hand) / 2
 	for i := 0; i < discardAmount; i++ {
 		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
-		cardName := AskUserToDiscard(gs.gameid, user, player.Hand, desc)
+		cardName := AskUserToSelectCard(user, gs.gameid, player.Hand, desc)
 
 		for i, c := range player.Hand {
-			if c.Name == cardName {
+			if c.Id == cardName {
 				player.Hand = RemoveCardAtIndex(player.Hand, i)
 				player.Discard = append(player.Discard, c)
 				break

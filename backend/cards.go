@@ -10,7 +10,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		Effects:  []Effect{GainMoney{Amount: 10}},
+		Effects:  []Effect{GainMoney{Amount: 100}},
 	}
 }
 
@@ -28,7 +28,8 @@ func pigwidgeon() Card {
 					GainDamage{Amount: 1},
 					GainHealth{Amount: 2},
 				},
-				Options: []string{"Gain 1 Damage", "Gain 2 Health"},
+				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
+				Description: "",
 			},
 		},
 	}
@@ -380,7 +381,7 @@ func stupefy() Card {
 		Id:       int(uuid.New().ID()),
 		Name:     "Stupefy!",
 		SetId:    "game 5",
-		ImgPath:  "/images/marketcards/filiusflitwick.jpg",
+		ImgPath:  "/images/marketcards/stupefy.jpg",
 		CardType: "spell",
 		Cost:     6,
 		Effects: []Effect{
@@ -434,4 +435,132 @@ func (effect SybillDiscard) Trigger(gs *Gamestate) {
 	event := Event{senderId: -1, message: "player discarded", data: user}
 	eventBroker.Messages <- event
 	// update turnstats
+}
+
+func butterbeer() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Butterbeer",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/butterbeer.jpg",
+		CardType: "item",
+		Cost:     3,
+		Effects: []Effect{
+			SelectTwoPlayersToGainStats{
+				AmountHealth: 1,
+				AmountMoney:  1,
+				Exclusive:    true,
+			},
+		},
+	}
+}
+
+func dobbyTheHouseElf() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Dobby the House Elf",
+		SetId:    "2",
+		ImgPath:  "/images/marketcards/dobbythehouseelf.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			RemoveFromLocation{Amount: 1},
+			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func essenceOfDittany() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Essence of Dittany",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/essenceofdittany.jpg",
+		CardType: "item",
+		Cost:     2,
+		Effects: []Effect{
+			HealAnyPlayer{Amount: 2},
+		},
+	}
+}
+
+func fang() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Fang",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/fang.jpg",
+		CardType: "ally",
+		Cost:     3,
+		Effects: []Effect{
+			SelectPlayerToGainStats{
+				AmountHealth: 2,
+				AmountMoney:  1,
+			},
+		},
+	}
+}
+
+func goldenSnitch() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Golden Snitch",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/goldensnitch.jpg",
+		CardType: "item",
+		Cost:     5,
+		Effects: []Effect{
+			GainMoney{Amount: 2},
+			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func pensieve() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Pensieve",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/pensieve.jpg",
+		CardType: "item",
+		Cost:     5,
+		Effects: []Effect{
+			SelectTwoPlayersToGainStats{
+				AmountMoney: 1,
+				AmountCards: 1,
+				Exclusive:   true,
+			},
+		},
+	}
+}
+
+func rubeusHagrid() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Rubeus Hagrid",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/rubeushagrid.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			AllPlayersGainHealth{Amount: 1},
+		},
+	}
+}
+
+func fleurDelacour() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Fleur Delacour",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/fleurdelacour.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainMoney{Amount: 2},
+			GainStatIfXPlayed{AmountHealth: 2, Cardtype: "ally", Id: id},
+		},
+	}
 }

@@ -5,6 +5,25 @@ import (
 	"math/rand"
 )
 
+// Wrapper for changing stats of a given player
+type ChangeStats struct {
+	User         string
+	AmountHealth int
+	AmountDamage int
+	AmountMoney  int
+	AmountCards  int
+}
+
+func (effect ChangeStats) Trigger(gs *Gamestate) {
+	ChangePlayerHealth(effect.User, effect.AmountHealth, gs)
+	DrawXCards(effect.User, gs, effect.AmountCards)
+
+	player := gs.Players[effect.User]
+	player.Damage += effect.AmountDamage
+	player.Money += effect.AmountMoney
+	gs.Players[effect.User] = player
+}
+
 type DamageAllPlayers struct {
 	Amount int
 }
@@ -67,7 +86,7 @@ type ChooseOne struct {
 }
 
 func (effect ChooseOne) Trigger(gs *Gamestate) {
-	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect)
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect, effect.Description)
 
 	for i, option := range effect.Options {
 		if choice == option {
@@ -174,9 +193,8 @@ type AllPlayersGainHealth struct {
 }
 
 func (effect AllPlayersGainHealth) Trigger(gs *Gamestate) {
-	for _, p := range gs.Players {
-		p.Health += effect.Amount
-		gs.Players[p.Name] = p
+	for user := range gs.Players {
+		ChangePlayerHealth(user, effect.Amount, gs)
 	}
 }
 
@@ -193,6 +211,7 @@ func (effect AllPlayersGainMoney) Trigger(gs *Gamestate) {
 
 type ActivePlayerDiscards struct {
 	Amount int
+	Prompt string
 }
 
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
@@ -204,8 +223,12 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 		return
 	}
 
+	if effect.Prompt == "" {
+		effect.Prompt = "Discard a card"
+	}
+
 	for i := 0; i < effect.Amount; i++ {
-		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, "Discard a card")
+		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
 		for i, c := range cards {
 			if c.Id == discardCardId {
 				cards = RemoveCardAtIndex(cards, i)
@@ -219,8 +242,11 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 		event := Event{senderId: -1, message: "player discarded", data: user}
 		eventBroker.Messages <- event
 		// update turnstats
-	}
 
+		if len(cards) == 0 {
+			return
+		}
+	}
 }
 
 type AddToLocation struct {
@@ -276,6 +302,7 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 	gs.Locations[gs.CurrentLocation] = loc
 }
 
+// current player draws Amount of cards.
 type DrawCards struct {
 	Amount int
 }
@@ -363,6 +390,74 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 	ChangePlayerHealth(choice, effect.Amount, gs)
 }
 
+type SelectPlayerToGainStats struct {
+	AmountHealth int
+	AmountMoney  int
+	AmountDamage int
+	AmountCards  int
+	ExcludeUser  string
+}
+
+func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
+	playernames := []string{}
+	for p := range gs.Players {
+		if p != effect.ExcludeUser {
+			playernames = append(playernames, p)
+		}
+	}
+
+	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
+
+	// Use helpers to change player these values before getting/setting player
+	ChangePlayerHealth(choice, effect.AmountHealth, gs)
+	DrawXCards(choice, gs, effect.AmountCards)
+
+	player := gs.Players[choice]
+	player.Damage += effect.AmountDamage
+	player.Money += effect.AmountMoney
+	gs.Players[choice] = player
+}
+
+type SelectTwoPlayersToGainStats struct {
+	AmountHealth int
+	AmountMoney  int
+	AmountDamage int
+	AmountCards  int
+	Exclusive    bool
+}
+
+func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
+	playernames := []string{}
+	for p := range gs.Players {
+		playernames = append(playernames, p)
+	}
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
+
+	ChangePlayerHealth(choice, effect.AmountHealth, gs)
+	DrawXCards(choice, gs, effect.AmountCards)
+
+	player := gs.Players[choice]
+	player.Damage += effect.AmountDamage
+	player.Money += effect.AmountMoney
+	gs.Players[choice] = player
+
+	if len(playernames) <= 1 {
+		return
+	}
+
+	secondEffect := SelectPlayerToGainStats{
+		AmountHealth: effect.AmountHealth,
+		AmountMoney:  effect.AmountMoney,
+		AmountDamage: effect.AmountDamage,
+		AmountCards:  effect.AmountCards,
+	}
+	if effect.Exclusive {
+		secondEffect.ExcludeUser = choice
+	}
+
+	secondEffect.Trigger(gs)
+}
+
 type AllSearchDiscardPileForItem struct{}
 
 func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
@@ -408,7 +503,7 @@ type AllChooseOne struct {
 
 func (effect AllChooseOne) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
-		choice := getUserInput(gs.gameid, user, effect)
+		choice := getUserInput(gs.gameid, user, effect, effect.Description)
 
 		for i, option := range effect.Options {
 			if choice == option {
@@ -576,10 +671,11 @@ func (effect DamageAllPerDetention) Trigger(gs *Gamestate) {
 }
 
 type AllDiscard struct {
-	Amount int
+	Amount int // doesn't do anything.
 	Prompt string
 }
 
+// Only discards one card atm.
 func (effect AllDiscard) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		player := gs.Players[user]
@@ -715,7 +811,7 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 		Options:     effect.Options,
 		Description: effect.Prompt + "(1 of 2)",
 	}
-	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice)
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice, firstChoice.Description)
 
 	secondChoice := ChooseOne{}
 	for i, option := range firstChoice.Options {
@@ -726,10 +822,82 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 			secondChoice.Description = effect.Prompt + "(2 of 2)"
 		}
 	}
-	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice)
+	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice, firstChoice.Description)
 	for i, option := range firstChoice.Options {
 		if choice == option {
 			secondChoice.Effects[i].Trigger(gs)
 		}
 	}
+}
+
+// Gives current user health/money/dmg/cards if a cardtype X is played during their turn.
+type GainStatIfXPlayed struct {
+	AmountHealth int
+	AmountDamage int
+	AmountMoney  int
+	AmountCards  int
+	Cardtype     string
+	Id           int
+}
+
+// Triggers off its own card, e.g. play an ally card which triggers when an ally is played.
+func (effect GainStatIfXPlayed) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	triggerEffect := false
+	changeStats := ChangeStats{
+		User:         user,
+		AmountHealth: effect.AmountHealth,
+		AmountDamage: effect.AmountDamage,
+		AmountMoney:  effect.AmountMoney,
+		AmountCards:  effect.AmountCards,
+	}
+
+	switch effect.Cardtype {
+	case "ally":
+		if gs.turnStats.AlliesPlayed > 0 {
+			triggerEffect = true
+		}
+	case "item":
+		if gs.turnStats.ItemsPlayed > 0 {
+			triggerEffect = true
+		}
+	case "spell":
+		if gs.turnStats.SpellsPlayed > 0 {
+			triggerEffect = true
+		}
+	}
+
+	if triggerEffect {
+		changeStats.Trigger(gs)
+		return
+	}
+
+	sub := Subscriber{
+		id:              effect.Id,
+		messageChan:     make(chan string),
+		conditionMet:    effect.Cardtype + " played",
+		conditionFailed: "end turn",
+		unsubChan:       eventBroker.Messages,
+	}
+
+	// Only trigger once.
+	go func() {
+		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
+
+		res := <-resChan
+		if !res {
+			return
+		}
+
+		gs.mu.Lock()
+		// check if turn has changed while waiting for lock.
+		if res && user == gs.CurrentTurn {
+			changeStats.Trigger(gs)
+
+			SendLobbyUpdate(gs.gameid, gs)
+		}
+		gs.mu.Unlock()
+	}()
 }

@@ -27,7 +27,7 @@ func flipendo() DarkArt {
 		SetId:   "game 1",
 		Effects: []Effect{
 			DamageCurrentPlayer{Amount: 1},
-			ActivePlayerDiscards{Amount: 1},
+			ActivePlayerDiscards{Amount: 1, Prompt: "Flipendo! Discard a card"},
 		},
 	}
 }

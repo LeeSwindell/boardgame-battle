@@ -29,13 +29,21 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	for _, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
-			card := c
-
 			MoveToPlayed(user, c.Id, gs)
 
-			for _, e := range card.Effects {
+			switch c.CardType {
+			case "spell":
+				eventBroker.Messages <- SpellPlayed
+			case "item":
+				eventBroker.Messages <- ItemPlayed
+			case "ally":
+				eventBroker.Messages <- AllyPlayed
+			}
+
+			for _, e := range c.Effects {
 				e.Trigger(gs)
 			}
+
 			switch c.CardType {
 			case "spell":
 				gs.turnStats.SpellsPlayed += 1

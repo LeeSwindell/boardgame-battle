@@ -88,6 +88,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	RefillHand(user, gs)
 	NextTurnInOrder(gs)
 	gs.turnStats = TurnStats{}
+	ResetPlayerInfo(gs)
 
 	SendLobbyUpdate(gameid, gs)
 
@@ -203,17 +204,10 @@ func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	player := gs.Players[user]
 	for i, c := range gs.Market {
 		if c.Id == cardid && player.Money >= c.Cost {
-			player.Money -= c.Cost
-			player.Discard = append(player.Discard, c)
-			if c.Cost >= 4 {
-				eventBroker.Messages <- DoloresUmbridgeTrigger
-			}
+			PurchaseCard(c, user, gs)
 			RefillMarket(i, gs)
 		}
 	}
-
-	gs.Players[user] = player
-	// don't remove from market for now.
 
 	SendLobbyUpdate(gameid, gs)
 }

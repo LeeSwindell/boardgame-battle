@@ -133,7 +133,7 @@ func PopFromDeck(player *Player) (Card, bool) {
 	return topCard, true
 }
 
-// Used to draw cards and shuffle deck if needed.
+// Used to draw cards and shuffle deck if needed. Draws from end of slice.
 func DrawXCards(user string, gs *Gamestate, amount int) {
 	// Basilisk prevents players from drawing extra cards.
 	for _, v := range gs.Villains {
@@ -170,26 +170,38 @@ func RefillHand(user string, gs *Gamestate) {
 	gs.Players[user] = updated
 }
 
-func BanishCard(user string, cardId int, gs *Gamestate) {
-	// Find card in hand/discard/played
+// Optionally check the return for cardtype of banished card for some effects.
+func BanishCard(user string, cardId int, gs *Gamestate) string {
+	// Find card in hand/discard/played/deck
 	player := gs.Players[user]
+	cardtype := ""
 	for i, c := range player.Hand {
 		if c.Id == cardId {
 			player.Hand = RemoveCardAtIndex(player.Hand, i)
+			cardtype = c.CardType
 		}
 	}
 	for i, c := range player.Discard {
 		if c.Id == cardId {
 			player.Discard = RemoveCardAtIndex(player.Discard, i)
+			cardtype = c.CardType
 		}
 	}
 	for i, c := range player.PlayArea {
 		if c.Id == cardId {
-			player.PlayArea = RemoveCardAtIndex(player.Discard, i)
+			player.PlayArea = RemoveCardAtIndex(player.PlayArea, i)
+			cardtype = c.CardType
+		}
+	}
+	for i, c := range player.Deck {
+		if c.Id == cardId {
+			player.Deck = RemoveCardAtIndex(player.Deck, i)
+			cardtype = c.CardType
 		}
 	}
 
 	gs.Players[user] = player
+	return cardtype
 }
 
 func MoneyDamageToZero(user string, gs *Gamestate) {
@@ -278,6 +290,14 @@ func StunPlayer(user string, gs *Gamestate) {
 			if c.Id == cardName {
 				player.Hand = RemoveCardAtIndex(player.Hand, i)
 				player.Discard = append(player.Discard, c)
+
+				// Wrap the player mapping around onDiscard since it mutates the state directly.
+				if c.onDiscard != nil {
+					gs.Players[user] = player
+					c.onDiscard(user, gs)
+					player = gs.Players[user]
+				}
+
 				break
 			}
 		}
@@ -324,5 +344,69 @@ func AddNewActiveVillain(villains []Villain, gs *Gamestate) []Villain {
 		newVillain := gs.villainDeck[0]
 		gs.villainDeck = gs.villainDeck[1:]
 		return append(villains, newVillain)
+	}
+}
+
+func ResetPlayerInfo(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+		player.alliesToDeck = false
+		player.itemsToDeck = false
+		player.spellsToDeck = false
+		gs.Players[user] = player
+	}
+}
+
+func PurchaseCard(c Card, user string, gs *Gamestate) {
+	player := gs.Players[user]
+	player.Money -= c.Cost
+	gs.Players[user] = player
+
+	switch c.CardType {
+	case "item":
+		if player.itemsToDeck {
+			ChooseOne{
+				Effects: []Effect{
+					GainCardToTopDeck{user: user, card: c},
+					GainCardToDiscard{user: user, card: c},
+				},
+				Options:     []string{"Yes", "No"},
+				Description: "Gain to top of deck?",
+			}.Trigger(gs)
+		} else {
+			GainCardToDiscard{user: user, card: c}.Trigger(gs)
+		}
+	case "spell":
+		if player.spellsToDeck {
+			ChooseOne{
+				Effects: []Effect{
+					GainCardToTopDeck{user: user, card: c},
+					GainCardToDiscard{user: user, card: c},
+				},
+				Options:     []string{"Yes", "No"},
+				Description: "Gain to top of deck?",
+			}.Trigger(gs)
+		} else {
+			GainCardToDiscard{user: user, card: c}.Trigger(gs)
+		}
+	case "ally":
+		if player.alliesToDeck {
+			ChooseOne{
+				Effects: []Effect{
+					GainCardToTopDeck{user: user, card: c},
+					GainCardToDiscard{user: user, card: c},
+				},
+				Options:     []string{"Yes", "No"},
+				Description: "Gain to top of deck?",
+			}.Trigger(gs)
+		} else {
+			GainCardToDiscard{user: user, card: c}.Trigger(gs)
+		}
+	default:
+		GainCardToDiscard{user: user, card: c}.Trigger(gs)
+	}
+
+	if c.Cost >= 4 {
+		eventBroker.Messages <- DoloresUmbridgeTrigger
 	}
 }

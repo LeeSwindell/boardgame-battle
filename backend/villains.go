@@ -28,7 +28,6 @@ type DamageActiveIfLocationAdded struct {
 }
 
 func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
-	log.Println("calling damageactiveiflocationadded")
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
 
@@ -50,9 +49,7 @@ func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
 				break
 			}
 
-			Logger("draco wants lock")
 			gs.mu.Lock()
-			Logger("draco gets lock")
 			if currentTurn == gs.CurrentTurn {
 				user := gs.CurrentTurn
 				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
@@ -63,7 +60,6 @@ func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
 				SendLobbyUpdate(gs.gameid, gs)
 			}
 			gs.mu.Unlock()
-			Logger("draco releases lock")
 		}
 	}()
 }
@@ -131,23 +127,17 @@ func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 				break
 			}
 
-			Logger("c&g want lock")
 			gs.mu.Lock()
-			Logger("c&g gets lock")
 			if res && currentTurn == gs.CurrentTurn {
 				user := gs.CurrentTurn
-				// log.Println("c&g deal 1 dmg")
-				Logger("cg calling stunned")
 				stunned := ChangePlayerHealth(user, -effect.Amount, gs)
 				if stunned {
 					StunPlayer(user, gs)
 				}
-				Logger("cg sending lobby update ")
 
 				SendLobbyUpdate(gs.gameid, gs)
 			}
 			gs.mu.Unlock()
-			Logger("c&g release lock")
 		}
 	}()
 }
@@ -418,7 +408,7 @@ type LuciusEffect struct {
 	id int
 }
 
-// CHECK IF THIS GETS TRIGGERED WHEN HE DIES -  CHECK IF VILLAIN STILL ACTIVE WHEN TRIGGERING.
+// FIX CHECK IF THIS GETS TRIGGERED WHEN HE DIES -  CHECK IF VILLAIN STILL ACTIVE WHEN TRIGGERING.
 func (effect LuciusEffect) Trigger(gs *Gamestate) {
 	sub := Subscriber{
 		id:              effect.id,
@@ -545,6 +535,12 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 	// If cost > 1, discard it and add 1 to location.
 	if topCard.Cost >= 1 {
 		Logger("Triggering pettigrews effect")
+		// Wrap the player mapping around onDiscard since it mutates the state directly.
+		if topCard.onDiscard != nil {
+			gs.Players[user] = player
+			topCard.onDiscard(user, gs)
+			player = gs.Players[user]
+		}
 		player.Discard = append(player.Discard, topCard)
 		player.Deck = player.Deck[:len(player.Deck)-1]
 		AddToLocation{Amount: 1}.Trigger(gs)

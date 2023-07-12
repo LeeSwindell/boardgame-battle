@@ -107,6 +107,39 @@ func CreateMarketDeck() []Card {
 		goldenSnitch(),
 		pensieve(),
 		rubeusHagrid(),
+		advancedPotionMaking(),
+		alastorMadEyeMoody(),
+		argusFilchAndMrsNorris(),
+		cedricDiggory(),
+		descendo(),
+		expelliarmus(),
+		ginnyWeasley(),
+		horaceSlughorn(),
+		kingsleyShacklebolt(),
+		lumos(),
+		lunaLovegood(),
+		nimbusTwoThousandAndOne(),
+		nymphadoraTonks(),
+		polyjuicePotion(),
+		pomonaSprout(),
+		severusSnape(),
+		swordOfGryffindor(),
+		tergeo(),
+		viktorKrum(),
+		fawkesThePhoenix(),
+		minervaMcgonagall(),
+		remusLupin(),
+		elderWand(),
+		chocolateFrog(),
+		gilderoyLockhart(),
+		maraudersMap(),
+		protego(),
+		accio(),
+		fredWeasley(),
+		georgeWeasley(),
+		owls(),
+		sortingHat(),
+		wingardiumLeviosa(),
 	}
 
 	deck = ShuffleCards(deck)
@@ -116,12 +149,12 @@ func CreateMarketDeck() []Card {
 
 func CreateMarket() []Card {
 	market := []Card{
-		butterbeer(),
-		dobbyTheHouseElf(),
-		essenceOfDittany(),
-		fang(),
-		fleurDelacour(),
-		goldenSnitch(),
+		sortingHat(),
+		wingardiumLeviosa(),
+		choChang(),
+		owls(),
+		sortingHat(),
+		wingardiumLeviosa(),
 	}
 
 	return market

@@ -142,28 +142,30 @@ function GameWithState() {
           && (
           <div className="fixed w-full h-full backdrop-contrast-50">
             <div className="flex w-full h-full justify-center items-center">
-              <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl">
+              <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl items-center">
                 <p className="p-2 w-full text-center font-bold">
                   {userInput.description}
                 </p>
-                {userInput.inputs.map((option, i) => {
-                  console.log('options', option);
-                  if (typeof option === 'string') {
-                    return (
-                      <button key={option + i} type="submit" className="p-2 m-2 border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold" onClick={SubmitUserChoice(option)}>
-                        {option}
-                      </button>
-                    );
-                  }
-                  if (typeof option === 'object') {
-                    console.log('inside market card option');
-                    return (
-                      <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
-                        <MarketCard img={option.ImgPath} />
-                      </button>
-                    );
-                  }
-                })}
+                <div className="flex items-center justify-evenly">
+                  {userInput.inputs.map((option, i) => {
+                    console.log('options', option);
+                    if (typeof option === 'string') {
+                      return (
+                        <button key={option + i} type="submit" className="p-2 m-2 w-16 w-fit border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold text-center justify-between" onClick={SubmitUserChoice(option)}>
+                          {option}
+                        </button>
+                      );
+                    }
+                    if (typeof option === 'object') {
+                      console.log('inside market card option');
+                      return (
+                        <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
+                          <MarketCard img={option.ImgPath} />
+                        </button>
+                      );
+                    }
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -194,6 +196,39 @@ function GameWithState() {
           </div>
         </div>
       </>
+    );
+  }
+  if (userInput) {
+    return (
+      <div className="fixed w-full h-full backdrop-contrast-50">
+        <div className="flex w-full h-full justify-center items-center">
+          <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl items-center">
+            <p className="p-2 w-full text-center font-bold">
+              {userInput.description}
+            </p>
+            <div className="flex items-center justify-evenly">
+              {userInput.inputs.map((option, i) => {
+                console.log('options', option);
+                if (typeof option === 'string') {
+                  return (
+                    <button key={option + i} type="submit" className="p-2 m-2 w-20 w-fit border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold text-center justify-between" onClick={SubmitUserChoice(option)}>
+                      {option}
+                    </button>
+                  );
+                }
+                if (typeof option === 'object') {
+                  console.log('inside market card option');
+                  return (
+                    <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
+                      <MarketCard img={option.ImgPath} />
+                    </button>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }

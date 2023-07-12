@@ -1,6 +1,8 @@
 package main
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 func alohamora() Card {
 	return Card{
@@ -10,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		Effects:  []Effect{GainMoney{Amount: 100}},
+		Effects:  []Effect{GainMoney{Amount: 10}},
 	}
 }
 
@@ -424,6 +426,12 @@ func (effect SybillDiscard) Trigger(gs *Gamestate) {
 			if c.CardType == "spell" {
 				player.Money += 2
 			}
+			// Wrap the player mapping around onDiscard since it mutates the state directly.
+			if c.onDiscard != nil {
+				gs.Players[user] = player
+				c.onDiscard(user, gs)
+				player = gs.Players[user]
+			}
 			cards = RemoveCardAtIndex(cards, i)
 			player.Discard = append(player.Discard, c)
 		}
@@ -561,6 +569,712 @@ func fleurDelacour() Card {
 		Effects: []Effect{
 			GainMoney{Amount: 2},
 			GainStatIfXPlayed{AmountHealth: 2, Cardtype: "ally", Id: id},
+		},
+	}
+}
+
+func advancedPotionMaking() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Advanced Potion Making",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/advancedpotionmaking.jpg",
+		CardType: "item",
+		Cost:     6,
+		Effects: []Effect{
+			AllPlayersGainHealth{Amount: 2},
+			AllPlayersAtMaxHealthGainX{
+				AmountDamage: 1,
+				AmountCards:  1,
+			},
+		},
+	}
+}
+
+func alastorMadEyeMoody() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Alastor Mad-Eye Moody",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/alastormadeyemoody.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainMoney{Amount: 2},
+			RemoveFromLocation{Amount: 1},
+		},
+	}
+}
+
+func argusFilchAndMrsNorris() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Argus Filch & Mrs. Norris",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/argusfilchandmrsnorris.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			DrawCards{Amount: 2},
+			ChooseOne{
+				Effects: []Effect{
+					ActivePlayerDiscards{Amount: 1},
+					ActivePlayerBanishes{Hand: true},
+				},
+				Options:     []string{"Discard a card", "Banish a card from hand"},
+				Description: "Argus Finally helps out! Choose one:",
+			},
+		},
+	}
+}
+
+func cedricDiggory() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Cedric Diggory",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/cedricdiggory.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			HufflepuffDice{},
+		},
+	}
+}
+
+func descendo() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Descendo!",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/descendo.jpg",
+		CardType: "spell",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+		},
+	}
+}
+
+func expelliarmus() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Expelliarmus!",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/expelliarmus.jpg",
+		CardType: "spell",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			DrawCards{Amount: 1},
+		},
+	}
+}
+
+func ginnyWeasley() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Ginny Weasley",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/ginnyweasley.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			GainMoney{Amount: 1},
+		},
+	}
+}
+
+func horaceSlughorn() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Horace Slughorn",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/horaceslughorn.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			AllChooseOne{
+				Effects: []Effect{
+					GainMoney{Amount: 1},
+					GainHealth{Amount: 1},
+				},
+				Options:     []string{"Gain 1 money", "Gain 1 health"},
+				Description: "Horace Slughorn: Choose one",
+			},
+			SlytherinDice{},
+		},
+	}
+}
+
+func kingsleyShacklebolt() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Kingsley Shacklebolt",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/kingsleyshacklebolt.jpg",
+		CardType: "ally",
+		Cost:     7,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			GainHealth{Amount: 1},
+			RemoveFromLocation{Amount: 1},
+		},
+	}
+}
+
+func lumos() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Lumos",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/lumos.jpg",
+		CardType: "spell",
+		Cost:     4,
+		Effects: []Effect{
+			AllDrawCards{Amount: 1},
+		},
+	}
+}
+
+func lunaLovegood() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Luna Lovegood",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/lunalovegood.jpg",
+		CardType: "ally",
+		Cost:     5,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			GainStatIfXPlayed{AmountDamage: 1, Cardtype: "item"},
+			RavenclawDice{},
+		},
+	}
+}
+
+func nimbusTwoThousandAndOne() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Nimbus Two Thousand And One",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/nimbustwothousandandone.jpg",
+		CardType: "item",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			MoneyIfVillainKilled{Amount: 2, Id: id},
+		},
+	}
+}
+
+func nymphadoraTonks() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Nymphadora Tonks",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/nymphadoratonks.jpg",
+		CardType: "ally",
+		Cost:     5,
+		Effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainMoney{Amount: 3},
+					GainDamage{Amount: 2},
+					RemoveFromLocation{Amount: 1},
+				},
+				Options:     []string{"Gain 3 Money", "Gain 2 Damage", "Remove 1 from location"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func polyjuicePotion() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Polyjuice Potion",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/polyjuicepotion.jpg",
+		CardType: "item",
+		Cost:     3,
+		Effects: []Effect{
+			PolyjuiceEffect{Id: id},
+		},
+	}
+}
+
+// active player selects an ally they've played an copies it's effect.
+type PolyjuiceEffect struct {
+	Id int
+}
+
+func (effect PolyjuiceEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+
+	playArea := gs.Players[user].PlayArea
+	alliesPlayed := []Card{}
+	for _, c := range playArea {
+		if c.CardType == "ally" {
+			alliesPlayed = append(alliesPlayed, c)
+		}
+	}
+
+	if len(alliesPlayed) == 0 {
+		return
+	}
+
+	choice := AskUserToSelectCard(user, gs.gameid, alliesPlayed, "Polyjuice: Select an Ally to copy")
+
+	for _, c := range playArea {
+		if c.Id == choice {
+			for _, e := range c.Effects {
+				e.Trigger(gs)
+			}
+		}
+	}
+}
+
+func pomonaSprout() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Pomona Sprout",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/pomonasprout.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			HealAnyPlayer{Amount: 2},
+			HufflepuffDice{},
+		},
+	}
+}
+
+func severusSnape() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Severus Snape",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/severussnape.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			GainHealth{Amount: 2},
+			SlytherinDice{},
+		},
+	}
+}
+
+func swordOfGryffindor() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Sword of Gryffindor",
+		SetId:    "game 7",
+		ImgPath:  "/images/marketcards/swordofgryffindor.jpg",
+		CardType: "item",
+		Cost:     7,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			GryffindorDice{},
+			GryffindorDice{},
+		},
+	}
+}
+
+func tergeo() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Tergeo",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/tergeo.jpg",
+		CardType: "spell",
+		Cost:     2,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			ActivePlayerBanishAndGainXIfY{
+				Hand:     true,
+				CardType: "item",
+				GainX:    DrawCards{Amount: 1},
+			},
+		},
+	}
+}
+
+func viktorKrum() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Viktor Krum",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/viktorkrum.jpg",
+		CardType: "ally",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 2},
+			GainXIfVillainKilled{
+				Id:    id,
+				GainX: ChangeStats{AmountHealth: 1, AmountMoney: 1},
+			},
+		},
+	}
+}
+
+func fawkesThePhoenix() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Fawkes the Phoenix",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/fawkesthephoenix.jpg",
+		CardType: "ally",
+		Cost:     5,
+		Effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 2},
+					AllPlayersGainHealth{Amount: 2},
+				},
+				Options:     []string{"Gain 2 Damage", "All players gain 2 Health"},
+				Description: "Fawkes brings you a sword and some tears, choose one:",
+			},
+		},
+	}
+}
+
+func minervaMcgonagall() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Minerva McGonagall",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/minervamcgonagall.jpg",
+		CardType: "ally",
+		Cost:     6,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			GainDamage{Amount: 1},
+			GryffindorDice{},
+		},
+	}
+}
+
+func remusLupin() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Remus Lupin",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/remuslupin.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			HealAnyPlayer{Amount: 3},
+		},
+	}
+}
+
+func elderWand() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Elder Wand",
+		SetId:    "game 7",
+		ImgPath:  "/images/marketcards/elderwand.jpg",
+		CardType: "item",
+		Cost:     7,
+		Effects: []Effect{
+			GainXPerSpellPlayed{
+				X: ChangeStats{
+					AmountDamage: 1,
+					AmountHealth: 1,
+				},
+			},
+		},
+	}
+}
+
+func chocolateFrog() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Chocolate Frog",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/chocolatefrog.jpg",
+		CardType: "item",
+		Cost:     2,
+		Effects: []Effect{
+			ChoosePlayerToGainX{
+				X: ChangeStats{
+					AmountHealth: 1,
+					AmountMoney:  1,
+				},
+			},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				User:         target,
+				AmountHealth: 1,
+				AmountMoney:  1,
+			}.Trigger(gs)
+		},
+	}
+}
+
+func gilderoyLockhart() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Gilderoy Lockhart",
+		SetId:    "game 2",
+		ImgPath:  "/images/marketcards/gilderoylockhart.jpg",
+		CardType: "ally",
+		Cost:     2,
+		Effects: []Effect{
+			DrawCards{Amount: 1},
+			ActivePlayerDiscards{Amount: 1, Prompt: "You swoon at the sight of Lockhart, discard a card"},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				User:        target,
+				AmountCards: 1,
+			}.Trigger(gs)
+		},
+	}
+}
+
+func maraudersMap() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Marauder's Map",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/maraudersmap.jpg",
+		CardType: "item",
+		Cost:     5,
+		Effects: []Effect{
+			DrawCards{Amount: 2},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			AllDrawCards{Amount: 1}.Trigger(gs)
+		},
+	}
+}
+
+func protego() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Protego!",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/protego.jpg",
+		CardType: "spell",
+		Cost:     5,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			GainHealth{Amount: 1},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				User:         target,
+				AmountDamage: 1,
+				AmountHealth: 1,
+			}.Trigger(gs)
+		},
+	}
+}
+
+func accio() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Accio!",
+		SetId:    "game 4",
+		ImgPath:  "/images/marketcards/accio.jpg",
+		CardType: "spell",
+		Cost:     4,
+		Effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainMoney{Amount: 2},
+					ActivePlayerSearchesDiscardForX{CardType: "item"},
+				},
+				Options:     []string{"Gain 2 Money", "Search discard for an item"},
+				Description: "Accio! Choose one:",
+			},
+		},
+	}
+}
+
+func fredWeasley() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Fred Weasley",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/fredweasley.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			WeasleyTwinsEffect{Money: 1},
+			GryffindorDice{},
+		},
+	}
+}
+
+func georgeWeasley() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "George Weasley",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/georgeweasley.jpg",
+		CardType: "ally",
+		Cost:     4,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			WeasleyTwinsEffect{Health: 1},
+			GryffindorDice{},
+		},
+	}
+}
+
+var WeasleyNames = map[string]bool{"Fred Weasley": true, "George Weasley": true, "Molly Weasley": true, "Ginny Weasley": true, "Arthur Weasley": true}
+
+type WeasleyTwinsEffect struct {
+	Money  int
+	Health int
+}
+
+func (effect WeasleyTwinsEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+
+	for name := range gs.Players {
+		if name != user {
+			for _, c := range gs.Players[name].Hand {
+				_, ok := WeasleyNames[c.Name]
+				if ok {
+					AllPlayersGainHealth{Amount: effect.Health}.Trigger(gs)
+					AllPlayersGainMoney{Amount: effect.Money}.Trigger(gs)
+					return
+				}
+			}
+		}
+	}
+}
+
+func oldSock() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Old Sock",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/oldsock.jpg",
+		CardType: "item",
+		Cost:     1,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			OldSockEffect{},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				User:        target,
+				AmountMoney: 2,
+			}.Trigger(gs)
+		},
+	}
+}
+
+type OldSockEffect struct{}
+
+func (effect OldSockEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	matchingName := "Dobby the House Elf"
+
+	for name := range gs.Players {
+		if name != user {
+			for _, c := range gs.Players[name].Hand {
+				if c.Name == matchingName {
+					GainDamage{Amount: 2}.Trigger(gs)
+				}
+			}
+		}
+	}
+}
+
+func owls() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "O.W.L.S",
+		SetId:    "game 5",
+		ImgPath:  "/images/marketcards/owls.jpg",
+		CardType: "item",
+		Cost:     4,
+		Effects: []Effect{
+			GainMoney{Amount: 2},
+			GainXIfYSpellsPlayed{
+				X: ChangeStats{
+					AmountDamage: 1,
+					AmountHealth: 1,
+				},
+				Y: 2,
+			},
+		},
+	}
+}
+
+func sortingHat() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Sorting Hat",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/sortinghat.jpg",
+		CardType: "item",
+		Cost:     4,
+		Effects: []Effect{
+			GainMoney{Amount: 2},
+			PurchasedXGoToDeck{X: "ally"},
+		},
+	}
+}
+
+func wingardiumLeviosa() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Wingardium Leviosa",
+		SetId:    "game 1",
+		ImgPath:  "/images/marketcards/wingardiumleviosa.jpg",
+		CardType: "spell",
+		Cost:     2,
+		Effects: []Effect{
+			GainMoney{Amount: 1},
+			PurchasedXGoToDeck{X: "item"},
 		},
 	}
 }

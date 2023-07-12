@@ -143,6 +143,7 @@ func AskUserToDiscard(gameid int, user string, hand []Card, promptString string)
 	return string(body)
 }
 
+// FIX ADD PROMPT
 func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	url := fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)
 

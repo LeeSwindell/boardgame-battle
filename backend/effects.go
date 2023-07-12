@@ -15,7 +15,10 @@ type ChangeStats struct {
 }
 
 func (effect ChangeStats) Trigger(gs *Gamestate) {
-	ChangePlayerHealth(effect.User, effect.AmountHealth, gs)
+	stunned := ChangePlayerHealth(effect.User, effect.AmountHealth, gs)
+	if stunned {
+		StunPlayer(effect.User, gs)
+	}
 	DrawXCards(effect.User, gs, effect.AmountCards)
 
 	player := gs.Players[effect.User]
@@ -130,6 +133,62 @@ func (effect GainDamagePerAllyPlayed) Trigger(gs *Gamestate) {
 	gs.Players[user] = player
 }
 
+// Active player triggers the effect GainX if a villain is killed.
+type GainXIfVillainKilled struct {
+	GainX ChangeStats
+	Id    int
+}
+
+// Gives current player X (this turn) if a villain is killed.
+func (effect GainXIfVillainKilled) Trigger(gs *Gamestate) {
+	effect.GainX.User = gs.CurrentTurn
+
+	// check if villain already killed
+	if gs.turnStats.VillainsKilled > 0 {
+		for name := range gs.Players {
+			player, ok := gs.Players[name]
+			if !ok {
+				return
+			}
+			effect.GainX.Trigger(gs)
+			gs.Players[name] = player
+		}
+	} else {
+		// Check to see if the turn has changed before this can take the lock.
+		currentTurn := gs.CurrentTurn
+
+		sub := Subscriber{
+			id:              effect.Id,
+			messageChan:     make(chan string),
+			conditionMet:    "villain killed",
+			conditionFailed: "end turn",
+			unsubChan:       eventBroker.Messages,
+		}
+
+		go func() {
+			eventBroker.Subscribe(sub)
+			resChan := make(chan bool)
+			go sub.Receive(resChan)
+
+			for {
+				res := <-resChan
+				if !res {
+					break
+				}
+
+				gs.mu.Lock()
+				if currentTurn == gs.CurrentTurn {
+					effect.GainX.Trigger(gs)
+
+					SendLobbyUpdate(gs.gameid, gs)
+				}
+				gs.mu.Unlock()
+			}
+		}()
+
+	}
+}
+
 type MoneyIfVillainKilled struct {
 	Id     int
 	Amount int
@@ -233,6 +292,13 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 			if c.Id == discardCardId {
 				cards = RemoveCardAtIndex(cards, i)
 				player.Discard = append(player.Discard, c)
+
+				// Wrap the player mapping around onDiscard since it mutates the state directly.
+				if c.onDiscard != nil {
+					gs.Players[user] = player
+					c.onDiscard(user, gs)
+					player = gs.Players[user]
+				}
 			}
 		}
 
@@ -386,7 +452,7 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 		playernames = append(playernames, p)
 	}
 
-	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 	ChangePlayerHealth(choice, effect.Amount, gs)
 }
 
@@ -690,6 +756,13 @@ func (effect AllDiscard) Trigger(gs *Gamestate) {
 			if c.Id == discardCardId {
 				cards = RemoveCardAtIndex(cards, i)
 				player.Discard = append(player.Discard, c)
+
+				// Wrap the player mapping around onDiscard since it mutates the state directly.
+				if c.onDiscard != nil {
+					gs.Players[user] = player
+					c.onDiscard(user, gs)
+					player = gs.Players[user]
+				}
 			}
 		}
 
@@ -901,3 +974,236 @@ func (effect GainStatIfXPlayed) Trigger(gs *Gamestate) {
 		gs.mu.Unlock()
 	}()
 }
+
+type AllPlayersAtMaxHealthGainX struct {
+	// AmountHealth int
+	AmountMoney  int
+	AmountDamage int
+	AmountCards  int
+}
+
+func (effect AllPlayersAtMaxHealthGainX) Trigger(gs *Gamestate) {
+	for user, p := range gs.Players {
+		if p.Health >= 10 {
+			DrawXCards(user, gs, effect.AmountCards)
+			player := gs.Players[user]
+			player.Damage += effect.AmountDamage
+			player.Money += effect.AmountMoney
+			gs.Players[user] = player
+		}
+	}
+}
+
+type ActivePlayerBanishes struct {
+	Hand     bool
+	Discard  bool
+	Deck     bool
+	PlayArea bool
+}
+
+func (effect ActivePlayerBanishes) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+
+	cards := []Card{}
+	if effect.Hand {
+		cards = append(cards, player.Hand...)
+	}
+	if effect.Discard {
+		cards = append(cards, player.Discard...)
+	}
+	if effect.Deck {
+		cards = append(cards, player.Deck...)
+	}
+	if effect.PlayArea {
+		cards = append(cards, player.PlayArea...)
+	}
+
+	if len(cards) == 0 {
+		return
+	}
+
+	choice := AskUserToSelectCard(user, gs.gameid, cards, "Banish a card:")
+	BanishCard(user, choice, gs)
+}
+
+// FIX -- May banish a card
+type ActivePlayerBanishAndGainXIfY struct {
+	Hand     bool
+	Discard  bool
+	Deck     bool
+	PlayArea bool
+
+	CardType string // "item", "spell", "ally"
+	GainX    Effect
+}
+
+func (effect ActivePlayerBanishAndGainXIfY) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	player := gs.Players[user]
+
+	cards := []Card{}
+	if effect.Hand {
+		cards = append(cards, player.Hand...)
+	}
+	if effect.Discard {
+		cards = append(cards, player.Discard...)
+	}
+	if effect.Deck {
+		cards = append(cards, player.Deck...)
+	}
+	if effect.PlayArea {
+		cards = append(cards, player.PlayArea...)
+	}
+
+	if len(cards) == 0 {
+		return
+	}
+
+	choice := AskUserToSelectCard(user, gs.gameid, cards, "Banish a card:")
+	choiceType := BanishCard(user, choice, gs)
+
+	if choiceType == effect.CardType {
+		effect.GainX.Trigger(gs)
+	}
+}
+
+type GainXPerSpellPlayed struct {
+	X ChangeStats
+}
+
+func (effect GainXPerSpellPlayed) Trigger(gs *Gamestate) {
+	effect.X.User = gs.CurrentTurn
+	numSpells := gs.turnStats.SpellsPlayed
+	for i := 0; i < numSpells; i++ {
+		effect.X.Trigger(gs)
+	}
+}
+
+type ChoosePlayerToGainX struct {
+	X ChangeStats
+}
+
+func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
+	currentTurn := gs.CurrentTurn
+	players := []string{}
+	for name := range gs.Players {
+		players = append(players, name)
+	}
+
+	effect.X.User = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
+	effect.X.Trigger(gs)
+}
+
+type ActivePlayerSearchesDiscardForX struct {
+	CardType string // "any" if it doesn't matter what type.
+}
+
+func (effect ActivePlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	choices := []Card{}
+	for _, c := range gs.Players[user].Discard {
+		if c.CardType == effect.CardType || effect.CardType == "any" {
+			choices = append(choices, c)
+		}
+	}
+
+	if len(choices) != 0 {
+		prompt := "Choose an item from your discard to gain to your hand!"
+		cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
+		MoveCardFromDiscardToHand(user, cardId, gs)
+	}
+}
+
+type GainXIfYSpellsPlayed struct {
+	Id int
+	X  ChangeStats
+	Y  int
+}
+
+func (effect GainXIfYSpellsPlayed) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	effect.X.User = user
+	numSpellsPlayed := gs.turnStats.SpellsPlayed
+
+	if numSpellsPlayed >= effect.Y {
+		effect.X.Trigger(gs)
+	}
+
+	sub := Subscriber{
+		id:              effect.Id,
+		messageChan:     make(chan string),
+		conditionMet:    "spell played",
+		conditionFailed: "end turn",
+		unsubChan:       eventBroker.Messages,
+	}
+
+	go func() {
+		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
+
+		for {
+			res := <-resChan
+			if !res {
+				break
+			}
+
+			gs.mu.Lock()
+			if user == gs.CurrentTurn {
+				numSpellsPlayed++
+				if numSpellsPlayed >= effect.Y {
+					effect.X.Trigger(gs)
+					SendLobbyUpdate(gs.gameid, gs)
+					gs.mu.Unlock()
+					return
+				}
+			}
+			gs.mu.Unlock()
+		}
+	}()
+}
+
+type PurchasedXGoToDeck struct {
+	X string
+}
+
+func (effect PurchasedXGoToDeck) Trigger(gs *Gamestate) {
+	player := gs.Players[gs.CurrentTurn]
+	switch effect.X {
+	case "item":
+		player.itemsToDeck = true
+	case "spell":
+		player.spellsToDeck = true
+	case "ally":
+		player.alliesToDeck = true
+	}
+
+	gs.Players[gs.CurrentTurn] = player
+}
+
+type GainCardToTopDeck struct {
+	user string
+	card Card
+}
+
+func (effect GainCardToTopDeck) Trigger(gs *Gamestate) {
+	player := gs.Players[effect.user]
+	player.Deck = append(player.Deck, effect.card)
+	gs.Players[effect.user] = player
+}
+
+type GainCardToDiscard struct {
+	user string
+	card Card
+}
+
+func (effect GainCardToDiscard) Trigger(gs *Gamestate) {
+	player := gs.Players[effect.user]
+	player.Discard = append(player.Discard, effect.card)
+	gs.Players[effect.user] = player
+}
+
+type DoNothing struct{}
+
+func (effect DoNothing) Trigger(gs *Gamestate) {}

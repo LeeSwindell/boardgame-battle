@@ -22,25 +22,29 @@ type Gamestate struct {
 }
 
 type Player struct {
-	Name      string
-	Character string
-	Health    int
-	Damage    int
-	Money     int
-	Deck      []Card
-	Hand      []Card
-	Discard   []Card
-	PlayArea  []Card
+	Name         string
+	Character    string
+	Health       int
+	Damage       int
+	Money        int
+	Deck         []Card
+	Hand         []Card
+	Discard      []Card
+	PlayArea     []Card
+	spellsToDeck bool
+	itemsToDeck  bool
+	alliesToDeck bool
 }
 
 type Card struct {
-	Id       int      `json:"Id"`
-	Name     string   `json:"Name"`
-	SetId    string   `json:"SetId"`
-	ImgPath  string   `json:"ImgPath"`
-	CardType string   `json:"CardType"`
-	Cost     int      `json:"Cost"`
-	Effects  []Effect `json:"Effects"`
+	Id        int      `json:"Id"`
+	Name      string   `json:"Name"`
+	SetId     string   `json:"SetId"`
+	ImgPath   string   `json:"ImgPath"`
+	CardType  string   `json:"CardType"`
+	Cost      int      `json:"Cost"`
+	Effects   []Effect `json:"Effects"`
+	onDiscard func(target string, gs *Gamestate)
 }
 
 type Location struct {
@@ -86,4 +90,9 @@ type TurnStats struct {
 // Define an effect as something that changes the gamestate.
 type Effect interface {
 	Trigger(gs *Gamestate)
+}
+
+type TargetedEffect struct {
+	Target string // a playername.
+	Effect Effect
 }

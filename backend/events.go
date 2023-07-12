@@ -99,3 +99,4 @@ var DoloresUmbridgeTrigger = Event{senderId: -1, message: "umbridge condition"}
 var AllyPlayed = Event{senderId: -1, message: "ally played"}
 var ItemPlayed = Event{senderId: -1, message: "item played"}
 var SpellPlayed = Event{senderId: -1, message: "spell played"}
+var NewVillainHitEvent = Event{senderId: -1, message: "new villain hit"}

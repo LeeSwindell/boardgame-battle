@@ -16,6 +16,8 @@ func draco() Villain {
 		SetId:        "Game 1",
 		CurDamage:    0,
 		MaxHp:        6,
+		Active:       false,
+		villainType:  "villain",
 		Effect:       []Effect{DamageActiveIfLocationAdded{Amount: 2, Id: id}},
 		DeathEffect:  []Effect{RemoveFromLocation{Amount: 1}},
 		playBeforeDA: true,
@@ -66,13 +68,15 @@ func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
 
 func quirrell() Villain {
 	return Villain{
-		Name:      "Quirinus Quirrell",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/quirrell.jpg",
-		SetId:     "Game 1",
-		CurDamage: 0,
-		MaxHp:     6,
-		Effect:    []Effect{DamageCurrentPlayer{Amount: 1}},
+		Name:        "Quirinus Quirrell",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/quirrell.jpg",
+		SetId:       "Game 1",
+		CurDamage:   0,
+		MaxHp:       6,
+		Active:      false,
+		villainType: "villain",
+		Effect:      []Effect{DamageCurrentPlayer{Amount: 1}},
 		DeathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 1},
@@ -84,12 +88,14 @@ func quirrell() Villain {
 func crabbeAndGoyle() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Crabbe and Goyle",
-		Id:        id,
-		ImgPath:   "/images/villains/crabbeandgoyle.jpg",
-		SetId:     "Game 1",
-		CurDamage: 0,
-		MaxHp:     5,
+		Name:        "Crabbe and Goyle",
+		Id:          id,
+		ImgPath:     "/images/villains/crabbeandgoyle.jpg",
+		SetId:       "Game 1",
+		CurDamage:   0,
+		MaxHp:       5,
+		Active:      false,
+		villainType: "villain",
 		Effect: []Effect{
 			DamageIfDiscard{Amount: 1, Id: id},
 		},
@@ -151,7 +157,8 @@ func bartyCrouchJr() Villain {
 		CurDamage: 0,
 		MaxHp:     7,
 		// Set Barty Crouch to Active=false before triggering death effect.
-		Active: false,
+		Active:      false,
+		villainType: "villain",
 		// This hero just prevents location from being removed, build into
 		// remove from location handler.
 		Effect:       []Effect{},
@@ -162,13 +169,14 @@ func bartyCrouchJr() Villain {
 
 func basilisk() Villain {
 	return Villain{
-		Name:      "Basilisk",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/basilisk.jpg",
-		SetId:     "Game 2",
-		CurDamage: 0,
-		MaxHp:     8,
-		Active:    false,
+		Name:        "Basilisk",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/basilisk.jpg",
+		SetId:       "Game 2",
+		CurDamage:   0,
+		MaxHp:       8,
+		Active:      false,
+		villainType: "villain-creature",
 		// This hero just prevents players from drawing, build into
 		// remove from draw handler.
 		Effect: []Effect{},
@@ -182,13 +190,14 @@ func basilisk() Villain {
 
 func bellatrixLestrange() Villain {
 	return Villain{
-		Name:      "Bellatrix Lestrange",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/bellatrixlestrange.jpg",
-		SetId:     "Game 6",
-		CurDamage: 0,
-		MaxHp:     9,
-		Active:    false,
+		Name:        "Bellatrix Lestrange",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/bellatrixlestrange.jpg",
+		SetId:       "Game 6",
+		CurDamage:   0,
+		MaxHp:       9,
+		Active:      false,
+		villainType: "villain",
 		Effect: []Effect{
 			RevealDarkArts{Amount: 1},
 		},
@@ -202,13 +211,14 @@ func bellatrixLestrange() Villain {
 
 func cornishPixies() Villain {
 	return Villain{
-		Name:      "Cornish Pixies",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/cornishpixies.jpg",
-		SetId:     "Box 1",
-		CurDamage: 0,
-		MaxHp:     6,
-		Active:    false,
+		Name:        "Cornish Pixies",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/cornishpixies.jpg",
+		SetId:       "Box 1",
+		CurDamage:   0,
+		MaxHp:       6,
+		Active:      false,
+		villainType: "creature",
 		Effect: []Effect{
 			DamageActiveForEachEvenInHand{Amount: 2},
 		},
@@ -243,13 +253,14 @@ func (effect DamageActiveForEachEvenInHand) Trigger(gs *Gamestate) {
 
 func dementor() Villain {
 	return Villain{
-		Name:      "Dementor",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/dementor.jpg",
-		SetId:     "Game 3",
-		CurDamage: 0,
-		MaxHp:     8,
-		Active:    false,
+		Name:        "Dementor",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/dementor.jpg",
+		SetId:       "Game 3",
+		CurDamage:   0,
+		MaxHp:       8,
+		Active:      false,
+		villainType: "villain-creature",
 		Effect: []Effect{
 			DamageCurrentPlayer{Amount: 2},
 		},
@@ -263,13 +274,14 @@ func dementor() Villain {
 
 func fenrirGreyback() Villain {
 	return Villain{
-		Name:      "Fenrir Greyback",
-		Id:        int(uuid.New().ID()),
-		ImgPath:   "/images/villains/fenrirgreyback.jpg",
-		SetId:     "Game 6",
-		CurDamage: 0,
-		MaxHp:     8,
-		Active:    false,
+		Name:        "Fenrir Greyback",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/fenrirgreyback.jpg",
+		SetId:       "Game 6",
+		CurDamage:   0,
+		MaxHp:       8,
+		Active:      false,
+		villainType: "villain",
 		// Makes players unable to gain health, add a check in changeHealth
 		Effect: []Effect{},
 		DeathEffect: []Effect{
@@ -283,14 +295,15 @@ func fenrirGreyback() Villain {
 func doloresUmbridge() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Dolores Umbridge",
-		Id:        id,
-		ImgPath:   "/images/villains/doloresumbridge.jpg",
-		SetId:     "Game 5",
-		CurDamage: 0,
-		MaxHp:     7,
-		Active:    false,
-		Effect:    []Effect{DoloresEffect{id}},
+		Name:        "Dolores Umbridge",
+		Id:          id,
+		ImgPath:     "/images/villains/doloresumbridge.jpg",
+		SetId:       "Game 5",
+		CurDamage:   0,
+		MaxHp:       7,
+		Active:      false,
+		villainType: "villain",
+		Effect:      []Effect{DoloresEffect{id}},
 		DeathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 2},
@@ -343,14 +356,15 @@ func (effect DoloresEffect) Trigger(gs *Gamestate) {
 func fluffy() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Fluffy",
-		Id:        id,
-		ImgPath:   "/images/villains/fluffy.jpg",
-		SetId:     "Box 1",
-		CurDamage: 0,
-		MaxHp:     8,
-		Active:    false,
-		Effect:    []Effect{FluffyEffect{}},
+		Name:        "Fluffy",
+		Id:          id,
+		ImgPath:     "/images/villains/fluffy.jpg",
+		SetId:       "Box 1",
+		CurDamage:   0,
+		MaxHp:       8,
+		Active:      false,
+		villainType: "creature",
+		Effect:      []Effect{FluffyEffect{}},
 		DeathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 1},
 			AllDrawCards{Amount: 1},
@@ -388,14 +402,15 @@ func (effect FluffyEffect) Trigger(gs *Gamestate) {
 func luciusMalfoy() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Lucius Malfoy",
-		Id:        id,
-		ImgPath:   "/images/villains/luciusmalfoy.jpg",
-		SetId:     "Game 2",
-		CurDamage: 0,
-		MaxHp:     7,
-		Active:    false,
-		Effect:    []Effect{LuciusEffect{id: id}},
+		Name:        "Lucius Malfoy",
+		Id:          id,
+		ImgPath:     "/images/villains/luciusmalfoy.jpg",
+		SetId:       "Game 2",
+		CurDamage:   0,
+		MaxHp:       7,
+		Active:      false,
+		villainType: "villain",
+		Effect:      []Effect{LuciusEffect{id: id}},
 		DeathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			RemoveFromLocation{Amount: 1},
@@ -448,6 +463,7 @@ func tomRiddle() Villain {
 		CurDamage:    0,
 		MaxHp:        6,
 		Active:       false,
+		villainType:  "villain",
 		Effect:       []Effect{TomRiddleEffect{}},
 		DeathEffect:  []Effect{TomRiddleDeathEffect{}},
 		playBeforeDA: false,
@@ -500,14 +516,15 @@ func (effect TomRiddleDeathEffect) Trigger(gs *Gamestate) {
 func peterPettigrew() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Peter Pettigrew",
-		Id:        id,
-		ImgPath:   "/images/villains/peterpettigrew.jpg",
-		SetId:     "Game 3",
-		CurDamage: 0,
-		MaxHp:     7,
-		Active:    false,
-		Effect:    []Effect{PeterPettigrewEffect{}},
+		Name:        "Peter Pettigrew",
+		Id:          id,
+		ImgPath:     "/images/villains/peterpettigrew.jpg",
+		SetId:       "Game 3",
+		CurDamage:   0,
+		MaxHp:       7,
+		Active:      false,
+		villainType: "villain",
+		Effect:      []Effect{PeterPettigrewEffect{}},
 		DeathEffect: []Effect{
 			PeterPettigrewDeathEffect{},
 			RemoveFromLocation{Amount: 1},
@@ -560,13 +577,14 @@ func (effect PeterPettigrewDeathEffect) Trigger(gs *Gamestate) {
 func voledmortFive() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Voldemort",
-		Id:        id,
-		ImgPath:   "/images/villains/voldemort5.jpg",
-		SetId:     "Game 5",
-		CurDamage: 0,
-		MaxHp:     10,
-		Active:    true,
+		Name:        "Voldemort",
+		Id:          id,
+		ImgPath:     "/images/villains/voldemort5.jpg",
+		SetId:       "Game 5",
+		CurDamage:   0,
+		MaxHp:       10,
+		Active:      true,
+		villainType: "villain",
 		Effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
 			ActivePlayerDiscards{Amount: 1, Prompt: "Voldemort attacks! Discard a card"},
@@ -579,13 +597,14 @@ func voledmortFive() Villain {
 func troll() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Troll",
-		Id:        id,
-		ImgPath:   "/images/villains/troll.jpg",
-		SetId:     "Box 1",
-		CurDamage: 0,
-		MaxHp:     7,
-		Active:    false,
+		Name:        "Troll",
+		Id:          id,
+		ImgPath:     "/images/villains/troll.jpg",
+		SetId:       "Box 1",
+		CurDamage:   0,
+		MaxHp:       7,
+		Active:      false,
+		villainType: "creature",
 		Effect: []Effect{
 			ChooseOne{
 				Effects: []Effect{
@@ -610,13 +629,14 @@ func troll() Villain {
 func norbert() Villain {
 	id := int(uuid.New().ID())
 	return Villain{
-		Name:      "Norbert",
-		Id:        id,
-		ImgPath:   "/images/villains/norbert.jpg",
-		SetId:     "Box 1",
-		CurDamage: 0,
-		MaxHp:     6,
-		Active:    false,
+		Name:        "Norbert",
+		Id:          id,
+		ImgPath:     "/images/villains/norbert.jpg",
+		SetId:       "Box 1",
+		CurDamage:   0,
+		MaxHp:       6,
+		Active:      false,
+		villainType: "creature",
 		Effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
 			DamageActivePerDetention{Amount: 1},

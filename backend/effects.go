@@ -1204,6 +1204,30 @@ func (effect GainCardToDiscard) Trigger(gs *Gamestate) {
 	gs.Players[effect.user] = player
 }
 
-type DoNothing struct{}
+type BlockVillainEffects struct {
+	villain  bool
+	creature bool
+}
 
-func (effect DoNothing) Trigger(gs *Gamestate) {}
+func (effect BlockVillainEffects) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	turnNumber := gs.turnNumber
+	numTurns := len(gs.TurnOrder)
+	unblockedAt := turnNumber + numTurns
+
+	choices := []string{}
+	for _, v := range gs.Villains {
+		if v.Active && ((effect.villain && v.villainType == "villain") || (effect.creature && v.villainType == "creature") || (v.villainType == "villain-creature")) && (turnNumber >= v.BlockedUntil) {
+			choices = append(choices, v.Name)
+		}
+	}
+
+	if len(choices) > 0 {
+		choice := AskUserToSelectPlayer(gs.gameid, user, choices)
+		for i, v := range gs.Villains {
+			if v.Name == choice {
+				gs.Villains[i].BlockedUntil = unblockedAt
+			}
+		}
+	}
+}

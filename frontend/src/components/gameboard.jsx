@@ -17,7 +17,8 @@ function Gameboard(props) {
           {gamestate
         && <CardContainer card={<Location imgPath={gamestate.locations[gamestate.currentlocation].ImgPath} curControl={gamestate.locations[gamestate.currentlocation].CurControl} maxControl={gamestate.locations[gamestate.currentlocation].MaxControl} />} size="wide" />}
           {gamestate && gamestate.villains.map((v) => (
-            <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<Villain img={v.ImgPath} maxHp={v.MaxHp} curDamage={v.CurDamage} />} size="wide" />
+            v.Active
+            && <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<Villain img={v.ImgPath} maxHp={v.MaxHp} curDamage={v.CurDamage} />} size="wide" />
           ))}
         </div>
       </div>

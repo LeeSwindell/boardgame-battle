@@ -12,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		Effects:  []Effect{GainMoney{Amount: 10}},
+		Effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 100}},
 	}
 }
 
@@ -1277,4 +1277,117 @@ func wingardiumLeviosa() Card {
 			PurchasedXGoToDeck{X: "item"},
 		},
 	}
+}
+
+func petrificusTotalus() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Petrificus Totalus!",
+		SetId:    "game 3",
+		ImgPath:  "/images/marketcards/petrificustotalus.jpg",
+		CardType: "spell",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			BlockVillainEffects{villain: true},
+		},
+	}
+}
+
+func harp() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Harp",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/harp.jpg",
+		CardType: "item",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			BlockVillainEffects{creature: true},
+		},
+	}
+}
+
+func finiteIncantatem() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Finite Incantatem!",
+		SetId:    "box 1",
+		ImgPath:  "/images/marketcards/finiteincantatem.jpg",
+		CardType: "spell",
+		Cost:     6,
+		Effects: []Effect{
+			RemoveFromLocation{Amount: 1},
+		},
+	}
+}
+
+func confundus() Card {
+	id := int(uuid.New().ID())
+	return Card{
+		Id:       id,
+		Name:     "Confundus!",
+		SetId:    "game 6",
+		ImgPath:  "/images/marketcards/confundus.jpg",
+		CardType: "spell",
+		Cost:     6,
+		Effects: []Effect{
+			GainDamage{Amount: 1},
+			ConfundusEffect{Id: id},
+		},
+	}
+}
+
+type ConfundusEffect struct{ Id int }
+
+func (effect ConfundusEffect) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	confund := RemoveFromLocation{Amount: 1}
+
+	numVillains := 0
+	for _, v := range gs.Villains {
+		if v.Active && v.Name != "Norbert" {
+			numVillains++
+		}
+	}
+	if len(gs.turnStats.VillainsHit) >= numVillains {
+		confund.Trigger(gs)
+		return
+	}
+
+	sub := Subscriber{
+		id:              effect.Id,
+		messageChan:     make(chan string),
+		conditionMet:    "new villain hit",
+		conditionFailed: "end turn",
+		unsubChan:       eventBroker.Messages,
+	}
+
+	go func() {
+		eventBroker.Subscribe(sub)
+		resChan := make(chan bool)
+		go sub.Receive(resChan)
+
+		for {
+			res := <-resChan
+			if !res {
+				break
+			}
+
+			gs.mu.Lock()
+			if user == gs.CurrentTurn {
+				if len(gs.turnStats.VillainsHit) >= numVillains {
+					confund.Trigger(gs)
+					SendLobbyUpdate(gs.gameid, gs)
+					gs.mu.Unlock()
+					return
+				}
+			}
+			gs.mu.Unlock()
+		}
+	}()
 }

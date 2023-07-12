@@ -15,6 +15,7 @@ type Gamestate struct {
 	CurrentLocation int               `json:"currentlocation"`
 	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
 	villainDeck     []Villain
+	turnNumber      int
 	turnStats       TurnStats
 	started         bool
 	mu              sync.Mutex
@@ -58,15 +59,17 @@ type Location struct {
 }
 
 type Villain struct {
-	Name        string
-	Id          int
-	ImgPath     string
-	SetId       string
-	CurDamage   int
-	MaxHp       int
-	Active      bool
-	Effect      []Effect
-	DeathEffect []Effect
+	Name         string
+	Id           int
+	ImgPath      string
+	SetId        string
+	CurDamage    int
+	MaxHp        int
+	Active       bool
+	BlockedUntil int
+	villainType  string
+	Effect       []Effect
+	DeathEffect  []Effect
 
 	// true if this villain should be played before DA events - for triggered events.
 	playBeforeDA bool
@@ -85,6 +88,7 @@ type TurnStats struct {
 	ItemsPlayed    int
 	SpellsPlayed   int
 	VillainsKilled int
+	VillainsHit    []int
 }
 
 // Define an effect as something that changes the gamestate.

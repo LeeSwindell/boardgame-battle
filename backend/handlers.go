@@ -77,9 +77,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		return
 	}
 
-	Logger("end turn sending event")
 	eventBroker.Messages <- EndTurnEvent
-	Logger("end turn sent event")
 	HealStunned(gs)
 	MovePlayedToDiscard(user, gs)
 	MoveHandToDiscard(user, gs)
@@ -93,13 +91,12 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	SendLobbyUpdate(gameid, gs)
 
 	// Starting next turn actions.
-	Logger("new turn")
-	Logger("Before DA villains")
+	gs.turnNumber++
 	for i, v := range gs.Villains {
 		if !v.Active {
 			gs.Villains[i].Active = true
 		}
-		if v.playBeforeDA {
+		if v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
 			for _, e := range v.Effect {
 				e.Trigger(gs)
 			}
@@ -110,7 +107,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 	Logger("After DA villains")
 	for _, v := range gs.Villains {
-		if !v.playBeforeDA {
+		if !v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
 			for _, e := range v.Effect {
 				Logger("triggering " + v.Name)
 				e.Trigger(gs)
@@ -162,6 +159,16 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			}
 
 			gs.Villains[i].CurDamage += 1
+			alreadyHit := false
+			for _, hitId := range gs.turnStats.VillainsHit {
+				if gs.Villains[i].Id == hitId {
+					alreadyHit = true
+				}
+			}
+			if !alreadyHit && gs.Villains[i].Name != "Norbert" {
+				gs.turnStats.VillainsHit = append(gs.turnStats.VillainsHit, gs.Villains[i].Id)
+				eventBroker.Messages <- NewVillainHitEvent
+			}
 			gs.Players[user] = updatedPlayer
 
 			// check if villain is now dead.

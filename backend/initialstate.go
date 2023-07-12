@@ -140,6 +140,10 @@ func CreateMarketDeck() []Card {
 		owls(),
 		sortingHat(),
 		wingardiumLeviosa(),
+		petrificusTotalus(),
+		harp(),
+		finiteIncantatem(),
+		confundus(),
 	}
 
 	deck = ShuffleCards(deck)
@@ -149,12 +153,12 @@ func CreateMarketDeck() []Card {
 
 func CreateMarket() []Card {
 	market := []Card{
-		sortingHat(),
-		wingardiumLeviosa(),
-		choChang(),
-		owls(),
-		sortingHat(),
-		wingardiumLeviosa(),
+		confundus(),
+		confundus(),
+		confundus(),
+		confundus(),
+		confundus(),
+		confundus(),
 	}
 
 	return market

@@ -9,6 +9,26 @@ type RevealDarkArts struct {
 }
 
 func (effect RevealDarkArts) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	for _, c := range gs.Players[user].Hand {
+		if c.Name == "Finite Incantatem!" {
+			if len(gs.DarkArtsPlayed) == 0 {
+				curDarkArtIndex := gs.CurrentDarkArt
+
+				// Play current dark art.
+				curDarkArt := gs.DarkArts[curDarkArtIndex]
+				Logger("playing dark art: " + curDarkArt.Name)
+				gs.DarkArtsPlayed = append(gs.DarkArtsPlayed, curDarkArt)
+				for _, e := range curDarkArt.Effects {
+					e.Trigger(gs)
+				}
+
+				LoadNewDarkArt(gs)
+			}
+			return
+		}
+	}
+
 	for i := 0; i < effect.Amount; i++ {
 		curDarkArtIndex := gs.CurrentDarkArt
 

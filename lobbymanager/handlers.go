@@ -325,17 +325,17 @@ func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {
 
 	// var chooseOne ChooseOne
 	var data struct {
-		Effect ChooseOne `json:"effect"`
-		Prompt string    `json:"prompt"`
+		Options []string `json:"options"`
+		Prompt  string   `json:"prompt"`
 	}
 
 	json.NewDecoder(r.Body).Decode(&data)
 
 	listenID := 0
 	if data.Prompt != "" {
-		listenID = hub.askPlayerChoice(user, data.Effect.Options, data.Prompt)
+		listenID = hub.askPlayerChoice(user, data.Options, data.Prompt)
 	} else {
-		listenID = hub.askPlayerChoice(user, data.Effect.Options, "Choose One")
+		listenID = hub.askPlayerChoice(user, data.Options, "Choose One")
 	}
 
 	listenChan := messageBroadcaster.RegisterListener(listenID)

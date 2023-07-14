@@ -18,8 +18,8 @@ func draco() Villain {
 		MaxHp:        6,
 		Active:       false,
 		villainType:  "villain",
-		Effect:       []Effect{DamageActiveIfLocationAdded{Amount: 2, Id: id}},
-		DeathEffect:  []Effect{RemoveFromLocation{Amount: 1}},
+		effect:       []Effect{DamageActiveIfLocationAdded{Amount: 2, Id: id}},
+		deathEffect:  []Effect{RemoveFromLocation{Amount: 1}},
 		playBeforeDA: true,
 	}
 }
@@ -76,8 +76,8 @@ func quirrell() Villain {
 		MaxHp:       6,
 		Active:      false,
 		villainType: "villain",
-		Effect:      []Effect{DamageCurrentPlayer{Amount: 1}},
-		DeathEffect: []Effect{
+		effect:      []Effect{DamageCurrentPlayer{Amount: 1}},
+		deathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 1},
 		},
@@ -96,10 +96,10 @@ func crabbeAndGoyle() Villain {
 		MaxHp:       5,
 		Active:      false,
 		villainType: "villain",
-		Effect: []Effect{
+		effect: []Effect{
 			DamageIfDiscard{Amount: 1, Id: id},
 		},
-		DeathEffect:  []Effect{AllDrawCards{Amount: 1}},
+		deathEffect:  []Effect{AllDrawCards{Amount: 1}},
 		playBeforeDA: true,
 	}
 }
@@ -161,8 +161,8 @@ func bartyCrouchJr() Villain {
 		villainType: "villain",
 		// This hero just prevents location from being removed, build into
 		// remove from location handler.
-		Effect:       []Effect{},
-		DeathEffect:  []Effect{RemoveFromLocation{2}},
+		effect:       []Effect{},
+		deathEffect:  []Effect{RemoveFromLocation{2}},
 		playBeforeDA: true,
 	}
 }
@@ -179,8 +179,8 @@ func basilisk() Villain {
 		villainType: "villain-creature",
 		// This hero just prevents players from drawing, build into
 		// remove from draw handler.
-		Effect: []Effect{},
-		DeathEffect: []Effect{
+		effect: []Effect{},
+		deathEffect: []Effect{
 			AllDrawCards{Amount: 1},
 			RemoveFromLocation{1},
 		},
@@ -198,10 +198,10 @@ func bellatrixLestrange() Villain {
 		MaxHp:       9,
 		Active:      false,
 		villainType: "villain",
-		Effect: []Effect{
+		effect: []Effect{
 			RevealDarkArts{Amount: 1},
 		},
-		DeathEffect: []Effect{
+		deathEffect: []Effect{
 			AllSearchDiscardPileForItem{},
 			RemoveFromLocation{Amount: 2},
 		},
@@ -219,10 +219,10 @@ func cornishPixies() Villain {
 		MaxHp:       6,
 		Active:      false,
 		villainType: "creature",
-		Effect: []Effect{
+		effect: []Effect{
 			DamageActiveForEachEvenInHand{Amount: 2},
 		},
-		DeathEffect: []Effect{
+		deathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 2},
 			AllPlayersGainMoney{Amount: 1},
 		},
@@ -261,10 +261,10 @@ func dementor() Villain {
 		MaxHp:       8,
 		Active:      false,
 		villainType: "villain-creature",
-		Effect: []Effect{
+		effect: []Effect{
 			DamageCurrentPlayer{Amount: 2},
 		},
-		DeathEffect: []Effect{
+		deathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 2},
 			RemoveFromLocation{Amount: 1},
 		},
@@ -283,8 +283,8 @@ func fenrirGreyback() Villain {
 		Active:      false,
 		villainType: "villain",
 		// Makes players unable to gain health, add a check in changeHealth
-		Effect: []Effect{},
-		DeathEffect: []Effect{
+		effect: []Effect{},
+		deathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 3},
 			RemoveFromLocation{Amount: 2},
 		},
@@ -303,8 +303,8 @@ func doloresUmbridge() Villain {
 		MaxHp:       7,
 		Active:      false,
 		villainType: "villain",
-		Effect:      []Effect{DoloresEffect{id}},
-		DeathEffect: []Effect{
+		effect:      []Effect{DoloresEffect{id}},
+		deathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 2},
 		},
@@ -364,8 +364,8 @@ func fluffy() Villain {
 		MaxHp:       8,
 		Active:      false,
 		villainType: "creature",
-		Effect:      []Effect{FluffyEffect{}},
-		DeathEffect: []Effect{
+		effect:      []Effect{FluffyEffect{}},
+		deathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 1},
 			AllDrawCards{Amount: 1},
 		},
@@ -410,8 +410,8 @@ func luciusMalfoy() Villain {
 		MaxHp:       7,
 		Active:      false,
 		villainType: "villain",
-		Effect:      []Effect{LuciusEffect{id: id}},
-		DeathEffect: []Effect{
+		effect:      []Effect{LuciusEffect{id: id}},
+		deathEffect: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			RemoveFromLocation{Amount: 1},
 		},
@@ -464,8 +464,8 @@ func tomRiddle() Villain {
 		MaxHp:        6,
 		Active:       false,
 		villainType:  "villain",
-		Effect:       []Effect{TomRiddleEffect{}},
-		DeathEffect:  []Effect{TomRiddleDeathEffect{}},
+		effect:       []Effect{TomRiddleEffect{}},
+		deathEffect:  []Effect{TomRiddleDeathEffect{}},
 		playBeforeDA: false,
 	}
 }
@@ -524,8 +524,8 @@ func peterPettigrew() Villain {
 		MaxHp:       7,
 		Active:      false,
 		villainType: "villain",
-		Effect:      []Effect{PeterPettigrewEffect{}},
-		DeathEffect: []Effect{
+		effect:      []Effect{PeterPettigrewEffect{}},
+		deathEffect: []Effect{
 			PeterPettigrewDeathEffect{},
 			RemoveFromLocation{Amount: 1},
 		},
@@ -561,6 +561,7 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 		player.Discard = append(player.Discard, topCard)
 		player.Deck = player.Deck[:len(player.Deck)-1]
 		AddToLocation{Amount: 1}.Trigger(gs)
+		eventBroker.Messages <- PlayerDiscarded
 	}
 
 	gs.Players[user] = player
@@ -585,11 +586,11 @@ func voledmortFive() Villain {
 		MaxHp:       10,
 		Active:      true,
 		villainType: "villain",
-		Effect: []Effect{
+		effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
 			ActivePlayerDiscards{Amount: 1, Prompt: "Voldemort attacks! Discard a card"},
 		},
-		DeathEffect:  []Effect{},
+		deathEffect:  []Effect{},
 		playBeforeDA: false,
 	}
 }
@@ -605,7 +606,7 @@ func troll() Villain {
 		MaxHp:       7,
 		Active:      false,
 		villainType: "creature",
-		Effect: []Effect{
+		effect: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					DamageCurrentPlayer{Amount: 2},
@@ -618,7 +619,7 @@ func troll() Villain {
 				Description: "Troll attack!",
 			},
 		},
-		DeathEffect: []Effect{
+		deathEffect: []Effect{
 			AllPlayersGainHealth{Amount: 1},
 			AllBanishItem{},
 		},
@@ -637,11 +638,11 @@ func norbert() Villain {
 		MaxHp:       6,
 		Active:      false,
 		villainType: "creature",
-		Effect: []Effect{
+		effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
 			DamageActivePerDetention{Amount: 1},
 		},
-		DeathEffect: []Effect{
+		deathEffect: []Effect{
 			AllBanishCard{},
 		},
 		playBeforeDA: false,

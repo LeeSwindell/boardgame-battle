@@ -75,14 +75,14 @@ func SendLobbyUpdate(id int, gs *Gamestate) {
 	client.Do(req)
 }
 
-func getUserInput(id int, user string, effect Effect, prompt string) string {
+func getUserInput(id int, user string, options []string, prompt string) string {
 	// pass result to card effect.
 	url := fmt.Sprintf("%s/game/%d/getuserinput/%s", config.LobbyManagerURL, id, user)
 
 	var dataToSend = struct {
-		Effect Effect `json:"effect"`
-		Prompt string `json:"prompt"`
-	}{Effect: effect, Prompt: prompt}
+		Options []string `json:"options"`
+		Prompt  string   `json:"prompt"`
+	}{Options: options, Prompt: prompt}
 
 	data, err := json.Marshal(dataToSend)
 	if err != nil {

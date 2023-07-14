@@ -40,7 +40,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 				eventBroker.Messages <- AllyPlayed
 			}
 
-			for _, e := range c.Effects {
+			for _, e := range c.effects {
 				e.Trigger(gs)
 			}
 
@@ -97,18 +97,18 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			gs.Villains[i].Active = true
 		}
 		if v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
-			for _, e := range v.Effect {
+			for _, e := range v.effect {
 				e.Trigger(gs)
 			}
 		}
 	}
 	Logger("triggering locations")
-	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+	gs.Locations[gs.CurrentLocation].effect.Trigger(gs)
 
 	Logger("After DA villains")
 	for _, v := range gs.Villains {
 		if !v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
-			for _, e := range v.Effect {
+			for _, e := range v.effect {
 				Logger("triggering " + v.Name)
 				e.Trigger(gs)
 			}
@@ -175,7 +175,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			if gs.Villains[i].CurDamage >= v.MaxHp {
 				gs.Villains[i].Active = false
 				// trigger villain death effect.
-				for _, effect := range gs.Villains[i].DeathEffect {
+				for _, effect := range gs.Villains[i].deathEffect {
 					effect.Trigger(gs)
 				}
 

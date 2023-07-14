@@ -19,7 +19,7 @@ func (effect RevealDarkArts) Trigger(gs *Gamestate) {
 				curDarkArt := gs.DarkArts[curDarkArtIndex]
 				Logger("playing dark art: " + curDarkArt.Name)
 				gs.DarkArtsPlayed = append(gs.DarkArtsPlayed, curDarkArt)
-				for _, e := range curDarkArt.Effects {
+				for _, e := range curDarkArt.effect {
 					e.Trigger(gs)
 				}
 
@@ -36,7 +36,7 @@ func (effect RevealDarkArts) Trigger(gs *Gamestate) {
 		curDarkArt := gs.DarkArts[curDarkArtIndex]
 		Logger("playing dark art: " + curDarkArt.Name)
 		gs.DarkArtsPlayed = append(gs.DarkArtsPlayed, curDarkArt)
-		for _, e := range curDarkArt.Effects {
+		for _, e := range curDarkArt.effect {
 			e.Trigger(gs)
 		}
 
@@ -69,7 +69,7 @@ func greatHall() Location {
 		ImgPath:    "/images/locations/greathall.jpg",
 		MaxControl: 7,
 		CurControl: 0,
-		Effect:     RevealDarkArts{Amount: 3},
+		effect:     RevealDarkArts{Amount: 3},
 	}
 }
 
@@ -81,7 +81,7 @@ func hagridsHut() Location {
 		ImgPath:    "/images/locations/hagridshut.jpg",
 		MaxControl: 6,
 		CurControl: 0,
-		Effect:     RevealDarkArts{Amount: 2},
+		effect:     RevealDarkArts{Amount: 2},
 	}
 }
 
@@ -93,6 +93,6 @@ func castleGates() Location {
 		ImgPath:    "/images/locations/castlegates.jpg",
 		MaxControl: 5,
 		CurControl: 0,
-		Effect:     RevealDarkArts{Amount: 1},
+		effect:     RevealDarkArts{Amount: 1},
 	}
 }

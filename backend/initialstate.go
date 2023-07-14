@@ -62,16 +62,18 @@ func CreateLocations() []Location {
 
 func CreateDarkArtDeck() []DarkArt {
 	darkArts := []DarkArt{
-		dementorsKiss(),
-		heWhoMustNotBeNamed(),
-		flipendo(),
-		avadaKedavra(),
-		expulso(),
-		handOfGlory(),
-		heirOfSlytherin(),
-		inquisitorialSquad(),
-		menacingGrowl(),
-		regeneration(),
+		// dementorsKiss(),
+		// heWhoMustNotBeNamed(),
+		// flipendo(),
+		// avadaKedavra(),
+		// expulso(),
+		// handOfGlory(),
+		// heirOfSlytherin(),
+		// inquisitorialSquad(),
+		// menacingGrowl(),
+		// regeneration(),
+		obliviate(),
+		obliviate(),
 	}
 
 	return darkArts

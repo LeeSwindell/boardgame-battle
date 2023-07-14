@@ -41,7 +41,7 @@ func MovePlayedToDiscard(user string, gs *Gamestate) {
 	gs.Players[user] = updatedPlayer
 }
 
-// Moves a users cards from the PlayArea into the Discard
+// Moves a users cards from the Hand into the Discard
 func MoveHandToDiscard(user string, gs *Gamestate) {
 	updatedPlayer := gs.Players[user]
 	updatedPlayer.Discard = append(updatedPlayer.Discard, updatedPlayer.Hand...)
@@ -225,18 +225,18 @@ func StartNewTurn(gameid int, gs *Gamestate) {
 	Logger("stuck at 1")
 	for _, v := range gs.Villains {
 		if v.playBeforeDA {
-			for _, e := range v.Effect {
+			for _, e := range v.effect {
 				e.Trigger(gs)
 			}
 		}
 	}
 	Logger("stuck at 2")
-	gs.Locations[gs.CurrentLocation].Effect.Trigger(gs)
+	gs.Locations[gs.CurrentLocation].effect.Trigger(gs)
 	Logger("stuck at 3")
 	for _, v := range gs.Villains {
 		if !v.playBeforeDA {
 			Logger(v.Name)
-			for _, e := range v.Effect {
+			for _, e := range v.effect {
 				e.Trigger(gs)
 			}
 		}
@@ -409,4 +409,34 @@ func PurchaseCard(c Card, user string, gs *Gamestate) {
 	if c.Cost >= 4 {
 		eventBroker.Messages <- DoloresUmbridgeTrigger
 	}
+}
+
+func getPreviousUser(gs *Gamestate) string {
+	currUser := gs.CurrentTurn
+	currTurn := 0
+	for i, u := range gs.TurnOrder {
+		if u == currUser {
+			currTurn = i
+		}
+	}
+
+	prevTurn := currTurn - 1
+	if prevTurn == -1 {
+		prevTurn = len(gs.TurnOrder) - 1
+	}
+
+	return gs.TurnOrder[prevTurn]
+}
+
+func getNextUser(gs *Gamestate) string {
+	currUser := gs.CurrentTurn
+	currTurn := 0
+	for i, u := range gs.TurnOrder {
+		if u == currUser {
+			currTurn = i
+		}
+	}
+
+	nextTurn := (currTurn + 1) % len(gs.TurnOrder)
+	return gs.TurnOrder[nextTurn]
 }

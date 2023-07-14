@@ -7,24 +7,29 @@ import (
 
 // Wrapper for changing stats of a given player
 type ChangeStats struct {
-	User         string
-	AmountHealth int
-	AmountDamage int
-	AmountMoney  int
-	AmountCards  int
+	Target          string
+	AmountHealth    int
+	AmountDamage    int
+	AmountMoney     int
+	AmountCards     int
+	AmountToDiscard int
+	DiscardPrompt   string
 }
 
 func (effect ChangeStats) Trigger(gs *Gamestate) {
-	stunned := ChangePlayerHealth(effect.User, effect.AmountHealth, gs)
-	if stunned {
-		StunPlayer(effect.User, gs)
-	}
-	DrawXCards(effect.User, gs, effect.AmountCards)
-
-	player := gs.Players[effect.User]
+	player := gs.Players[effect.Target]
 	player.Damage += effect.AmountDamage
 	player.Money += effect.AmountMoney
-	gs.Players[effect.User] = player
+	gs.Players[effect.Target] = player
+
+	stunned := ChangePlayerHealth(effect.Target, effect.AmountHealth, gs)
+	if stunned {
+		StunPlayer(effect.Target, gs)
+	}
+	DrawXCards(effect.Target, gs, effect.AmountCards)
+	if effect.AmountToDiscard != 0 {
+		GivenPlayerDiscards{User: effect.Target, Prompt: effect.DiscardPrompt, Amount: effect.AmountToDiscard}.Trigger(gs)
+	}
 }
 
 type DamageAllPlayers struct {
@@ -89,7 +94,7 @@ type ChooseOne struct {
 }
 
 func (effect ChooseOne) Trigger(gs *Gamestate) {
-	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect, effect.Description)
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect.Options, effect.Description)
 
 	for i, option := range effect.Options {
 		if choice == option {
@@ -141,7 +146,7 @@ type GainXIfVillainKilled struct {
 
 // Gives current player X (this turn) if a villain is killed.
 func (effect GainXIfVillainKilled) Trigger(gs *Gamestate) {
-	effect.GainX.User = gs.CurrentTurn
+	effect.GainX.Target = gs.CurrentTurn
 
 	// check if villain already killed
 	if gs.turnStats.VillainsKilled > 0 {
@@ -265,6 +270,54 @@ func (effect AllPlayersGainMoney) Trigger(gs *Gamestate) {
 	for _, p := range gs.Players {
 		p.Money += effect.Amount
 		gs.Players[p.Name] = p
+	}
+}
+
+type GivenPlayerDiscards struct {
+	User   string
+	Amount int
+	Prompt string
+}
+
+func (effect GivenPlayerDiscards) Trigger(gs *Gamestate) {
+	user := effect.User
+	player := gs.Players[user]
+
+	cards := player.Hand
+	if len(cards) == 0 {
+		return
+	}
+
+	if effect.Prompt == "" {
+		effect.Prompt = "Discard a card"
+	}
+
+	for i := 0; i < effect.Amount; i++ {
+		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
+		for i, c := range cards {
+			if c.Id == discardCardId {
+				cards = RemoveCardAtIndex(cards, i)
+				player.Discard = append(player.Discard, c)
+
+				// Wrap the player mapping around onDiscard since it mutates the state directly.
+				if c.onDiscard != nil {
+					gs.Players[user] = player
+					c.onDiscard(user, gs)
+					player = gs.Players[user]
+				}
+			}
+		}
+
+		player.Hand = cards
+		gs.Players[user] = player
+
+		event := Event{senderId: -1, message: "player discarded", data: user}
+		eventBroker.Messages <- event
+		// update turnstats
+
+		if len(cards) == 0 {
+			return
+		}
 	}
 }
 
@@ -569,7 +622,7 @@ type AllChooseOne struct {
 
 func (effect AllChooseOne) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
-		choice := getUserInput(gs.gameid, user, effect, effect.Description)
+		choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
 
 		for i, option := range effect.Options {
 			if choice == option {
@@ -577,6 +630,39 @@ func (effect AllChooseOne) Trigger(gs *Gamestate) {
 			}
 		}
 	}
+}
+
+type AllChooseOneTargeted struct {
+	// funcs that create an effect with a given target.
+	EffectTargeting []func(target string, effect Effect) Effect
+
+	Effects []Effect
+	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
+	Options     []string `json:"options"`
+	Description string   `json:"description"`
+}
+
+func (effect AllChooseOneTargeted) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
+
+		for i, option := range effect.Options {
+			if choice == option {
+				e := effect.EffectTargeting[i](user, effect.Effects[i])
+				e.Trigger(gs)
+			}
+		}
+	}
+}
+
+// return a new version, that way the cards effect isn't changed every other time it gets triggered.
+func TargetCreateStats(target string, effect Effect) Effect {
+	changeStats, ok := effect.(ChangeStats)
+	if !ok {
+		log.Println("Type assertion failed: TargetChangeStats")
+	}
+	changeStats.Target = target
+	return changeStats
 }
 
 type ChosenPlayerSearchesDiscardForX struct {
@@ -631,7 +717,10 @@ type ChosenPlayerGainsHealth struct {
 }
 
 func (effect ChosenPlayerGainsHealth) Trigger(gs *Gamestate) {
-	ChangePlayerHealth(effect.Playername, effect.Amount, gs)
+	stunned := ChangePlayerHealth(effect.Playername, effect.Amount, gs)
+	if stunned {
+		StunPlayer(effect.Playername, gs)
+	}
 }
 
 type GainDetentionToDiscard struct {
@@ -796,6 +885,48 @@ func (effect DamageAllPerMatchingCost) Trigger(gs *Gamestate) {
 	}
 }
 
+type DamageActivePerMatchingCost struct {
+	Cost   int
+	Amount int
+}
+
+func (effect DamageActivePerMatchingCost) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	damage := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.Cost == effect.Cost {
+			damage += effect.Amount
+		}
+	}
+	if damage > 0 {
+		stunned := ChangePlayerHealth(user, -damage, gs)
+		if stunned {
+			StunPlayer(user, gs)
+		}
+	}
+}
+
+type DamageActivePerCardGreaterThanCost struct {
+	Cost   int
+	Amount int
+}
+
+func (effect DamageActivePerCardGreaterThanCost) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	damage := 0
+	for _, c := range gs.Players[user].Hand {
+		if c.Cost >= effect.Cost {
+			damage += effect.Amount
+		}
+	}
+	if damage > 0 {
+		stunned := ChangePlayerHealth(user, -damage, gs)
+		if stunned {
+			StunPlayer(user, gs)
+		}
+	}
+}
+
 type AllPlayersGainDamage struct {
 	Amount int
 }
@@ -884,7 +1015,7 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 		Options:     effect.Options,
 		Description: effect.Prompt + "(1 of 2)",
 	}
-	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice, firstChoice.Description)
+	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice.Options, firstChoice.Description)
 
 	secondChoice := ChooseOne{}
 	for i, option := range firstChoice.Options {
@@ -895,7 +1026,7 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 			secondChoice.Description = effect.Prompt + "(2 of 2)"
 		}
 	}
-	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice, firstChoice.Description)
+	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice.Options, firstChoice.Description)
 	for i, option := range firstChoice.Options {
 		if choice == option {
 			secondChoice.Effects[i].Trigger(gs)
@@ -918,7 +1049,7 @@ func (effect GainStatIfXPlayed) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	triggerEffect := false
 	changeStats := ChangeStats{
-		User:         user,
+		Target:       user,
 		AmountHealth: effect.AmountHealth,
 		AmountDamage: effect.AmountDamage,
 		AmountMoney:  effect.AmountMoney,
@@ -1073,7 +1204,7 @@ type GainXPerSpellPlayed struct {
 }
 
 func (effect GainXPerSpellPlayed) Trigger(gs *Gamestate) {
-	effect.X.User = gs.CurrentTurn
+	effect.X.Target = gs.CurrentTurn
 	numSpells := gs.turnStats.SpellsPlayed
 	for i := 0; i < numSpells; i++ {
 		effect.X.Trigger(gs)
@@ -1091,7 +1222,7 @@ func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
 		players = append(players, name)
 	}
 
-	effect.X.User = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
+	effect.X.Target = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
 	effect.X.Trigger(gs)
 }
 
@@ -1123,7 +1254,7 @@ type GainXIfYSpellsPlayed struct {
 
 func (effect GainXIfYSpellsPlayed) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
-	effect.X.User = user
+	effect.X.Target = user
 	numSpellsPlayed := gs.turnStats.SpellsPlayed
 
 	if numSpellsPlayed >= effect.Y {
@@ -1230,4 +1361,110 @@ func (effect BlockVillainEffects) Trigger(gs *Gamestate) {
 			}
 		}
 	}
+}
+
+type PreviousHeroDoesX struct {
+	X ChangeStats
+}
+
+func (effect PreviousHeroDoesX) Trigger(gs *Gamestate) {
+	prevHero := getPreviousUser(gs)
+	effect.X.Target = prevHero
+	effect.X.Trigger(gs)
+}
+
+type ActivePlayerSelectsOtherPlayerToDoX struct {
+	X ChangeStats
+}
+
+func (effect ActivePlayerSelectsOtherPlayerToDoX) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	otherPlayers := []string{}
+	for name := range gs.Players {
+		if name != user {
+			otherPlayers = append(otherPlayers, name)
+		}
+	}
+
+	effect.X.Target = AskUserToSelectPlayer(gs.gameid, user, otherPlayers)
+	effect.X.Trigger(gs)
+}
+
+type AllRevealTopCardAndX struct {
+	X func(card Card, user string, gs *Gamestate)
+}
+
+func (effect AllRevealTopCardAndX) Trigger(gs *Gamestate) {
+	for user := range gs.Players {
+		player := gs.Players[user]
+
+		if len(player.Deck) == 0 {
+			ShuffleDiscardToDeck(&player)
+			if len(player.Deck) == 0 {
+				log.Println("deck is completely empty mate")
+				return
+			}
+		}
+		gs.Players[user] = player
+
+		topCard := player.Deck[len(player.Deck)-1]
+		effect.X(topCard, user, gs)
+	}
+}
+
+type DiscardASpell struct {
+	Target string
+	Prompt string
+}
+
+func (effect DiscardASpell) Trigger(gs *Gamestate) {
+	user := effect.Target
+	choices := []Card{}
+	for _, c := range gs.Players[user].Hand {
+		if c.CardType == "spell" {
+			choices = append(choices, c)
+		}
+	}
+
+	if len(choices) == 0 {
+		return
+	}
+
+	prompt := effect.Prompt
+	if prompt == "" {
+		prompt = "Discard a spell"
+	}
+
+	choice := AskUserToSelectCard(user, gs.gameid, choices, prompt)
+
+	player := gs.Players[user]
+	cards := player.Hand
+	for i, c := range cards {
+		if c.Id == choice {
+			cards = RemoveCardAtIndex(cards, i)
+			player.Discard = append(player.Discard, c)
+
+			// Wrap the player mapping around onDiscard since it mutates the state directly.
+			if c.onDiscard != nil {
+				gs.Players[user] = player
+				c.onDiscard(user, gs)
+				player = gs.Players[user]
+			}
+		}
+	}
+
+	player.Hand = cards
+	gs.Players[user] = player
+
+	event := Event{senderId: -1, message: "player discarded", data: user}
+	eventBroker.Messages <- event
+}
+
+func TargetDiscardASpell(target string, effect Effect) Effect {
+	ret, ok := effect.(DiscardASpell)
+	if !ok {
+		log.Println("Type Assertion failed: TargetDiscardASpell")
+	}
+	ret.Target = target
+	return ret
 }

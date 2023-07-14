@@ -12,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		Effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 100}},
+		effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 100}},
 	}
 }
 
@@ -24,7 +24,7 @@ func pigwidgeon() Card {
 		ImgPath:  "/images/starters/pigwidgeon.jpg",
 		CardType: "ally",
 		Cost:     0,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					GainDamage{Amount: 1},
@@ -46,7 +46,7 @@ func cleansweep() Card {
 		ImgPath:  "/images/starters/cleansweep.jpg",
 		CardType: "item",
 		Cost:     0,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			MoneyIfVillainKilled{Id: id, Amount: 1},
 		},
@@ -61,7 +61,7 @@ func bertieBottsEveryFlavourBeans() Card {
 		ImgPath:  "/images/starters/bertiebottseveryflavourbeans.jpg",
 		CardType: "item",
 		Cost:     0,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			GainDamagePerAllyPlayed{},
 		},
@@ -76,7 +76,7 @@ func crystalBall() Card {
 		ImgPath:  "/images/marketcards/crystalball.jpg",
 		CardType: "item",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 2},
 			SendGameUpdateEffect{},
 			ActivePlayerDiscards{Amount: 1},
@@ -92,7 +92,7 @@ func finite() Card {
 		ImgPath:  "/images/marketcards/finite.jpg",
 		CardType: "spell",
 		Cost:     3,
-		Effects:  []Effect{RemoveFromLocation{Amount: 1}},
+		effects:  []Effect{RemoveFromLocation{Amount: 1}},
 	}
 }
 
@@ -104,7 +104,7 @@ func incendio() Card {
 		ImgPath:  "/images/marketcards/incendio.jpg",
 		CardType: "spell",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			DrawCards{Amount: 1},
 		},
@@ -120,7 +120,7 @@ func oliverWood() Card {
 		ImgPath:  "/images/marketcards/oliverwood.jpg",
 		CardType: "ally",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			HealAnyIfVillainKilled{Amount: 2, Id: id},
 		},
@@ -135,7 +135,7 @@ func reparo() Card {
 		ImgPath:  "/images/marketcards/reparo.jpg",
 		CardType: "spell",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					GainMoney{Amount: 2},
@@ -155,7 +155,7 @@ func triwizardCup() Card {
 		ImgPath:  "/images/marketcards/triwizardcup.jpg",
 		CardType: "item",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			GainMoney{Amount: 1},
 			GainHealth{Amount: 1},
@@ -171,7 +171,7 @@ func detention() Card {
 		ImgPath:  "/images/marketcards/detention.jpg",
 		CardType: "item",
 		Cost:     0,
-		Effects:  []Effect{},
+		effects:  []Effect{},
 	}
 }
 
@@ -183,7 +183,7 @@ func albusDumbledore() Card {
 		ImgPath:  "/images/marketcards/albusdumbledore.jpg",
 		CardType: "ally",
 		Cost:     8,
-		Effects: []Effect{
+		effects: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 1},
 			AllPlayersGainDamage{Amount: 1},
@@ -200,7 +200,7 @@ func arthurWeasley() Card {
 		ImgPath:  "/images/marketcards/arthurweasley.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			AllPlayersGainMoney{Amount: 2},
 		},
 	}
@@ -214,7 +214,7 @@ func bezoar() Card {
 		ImgPath:  "/images/marketcards/bezoar.jpg",
 		CardType: "item",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			HealAnyPlayer{Amount: 3},
 			DrawCards{Amount: 1},
 		},
@@ -229,7 +229,7 @@ func choChang() Card {
 		ImgPath:  "/images/marketcards/chochang.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 3},
 			ActivePlayerDiscards{Amount: 2},
 			RavenclawDice{},
@@ -245,7 +245,7 @@ func deluminator() Card {
 		ImgPath:  "/images/marketcards/deluminator.jpg",
 		CardType: "item",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			RemoveFromLocation{Amount: 2},
 		},
 	}
@@ -259,7 +259,7 @@ func expectoPatronum() Card {
 		ImgPath:  "/images/marketcards/expectopatronum.jpg",
 		CardType: "spell",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			RemoveFromLocation{Amount: 1},
 		},
@@ -274,7 +274,7 @@ func felixFelicis() Card {
 		ImgPath:  "/images/marketcards/felixfelicis.jpg",
 		CardType: "item",
 		Cost:     7,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseTwo{
 				Exclusive: true,
 				Effects: []Effect{
@@ -300,7 +300,7 @@ func filiusFlitwick() Card {
 		ImgPath:  "/images/marketcards/filiusflitwick.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			DrawCards{Amount: 1},
 			RavenclawDice{},
@@ -316,7 +316,7 @@ func hogwartsAHistory() Card {
 		ImgPath:  "/images/marketcards/hogwartsahistory.jpg",
 		CardType: "item",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					RavenclawDice{},
@@ -341,7 +341,7 @@ func mollyWeasley() Card {
 		ImgPath:  "/images/marketcards/mollyweasley.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			AllPlayersGainMoney{Amount: 1},
 			AllPlayersGainHealth{Amount: 2},
 		},
@@ -356,7 +356,7 @@ func quidditchGear() Card {
 		ImgPath:  "/images/marketcards/quidditchgear.jpg",
 		CardType: "item",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			GainHealth{Amount: 1},
 		},
@@ -371,7 +371,7 @@ func siriusBlack() Card {
 		ImgPath:  "/images/marketcards/siriusblack.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			GainMoney{Amount: 1},
 		},
@@ -386,7 +386,7 @@ func stupefy() Card {
 		ImgPath:  "/images/marketcards/stupefy.jpg",
 		CardType: "spell",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			RemoveFromLocation{Amount: 1},
 			DrawCards{Amount: 1},
@@ -402,7 +402,7 @@ func sybillTrelawney() Card {
 		ImgPath:  "/images/marketcards/sybilltrelawney.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 2},
 			SybillDiscard{},
 		},
@@ -453,7 +453,7 @@ func butterbeer() Card {
 		ImgPath:  "/images/marketcards/butterbeer.jpg",
 		CardType: "item",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			SelectTwoPlayersToGainStats{
 				AmountHealth: 1,
 				AmountMoney:  1,
@@ -471,7 +471,7 @@ func dobbyTheHouseElf() Card {
 		ImgPath:  "/images/marketcards/dobbythehouseelf.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			RemoveFromLocation{Amount: 1},
 			DrawCards{Amount: 1},
 		},
@@ -486,7 +486,7 @@ func essenceOfDittany() Card {
 		ImgPath:  "/images/marketcards/essenceofdittany.jpg",
 		CardType: "item",
 		Cost:     2,
-		Effects: []Effect{
+		effects: []Effect{
 			HealAnyPlayer{Amount: 2},
 		},
 	}
@@ -500,7 +500,7 @@ func fang() Card {
 		ImgPath:  "/images/marketcards/fang.jpg",
 		CardType: "ally",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			SelectPlayerToGainStats{
 				AmountHealth: 2,
 				AmountMoney:  1,
@@ -517,7 +517,7 @@ func goldenSnitch() Card {
 		ImgPath:  "/images/marketcards/goldensnitch.jpg",
 		CardType: "item",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 2},
 			DrawCards{Amount: 1},
 		},
@@ -532,7 +532,7 @@ func pensieve() Card {
 		ImgPath:  "/images/marketcards/pensieve.jpg",
 		CardType: "item",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			SelectTwoPlayersToGainStats{
 				AmountMoney: 1,
 				AmountCards: 1,
@@ -550,7 +550,7 @@ func rubeusHagrid() Card {
 		ImgPath:  "/images/marketcards/rubeushagrid.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			AllPlayersGainHealth{Amount: 1},
 		},
@@ -566,7 +566,7 @@ func fleurDelacour() Card {
 		ImgPath:  "/images/marketcards/fleurdelacour.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 2},
 			GainStatIfXPlayed{AmountHealth: 2, Cardtype: "ally", Id: id},
 		},
@@ -582,7 +582,7 @@ func advancedPotionMaking() Card {
 		ImgPath:  "/images/marketcards/advancedpotionmaking.jpg",
 		CardType: "item",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			AllPlayersGainHealth{Amount: 2},
 			AllPlayersAtMaxHealthGainX{
 				AmountDamage: 1,
@@ -601,7 +601,7 @@ func alastorMadEyeMoody() Card {
 		ImgPath:  "/images/marketcards/alastormadeyemoody.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 2},
 			RemoveFromLocation{Amount: 1},
 		},
@@ -617,7 +617,7 @@ func argusFilchAndMrsNorris() Card {
 		ImgPath:  "/images/marketcards/argusfilchandmrsnorris.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 2},
 			ChooseOne{
 				Effects: []Effect{
@@ -640,7 +640,7 @@ func cedricDiggory() Card {
 		ImgPath:  "/images/marketcards/cedricdiggory.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			HufflepuffDice{},
 		},
@@ -656,7 +656,7 @@ func descendo() Card {
 		ImgPath:  "/images/marketcards/descendo.jpg",
 		CardType: "spell",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 		},
 	}
@@ -671,7 +671,7 @@ func expelliarmus() Card {
 		ImgPath:  "/images/marketcards/expelliarmus.jpg",
 		CardType: "spell",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			DrawCards{Amount: 1},
 		},
@@ -687,7 +687,7 @@ func ginnyWeasley() Card {
 		ImgPath:  "/images/marketcards/ginnyweasley.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			GainMoney{Amount: 1},
 		},
@@ -703,7 +703,7 @@ func horaceSlughorn() Card {
 		ImgPath:  "/images/marketcards/horaceslughorn.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			AllChooseOne{
 				Effects: []Effect{
 					GainMoney{Amount: 1},
@@ -726,7 +726,7 @@ func kingsleyShacklebolt() Card {
 		ImgPath:  "/images/marketcards/kingsleyshacklebolt.jpg",
 		CardType: "ally",
 		Cost:     7,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			GainHealth{Amount: 1},
 			RemoveFromLocation{Amount: 1},
@@ -743,7 +743,7 @@ func lumos() Card {
 		ImgPath:  "/images/marketcards/lumos.jpg",
 		CardType: "spell",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			AllDrawCards{Amount: 1},
 		},
 	}
@@ -758,7 +758,7 @@ func lunaLovegood() Card {
 		ImgPath:  "/images/marketcards/lunalovegood.jpg",
 		CardType: "ally",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			GainStatIfXPlayed{AmountDamage: 1, Cardtype: "item"},
 			RavenclawDice{},
@@ -775,7 +775,7 @@ func nimbusTwoThousandAndOne() Card {
 		ImgPath:  "/images/marketcards/nimbustwothousandandone.jpg",
 		CardType: "item",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			MoneyIfVillainKilled{Amount: 2, Id: id},
 		},
@@ -791,7 +791,7 @@ func nymphadoraTonks() Card {
 		ImgPath:  "/images/marketcards/nymphadoratonks.jpg",
 		CardType: "ally",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					GainMoney{Amount: 3},
@@ -814,7 +814,7 @@ func polyjuicePotion() Card {
 		ImgPath:  "/images/marketcards/polyjuicepotion.jpg",
 		CardType: "item",
 		Cost:     3,
-		Effects: []Effect{
+		effects: []Effect{
 			PolyjuiceEffect{Id: id},
 		},
 	}
@@ -844,7 +844,7 @@ func (effect PolyjuiceEffect) Trigger(gs *Gamestate) {
 
 	for _, c := range playArea {
 		if c.Id == choice {
-			for _, e := range c.Effects {
+			for _, e := range c.effects {
 				e.Trigger(gs)
 			}
 		}
@@ -860,7 +860,7 @@ func pomonaSprout() Card {
 		ImgPath:  "/images/marketcards/pomonasprout.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			HealAnyPlayer{Amount: 2},
 			HufflepuffDice{},
@@ -877,7 +877,7 @@ func severusSnape() Card {
 		ImgPath:  "/images/marketcards/severussnape.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			GainHealth{Amount: 2},
 			SlytherinDice{},
@@ -894,7 +894,7 @@ func swordOfGryffindor() Card {
 		ImgPath:  "/images/marketcards/swordofgryffindor.jpg",
 		CardType: "item",
 		Cost:     7,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			GryffindorDice{},
 			GryffindorDice{},
@@ -911,7 +911,7 @@ func tergeo() Card {
 		ImgPath:  "/images/marketcards/tergeo.jpg",
 		CardType: "spell",
 		Cost:     2,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			ActivePlayerBanishAndGainXIfY{
 				Hand:     true,
@@ -931,7 +931,7 @@ func viktorKrum() Card {
 		ImgPath:  "/images/marketcards/viktorkrum.jpg",
 		CardType: "ally",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 2},
 			GainXIfVillainKilled{
 				Id:    id,
@@ -950,7 +950,7 @@ func fawkesThePhoenix() Card {
 		ImgPath:  "/images/marketcards/fawkesthephoenix.jpg",
 		CardType: "ally",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					GainDamage{Amount: 2},
@@ -972,7 +972,7 @@ func minervaMcgonagall() Card {
 		ImgPath:  "/images/marketcards/minervamcgonagall.jpg",
 		CardType: "ally",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			GainDamage{Amount: 1},
 			GryffindorDice{},
@@ -989,7 +989,7 @@ func remusLupin() Card {
 		ImgPath:  "/images/marketcards/remuslupin.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			HealAnyPlayer{Amount: 3},
 		},
@@ -1005,7 +1005,7 @@ func elderWand() Card {
 		ImgPath:  "/images/marketcards/elderwand.jpg",
 		CardType: "item",
 		Cost:     7,
-		Effects: []Effect{
+		effects: []Effect{
 			GainXPerSpellPlayed{
 				X: ChangeStats{
 					AmountDamage: 1,
@@ -1025,7 +1025,7 @@ func chocolateFrog() Card {
 		ImgPath:  "/images/marketcards/chocolatefrog.jpg",
 		CardType: "item",
 		Cost:     2,
-		Effects: []Effect{
+		effects: []Effect{
 			ChoosePlayerToGainX{
 				X: ChangeStats{
 					AmountHealth: 1,
@@ -1035,7 +1035,7 @@ func chocolateFrog() Card {
 		},
 		onDiscard: func(target string, gs *Gamestate) {
 			ChangeStats{
-				User:         target,
+				Target:       target,
 				AmountHealth: 1,
 				AmountMoney:  1,
 			}.Trigger(gs)
@@ -1052,13 +1052,13 @@ func gilderoyLockhart() Card {
 		ImgPath:  "/images/marketcards/gilderoylockhart.jpg",
 		CardType: "ally",
 		Cost:     2,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 1},
 			ActivePlayerDiscards{Amount: 1, Prompt: "You swoon at the sight of Lockhart, discard a card"},
 		},
 		onDiscard: func(target string, gs *Gamestate) {
 			ChangeStats{
-				User:        target,
+				Target:      target,
 				AmountCards: 1,
 			}.Trigger(gs)
 		},
@@ -1074,7 +1074,7 @@ func maraudersMap() Card {
 		ImgPath:  "/images/marketcards/maraudersmap.jpg",
 		CardType: "item",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			DrawCards{Amount: 2},
 		},
 		onDiscard: func(target string, gs *Gamestate) {
@@ -1092,13 +1092,13 @@ func protego() Card {
 		ImgPath:  "/images/marketcards/protego.jpg",
 		CardType: "spell",
 		Cost:     5,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			GainHealth{Amount: 1},
 		},
 		onDiscard: func(target string, gs *Gamestate) {
 			ChangeStats{
-				User:         target,
+				Target:       target,
 				AmountDamage: 1,
 				AmountHealth: 1,
 			}.Trigger(gs)
@@ -1115,7 +1115,7 @@ func accio() Card {
 		ImgPath:  "/images/marketcards/accio.jpg",
 		CardType: "spell",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			ChooseOne{
 				Effects: []Effect{
 					GainMoney{Amount: 2},
@@ -1137,7 +1137,7 @@ func fredWeasley() Card {
 		ImgPath:  "/images/marketcards/fredweasley.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			WeasleyTwinsEffect{Money: 1},
 			GryffindorDice{},
@@ -1154,7 +1154,7 @@ func georgeWeasley() Card {
 		ImgPath:  "/images/marketcards/georgeweasley.jpg",
 		CardType: "ally",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			WeasleyTwinsEffect{Health: 1},
 			GryffindorDice{},
@@ -1195,13 +1195,13 @@ func oldSock() Card {
 		ImgPath:  "/images/marketcards/oldsock.jpg",
 		CardType: "item",
 		Cost:     1,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			OldSockEffect{},
 		},
 		onDiscard: func(target string, gs *Gamestate) {
 			ChangeStats{
-				User:        target,
+				Target:      target,
 				AmountMoney: 2,
 			}.Trigger(gs)
 		},
@@ -1234,7 +1234,7 @@ func owls() Card {
 		ImgPath:  "/images/marketcards/owls.jpg",
 		CardType: "item",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 2},
 			GainXIfYSpellsPlayed{
 				X: ChangeStats{
@@ -1256,7 +1256,7 @@ func sortingHat() Card {
 		ImgPath:  "/images/marketcards/sortinghat.jpg",
 		CardType: "item",
 		Cost:     4,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 2},
 			PurchasedXGoToDeck{X: "ally"},
 		},
@@ -1272,7 +1272,7 @@ func wingardiumLeviosa() Card {
 		ImgPath:  "/images/marketcards/wingardiumleviosa.jpg",
 		CardType: "spell",
 		Cost:     2,
-		Effects: []Effect{
+		effects: []Effect{
 			GainMoney{Amount: 1},
 			PurchasedXGoToDeck{X: "item"},
 		},
@@ -1288,7 +1288,7 @@ func petrificusTotalus() Card {
 		ImgPath:  "/images/marketcards/petrificustotalus.jpg",
 		CardType: "spell",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			BlockVillainEffects{villain: true},
 		},
@@ -1304,7 +1304,7 @@ func harp() Card {
 		ImgPath:  "/images/marketcards/harp.jpg",
 		CardType: "item",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			BlockVillainEffects{creature: true},
 		},
@@ -1320,7 +1320,7 @@ func finiteIncantatem() Card {
 		ImgPath:  "/images/marketcards/finiteincantatem.jpg",
 		CardType: "spell",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			RemoveFromLocation{Amount: 1},
 		},
 	}
@@ -1335,7 +1335,7 @@ func confundus() Card {
 		ImgPath:  "/images/marketcards/confundus.jpg",
 		CardType: "spell",
 		Cost:     6,
-		Effects: []Effect{
+		effects: []Effect{
 			GainDamage{Amount: 1},
 			ConfundusEffect{Id: id},
 		},

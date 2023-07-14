@@ -38,13 +38,13 @@ type Player struct {
 }
 
 type Card struct {
-	Id        int      `json:"Id"`
-	Name      string   `json:"Name"`
-	SetId     string   `json:"SetId"`
-	ImgPath   string   `json:"ImgPath"`
-	CardType  string   `json:"CardType"`
-	Cost      int      `json:"Cost"`
-	Effects   []Effect `json:"Effects"`
+	Id        int    `json:"Id"`
+	Name      string `json:"Name"`
+	SetId     string `json:"SetId"`
+	ImgPath   string `json:"ImgPath"`
+	CardType  string `json:"CardType"`
+	Cost      int    `json:"Cost"`
+	effects   []Effect
 	onDiscard func(target string, gs *Gamestate)
 }
 
@@ -55,7 +55,7 @@ type Location struct {
 	ImgPath    string
 	MaxControl int
 	CurControl int
-	Effect     Effect
+	effect     Effect
 }
 
 type Villain struct {
@@ -68,8 +68,8 @@ type Villain struct {
 	Active       bool
 	BlockedUntil int
 	villainType  string
-	Effect       []Effect
-	DeathEffect  []Effect
+	effect       []Effect
+	deathEffect  []Effect
 
 	// true if this villain should be played before DA events - for triggered events.
 	playBeforeDA bool
@@ -80,7 +80,7 @@ type DarkArt struct {
 	Id      int
 	ImgPath string
 	SetId   string
-	Effects []Effect
+	effect  []Effect
 }
 
 type TurnStats struct {
@@ -94,9 +94,4 @@ type TurnStats struct {
 // Define an effect as something that changes the gamestate.
 type Effect interface {
 	Trigger(gs *Gamestate)
-}
-
-type TargetedEffect struct {
-	Target string // a playername.
-	Effect Effect
 }

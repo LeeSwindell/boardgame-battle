@@ -172,6 +172,12 @@ func detention() Card {
 		CardType: "item",
 		Cost:     0,
 		effects:  []Effect{},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				Target:       target,
+				AmountHealth: -2,
+			}.Trigger(gs)
+		},
 	}
 }
 

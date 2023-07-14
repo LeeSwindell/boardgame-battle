@@ -142,6 +142,13 @@ func DrawXCards(user string, gs *Gamestate, amount int) {
 		}
 	}
 
+	// do nothing if petrification has been played.
+	for _, da := range gs.DarkArtsPlayed {
+		if da.Name == "Petrification" {
+			return
+		}
+	}
+
 	if amount <= 0 {
 		return
 	}
@@ -260,6 +267,13 @@ func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
 	for _, v := range gs.Villains {
 		if v.Name == "Fenrir Greyback" && v.Active && change >= 0 {
 			// Do nothing, they won't be stunned so return false.
+			return false
+		}
+	}
+
+	// Check for Sectumsempra
+	for _, da := range gs.DarkArtsPlayed {
+		if da.Name == "Sectumsempra!" && change >= 0 {
 			return false
 		}
 	}

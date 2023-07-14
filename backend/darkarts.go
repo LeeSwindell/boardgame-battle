@@ -171,9 +171,16 @@ func crucio() DarkArt {
 		SetId:   "game 5",
 		effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
+			LoadDarkArtEffect{},
 			RevealDarkArts{Amount: 1},
 		},
 	}
+}
+
+type LoadDarkArtEffect struct{}
+
+func (effect LoadDarkArtEffect) Trigger(gs *Gamestate) {
+	LoadNewDarkArt(gs)
 }
 
 func fiendfyre() DarkArt {
@@ -197,7 +204,18 @@ func morsmordre() DarkArt {
 		effect: []Effect{
 			DamageAllPlayers{Amount: 1},
 			AddToLocation{Amount: 1},
+			CheckForDeathEater{},
 		},
+	}
+}
+
+type CheckForDeathEater struct{}
+
+func (effect CheckForDeathEater) Trigger(gs *Gamestate) {
+	for _, v := range gs.Villains {
+		if v.Active && v.Name == "Death Eater" {
+			DamageAllPlayers{Amount: 1}.Trigger(gs)
+		}
 	}
 }
 
@@ -244,6 +262,7 @@ func imperio() DarkArt {
 			ActivePlayerSelectsOtherPlayerToDoX{
 				ChangeStats{AmountHealth: -2},
 			},
+			LoadDarkArtEffect{},
 			RevealDarkArts{Amount: 1},
 		},
 	}
@@ -289,16 +308,158 @@ func obliviate() DarkArt {
 		effect: []Effect{
 			AllChooseOneTargeted{
 				EffectTargeting: []func(target string, effect Effect) Effect{
-					TargetDiscardASpell,
+					TargetDiscardACard,
 					TargetCreateStats,
 				},
 				Effects: []Effect{
-					DiscardASpell{Prompt: "Discard a spell"},
+					DiscardACard{Cardtype: "spell", Prompt: "Discard a spell"},
 					ChangeStats{AmountHealth: -2},
 				},
 				Options:     []string{"Discard a spell", "Lose 2 Health"},
 				Description: "Obliviate! All heroes choose one:",
 			},
+		},
+	}
+}
+
+func oppugno() DarkArt {
+	return DarkArt{
+		Name:    "Oppugno!",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/oppugno.jpg",
+		SetId:   "game 3",
+		effect: []Effect{
+			AllRevealTopCardAndX{
+				X: OppugnoEffect,
+			},
+		},
+	}
+}
+
+func OppugnoEffect(card Card, user string, gs *Gamestate) {
+	if card.Cost == 0 {
+		return
+	}
+
+	ChangeStats{Target: user, AmountHealth: -2}.Trigger(gs)
+	player := gs.Players[user]
+	if card.onDiscard != nil {
+		gs.Players[user] = player
+		card.onDiscard(user, gs)
+		player = gs.Players[user]
+	}
+	player.Discard = append(player.Discard, card)
+	player.Deck = player.Deck[:len(player.Deck)-1]
+	eventBroker.Messages <- PlayerDiscarded
+}
+
+func petrification() DarkArt {
+	return DarkArt{
+		Name:    "Petrification",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/petrification.jpg",
+		SetId:   "game 1",
+		effect: []Effect{
+			DamageAllPlayers{Amount: 1},
+		},
+	}
+}
+
+func poison() DarkArt {
+	return DarkArt{
+		Name:    "Poison",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/poison.jpg",
+		SetId:   "game 2",
+		effect: []Effect{
+			AllChooseOneTargeted{
+				EffectTargeting: []func(target string, effect Effect) Effect{
+					TargetDiscardACard,
+					TargetCreateStats,
+				},
+				Effects: []Effect{
+					DiscardACard{Cardtype: "ally", Prompt: "Discard an ally"},
+					ChangeStats{AmountHealth: -2},
+				},
+				Options:     []string{"Discard an ally", "Lose 2 Health"},
+				Description: "Poison (which somehow everyone drank)! All heroes choose one:",
+			},
+		},
+	}
+}
+
+func ragingTroll() DarkArt {
+	return DarkArt{
+		Name:    "Raging Troll",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/ragingtroll.jpg",
+		SetId:   "box 1",
+		effect: []Effect{
+			NextHeroDoesX{
+				ChangeStats{
+					AmountHealth: -2,
+				},
+			},
+			AddToLocation{Amount: 1},
+		},
+	}
+}
+
+func relashio() DarkArt {
+	return DarkArt{
+		Name:    "Relashio!",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/relashio.jpg",
+		SetId:   "game 2",
+		effect: []Effect{
+			AllChooseOneTargeted{
+				EffectTargeting: []func(target string, effect Effect) Effect{
+					TargetDiscardACard,
+					TargetCreateStats,
+				},
+				Effects: []Effect{
+					DiscardACard{Cardtype: "item", Prompt: "Discard an item"},
+					ChangeStats{AmountHealth: -2},
+				},
+				Options:     []string{"Discard an item", "Lose 2 Health"},
+				Description: "Relashio! All heroes choose one:",
+			},
+		},
+	}
+}
+
+func sectumsempra() DarkArt {
+	return DarkArt{
+		Name:    "Sectumsempra!",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/sectumsempra.jpg",
+		SetId:   "game 6",
+		effect: []Effect{
+			DamageAllPlayers{Amount: 2},
+		},
+	}
+}
+
+func slugulusEructo() DarkArt {
+	return DarkArt{
+		Name:    "Slugulus Eructo!",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/sluguluseructo.jpg",
+		SetId:   "game 6",
+		effect: []Effect{
+			DamageAllPerCreature{Amount: 1},
+		},
+	}
+}
+
+func tarantallegra() DarkArt {
+	return DarkArt{
+		Name:    "Tarantallegra!",
+		Id:      int(uuid.New().ID()),
+		ImgPath: "/images/darkarts/tarantallegra.jpg",
+		SetId:   "game 3",
+		effect: []Effect{
+			DamageCurrentPlayer{Amount: 1},
 		},
 	}
 }

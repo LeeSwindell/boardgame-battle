@@ -272,6 +272,25 @@ func dementor() Villain {
 	}
 }
 
+func deathEater() Villain {
+	return Villain{
+		Name:        "Death Eater",
+		Id:          int(uuid.New().ID()),
+		ImgPath:     "/images/villains/deatheater4.jpg",
+		SetId:       "Game 4",
+		CurDamage:   0,
+		MaxHp:       7,
+		Active:      false,
+		villainType: "villain",
+		effect:      []Effect{},
+		deathEffect: []Effect{
+			AllPlayersGainHealth{Amount: 1},
+			RemoveFromLocation{Amount: 1},
+		},
+		playBeforeDA: false,
+	}
+}
+
 func fenrirGreyback() Villain {
 	return Villain{
 		Name:        "Fenrir Greyback",

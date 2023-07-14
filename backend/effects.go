@@ -1373,6 +1373,16 @@ func (effect PreviousHeroDoesX) Trigger(gs *Gamestate) {
 	effect.X.Trigger(gs)
 }
 
+type NextHeroDoesX struct {
+	X ChangeStats
+}
+
+func (effect NextHeroDoesX) Trigger(gs *Gamestate) {
+	nextHero := getNextUser(gs)
+	effect.X.Target = nextHero
+	effect.X.Trigger(gs)
+}
+
 type ActivePlayerSelectsOtherPlayerToDoX struct {
 	X ChangeStats
 }
@@ -1384,6 +1394,10 @@ func (effect ActivePlayerSelectsOtherPlayerToDoX) Trigger(gs *Gamestate) {
 		if name != user {
 			otherPlayers = append(otherPlayers, name)
 		}
+	}
+
+	if len(otherPlayers) == 0 {
+		return
 	}
 
 	effect.X.Target = AskUserToSelectPlayer(gs.gameid, user, otherPlayers)
@@ -1412,16 +1426,17 @@ func (effect AllRevealTopCardAndX) Trigger(gs *Gamestate) {
 	}
 }
 
-type DiscardASpell struct {
-	Target string
-	Prompt string
+type DiscardACard struct {
+	Target   string
+	Prompt   string
+	Cardtype string // "any" for any card
 }
 
-func (effect DiscardASpell) Trigger(gs *Gamestate) {
+func (effect DiscardACard) Trigger(gs *Gamestate) {
 	user := effect.Target
 	choices := []Card{}
 	for _, c := range gs.Players[user].Hand {
-		if c.CardType == "spell" {
+		if c.CardType == effect.Cardtype || effect.Cardtype == "any" {
 			choices = append(choices, c)
 		}
 	}
@@ -1432,7 +1447,7 @@ func (effect DiscardASpell) Trigger(gs *Gamestate) {
 
 	prompt := effect.Prompt
 	if prompt == "" {
-		prompt = "Discard a spell"
+		prompt = "Discard a card"
 	}
 
 	choice := AskUserToSelectCard(user, gs.gameid, choices, prompt)
@@ -1460,11 +1475,26 @@ func (effect DiscardASpell) Trigger(gs *Gamestate) {
 	eventBroker.Messages <- event
 }
 
-func TargetDiscardASpell(target string, effect Effect) Effect {
-	ret, ok := effect.(DiscardASpell)
+func TargetDiscardACard(target string, effect Effect) Effect {
+	ret, ok := effect.(DiscardACard)
 	if !ok {
-		log.Println("Type Assertion failed: TargetDiscardASpell")
+		log.Println("Type Assertion failed: TargetDiscardACard")
 	}
 	ret.Target = target
 	return ret
+}
+
+type DamageAllPerCreature struct {
+	Amount int
+}
+
+func (effect DamageAllPerCreature) Trigger(gs *Gamestate) {
+	damage := 0
+	for _, v := range gs.Villains {
+		if v.Active && (v.villainType == "creature" || v.villainType == "villain-creature") {
+			damage += effect.Amount
+		}
+	}
+
+	DamageAllPlayers{Amount: damage}.Trigger(gs)
 }

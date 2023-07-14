@@ -94,6 +94,11 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.turnNumber++
 	for i, v := range gs.Villains {
 		if !v.Active {
+			for _, v := range gs.Villains {
+				if v.Active && v.Name == "Death Eater" {
+					DamageAllPlayers{Amount: 1}.Trigger(gs)
+				}
+			}
 			gs.Villains[i].Active = true
 		}
 		if v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
@@ -149,6 +154,20 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 				return
 			}
 
+			alreadyHit := false
+			for _, hitId := range gs.turnStats.VillainsHit {
+				if gs.Villains[i].Id == hitId {
+					alreadyHit = true
+				}
+			}
+
+			// do nothing if Tarantallegra! is played and villain has already been hit.
+			for _, da := range gs.DarkArtsPlayed {
+				if da.Name == "Tarantallegra!" && alreadyHit && v.Name != "Norbert" {
+					return
+				}
+			}
+
 			// spend money to damage norbert.
 			if v.Name == "Norbert" && updatedPlayer.Money > 0 {
 				updatedPlayer.Money -= 1
@@ -159,12 +178,12 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			}
 
 			gs.Villains[i].CurDamage += 1
-			alreadyHit := false
-			for _, hitId := range gs.turnStats.VillainsHit {
-				if gs.Villains[i].Id == hitId {
-					alreadyHit = true
-				}
-			}
+			// alreadyHit := false
+			// for _, hitId := range gs.turnStats.VillainsHit {
+			// 	if gs.Villains[i].Id == hitId {
+			// 		alreadyHit = true
+			// 	}
+			// }
 			if !alreadyHit && gs.Villains[i].Name != "Norbert" {
 				gs.turnStats.VillainsHit = append(gs.turnStats.VillainsHit, gs.Villains[i].Id)
 				eventBroker.Messages <- NewVillainHitEvent

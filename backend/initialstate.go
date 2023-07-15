@@ -39,7 +39,9 @@ func CreateVillains() ([]Villain, []Villain) {
 	// villains := villainDeck[len(villainDeck)-3:]
 
 	villainDeck = ShuffleVillains(villainDeck)
-	villains := villainDeck[:3]
+	villains := villainDeck[:2]
+	// testing pettigrew
+	villains = append(villains, peterPettigrew())
 	villainDeck = villainDeck[3:]
 	villainDeck = append(villainDeck, voledmortFive())
 
@@ -168,14 +170,8 @@ func CreateMarketDeck() []Card {
 }
 
 func CreateMarket() []Card {
-	market := []Card{
-		confundus(),
-		confundus(),
-		confundus(),
-		confundus(),
-		confundus(),
-		confundus(),
-	}
+	deck := CreateMarketDeck()
+	market := deck[0:6]
 
 	return market
 }

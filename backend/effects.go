@@ -376,15 +376,11 @@ func (effect AddToLocation) Trigger(gs *Gamestate) {
 	loc := gs.Locations[gs.CurrentLocation]
 	loc.CurControl += effect.Amount
 	gs.Locations[gs.CurrentLocation] = loc
-	Logger("sending location added event")
-	// This is blocking! no one currently listening for event?
 	eventBroker.Messages <- LocationAddedEvent
-	Logger("sent location added event")
 
 	if loc.CurControl >= loc.MaxControl {
 		switch gs.CurrentLocation {
 		case len(gs.Locations) - 1:
-			log.Println("game over, loser!!!")
 		default:
 			gs.CurrentLocation += 1
 		}
@@ -416,6 +412,13 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 	// For Lucius effect - happens only when location control Actually changes.
 	for i := 0; i < gs.Locations[gs.CurrentLocation].CurControl-loc.CurControl; i++ {
 		eventBroker.Messages <- LocationRemovedEvent
+	}
+
+	// For Harry's character effect.
+	for _, p := range gs.Players {
+		if p.Character == "Harry" {
+			AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+		}
 	}
 
 	gs.Locations[gs.CurrentLocation] = loc
@@ -505,6 +508,9 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 		playernames = append(playernames, p)
 	}
 
+	if len(playernames) == 0 {
+		return
+	}
 	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 	ChangePlayerHealth(choice, effect.Amount, gs)
 }
@@ -525,6 +531,9 @@ func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
 		}
 	}
 
+	if len(playernames) == 0 {
+		return
+	}
 	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
 
 	// Use helpers to change player these values before getting/setting player
@@ -549,6 +558,9 @@ func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
 	playernames := []string{}
 	for p := range gs.Players {
 		playernames = append(playernames, p)
+	}
+	if len(playernames) == 0 {
+		return
 	}
 	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 
@@ -1222,6 +1234,9 @@ func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
 		players = append(players, name)
 	}
 
+	if len(players) == 0 {
+		return
+	}
 	effect.X.Target = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
 	effect.X.Trigger(gs)
 }
@@ -1433,6 +1448,8 @@ type DiscardACard struct {
 }
 
 func (effect DiscardACard) Trigger(gs *Gamestate) {
+	log.Println("starting DiscardACard vvvvvvv")
+	assertUniqueCards(gs)
 	user := effect.Target
 	choices := []Card{}
 	for _, c := range gs.Players[user].Hand {
@@ -1461,6 +1478,7 @@ func (effect DiscardACard) Trigger(gs *Gamestate) {
 
 			// Wrap the player mapping around onDiscard since it mutates the state directly.
 			if c.onDiscard != nil {
+				player.Hand = cards
 				gs.Players[user] = player
 				c.onDiscard(user, gs)
 				player = gs.Players[user]
@@ -1473,6 +1491,9 @@ func (effect DiscardACard) Trigger(gs *Gamestate) {
 
 	event := Event{senderId: -1, message: "player discarded", data: user}
 	eventBroker.Messages <- event
+
+	assertUniqueCards(gs)
+	log.Println("ending DiscardACard ^^^^^ ONE ERROR MEANS BUG")
 }
 
 func TargetDiscardACard(target string, effect Effect) Effect {

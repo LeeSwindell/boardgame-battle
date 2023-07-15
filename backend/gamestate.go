@@ -89,6 +89,7 @@ type TurnStats struct {
 	SpellsPlayed   int
 	VillainsKilled int
 	VillainsHit    []int
+	DamageDealt    int
 }
 
 // Define an effect as something that changes the gamestate.

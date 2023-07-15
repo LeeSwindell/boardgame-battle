@@ -294,11 +294,20 @@ func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
 
 // change it so that players at 0 life go to 10 at start of turn.
 func StunPlayer(user string, gs *Gamestate) {
+	Logger("BEGIN STUN: CHECK FOR UNIQUE CARDS")
+	assertUniqueCards(gs)
+	Logger("good at start? ^^^")
 	player := gs.Players[user]
 	discardAmount := len(player.Hand) / 2
 	for i := 0; i < discardAmount; i++ {
 		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
 		cardName := AskUserToSelectCard(user, gs.gameid, player.Hand, desc)
+
+		testids := []int{}
+		for _, c := range player.Hand {
+			testids = append(testids, c.Id)
+		}
+		log.Println("TURN:", gs.turnNumber, "HAND IDS:", testids)
 
 		for i, c := range player.Hand {
 			if c.Id == cardName {
@@ -324,8 +333,9 @@ func StunPlayer(user string, gs *Gamestate) {
 		Logger("stunned, sent event")
 	}
 
-	Logger("adding to location")
 	AddToLocation{Amount: 1}.Trigger(gs)
+	log.Println("good at end? vvvv")
+	assertUniqueCards(gs)
 	Logger("ending stun")
 }
 
@@ -453,4 +463,74 @@ func getNextUser(gs *Gamestate) string {
 
 	nextTurn := (currTurn + 1) % len(gs.TurnOrder)
 	return gs.TurnOrder[nextTurn]
+}
+
+func assertUniqueCards(gs *Gamestate) bool {
+	ret := true
+	seen := make(map[int]bool)
+	name := ""
+	dupe := 0
+	for _, p := range gs.Players {
+		for _, c := range p.Deck {
+			if seen[c.Id] {
+				ret = false
+				dupe = c.Id
+				name = c.Name
+			}
+			seen[c.Id] = true
+		}
+
+		for _, c := range p.Hand {
+			if seen[c.Id] {
+				ret = false
+				dupe = c.Id
+				name = c.Name
+			}
+			seen[c.Id] = true
+		}
+
+		for _, c := range p.Discard {
+			if seen[c.Id] {
+				ret = false
+				dupe = c.Id
+				name = c.Name
+			}
+			seen[c.Id] = true
+		}
+	}
+
+	if !ret {
+		log.Println("****************** DUPLICATE CARD IDS:", dupe, name)
+	}
+
+	return ret
+}
+
+func DiscardFromId(user string, cardId int, gs *Gamestate) {
+	log.Println("vvvvvvvvvvvv STARTING DISCARDFROMID:", cardId)
+	assertUniqueCards(gs)
+	log.Println("OKAY AT START? ^")
+
+	player := gs.Players[user]
+
+	for i, c := range player.Hand {
+		if c.Id == cardId {
+			player.Hand = RemoveCardAtIndex(player.Hand, i)
+			player.Discard = append(player.Discard, c)
+			gs.Players[user] = player
+
+			// Wrap the player mapping around onDiscard since it mutates the state directly.
+			if c.onDiscard != nil {
+				c.onDiscard(user, gs)
+			}
+		}
+	}
+
+	event := Event{senderId: -1, message: "player discarded", data: user}
+	eventBroker.Messages <- event
+	// update turnstats
+
+	log.Println("^^^^^^^^^^^^^^^^^ ENDING DISCARDFROMID:", cardId)
+	assertUniqueCards(gs)
+	log.Println("OKAY AT END? ^")
 }

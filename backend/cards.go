@@ -12,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 100}},
+		effects:  []Effect{GainMoney{Amount: 1}},
 	}
 }
 

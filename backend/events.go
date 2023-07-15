@@ -36,9 +36,7 @@ func (eb *EventBroker) StartPublishing() {
 			eb.Unsubscribe(m.senderId)
 		} else {
 			for _, s := range eb.Subscribers {
-				Logger("MESSAGE OUT " + m.message)
 				s.messageChan <- m.message
-				Logger("MESSAGE SENT" + m.message)
 			}
 		}
 	}

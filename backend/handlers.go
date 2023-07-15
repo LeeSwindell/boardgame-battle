@@ -68,7 +68,6 @@ func GetGamestateHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) 
 func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gameid, user := getIdAndUser(r)
 
-	Logger("end turn wants lock")
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -76,6 +75,12 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		log.Println("not your turn!")
 		return
 	}
+
+	// Testing
+	log.Println("Start end turn debug: ", gs.turnNumber)
+	assertUniqueCards(gs)
+	log.Println("Start end turn debug: ", gs.turnNumber)
+	// Testing
 
 	eventBroker.Messages <- EndTurnEvent
 	HealStunned(gs)
@@ -103,6 +108,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		}
 		if v.playBeforeDA && gs.turnNumber >= v.BlockedUntil {
 			for _, e := range v.effect {
+				Logger("triggering " + v.Name)
 				e.Trigger(gs)
 			}
 		}
@@ -120,8 +126,14 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 		}
 	}
 
+	// Testing
+	log.Println("End of end turn debug: ", gs.turnNumber-1)
+	assertUniqueCards(gs)
+	log.Println("End of end turn debug: ", gs.turnNumber-1)
+
+	// Testing
+
 	SendLobbyUpdate(gameid, gs)
-	Logger("end turn releases lock")
 }
 
 func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
@@ -135,7 +147,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
-	updatedPlayer := gs.Players[user]
+	player := gs.Players[user]
 
 	for i, v := range gs.Villains {
 		if v.Id == villainid {
@@ -149,7 +161,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 				return
 			}
 
-			if updatedPlayer.Damage <= 0 && v.Name != "Norbert" {
+			if player.Damage <= 0 && v.Name != "Norbert" {
 				log.Println("not enough damage tokens to do this")
 				return
 			}
@@ -169,26 +181,27 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 			}
 
 			// spend money to damage norbert.
-			if v.Name == "Norbert" && updatedPlayer.Money > 0 {
-				updatedPlayer.Money -= 1
-			} else if v.Name == "Norbert" && updatedPlayer.Money <= 0 {
+			if v.Name == "Norbert" && player.Money > 0 {
+				player.Money -= 1
+			} else if v.Name == "Norbert" && player.Money <= 0 {
 				return
 			} else {
-				updatedPlayer.Damage -= 1
+				player.Damage -= 1
 			}
 
 			gs.Villains[i].CurDamage += 1
-			// alreadyHit := false
-			// for _, hitId := range gs.turnStats.VillainsHit {
-			// 	if gs.Villains[i].Id == hitId {
-			// 		alreadyHit = true
-			// 	}
-			// }
+
+			// check for Rons character effect.
+			gs.turnStats.DamageDealt++
+			if gs.turnStats.DamageDealt == 3 && player.Character == "Ron" {
+				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+			}
+
 			if !alreadyHit && gs.Villains[i].Name != "Norbert" {
 				gs.turnStats.VillainsHit = append(gs.turnStats.VillainsHit, gs.Villains[i].Id)
 				eventBroker.Messages <- NewVillainHitEvent
 			}
-			gs.Players[user] = updatedPlayer
+			gs.Players[user] = player
 
 			// check if villain is now dead.
 			if gs.Villains[i].CurDamage >= v.MaxHp {

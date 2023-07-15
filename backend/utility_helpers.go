@@ -59,8 +59,6 @@ func getIdAndUser(r *http.Request) (int, string) {
 func SendLobbyUpdate(id int, gs *Gamestate) {
 	url := fmt.Sprintf("%s/game/%d/refreshgamestate", config.LobbyManagerURL, id)
 
-	log.Println("game sending refreshgamestate to url: ", url)
-
 	data, err := json.Marshal(gs)
 	if err != nil {
 		log.Println("err marshaling gamestate:", err.Error())

@@ -556,6 +556,9 @@ type PeterPettigrewEffect struct{}
 
 // Don't "Reveal" the card for now, just discard it if it matches.
 func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
+	log.Println("STARTING PETTIGREW EFFECT vvvvvvvvvvvvvvvvv")
+	assertUniqueCards(gs)
+	log.Println("line 561")
 	user := gs.CurrentTurn
 	player := gs.Players[user]
 
@@ -566,7 +569,8 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 			return
 		}
 	}
-
+	log.Println("line 572")
+	assertUniqueCards(gs)
 	topCard := player.Deck[len(player.Deck)-1]
 	// If cost > 1, discard it and add 1 to location.
 	if topCard.Cost >= 1 {
@@ -583,7 +587,12 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 		eventBroker.Messages <- PlayerDiscarded
 	}
 
+	log.Println("line 590")
+	assertUniqueCards(gs)
 	gs.Players[user] = player
+	log.Println("line 593")
+	assertUniqueCards(gs)
+	log.Println("ENDING PETTIGREW ^^^^^^^^^^^^^^^")
 }
 
 type PeterPettigrewDeathEffect struct{}

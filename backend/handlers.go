@@ -130,8 +130,10 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	log.Println("End of end turn debug: ", gs.turnNumber-1)
 	assertUniqueCards(gs)
 	log.Println("End of end turn debug: ", gs.turnNumber-1)
-
 	// Testing
+
+	// Add to statelog
+	addToGamestateLog(gs)
 
 	SendLobbyUpdate(gameid, gs)
 }

@@ -99,6 +99,15 @@ func RunGameServer() {
 		}
 		BuyCardHandler(w, r, gs)
 	})
+	r.HandleFunc("/game/{id}/undo", func(w http.ResponseWriter, r *http.Request) {
+		gs, ok := getGsForGameID(r)
+		if !ok || !gs.started {
+			log.Println("undo exiting...")
+			return
+		}
+		log.Println("undoing")
+		undoHandler(w, r, gs)
+	})
 	r.HandleFunc("/game/testserver", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "hello, world!")
 		log.Println("hello world?")

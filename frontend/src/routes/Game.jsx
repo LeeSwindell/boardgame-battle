@@ -16,6 +16,7 @@ import { api, gameapi } from '../api';
 import { logger } from '../logger/logger';
 import useLobbySocket from '../hooks/useLobbySocket';
 import EndGame from '../components/Endgame';
+import Undo from '../components/Undo';
 
 // use react context to pass inspect around
 const InspectContext = createContext();
@@ -187,7 +188,7 @@ function GameWithState() {
                   .map(([username]) => (<PlayerInfo key={username} username={username} />))
               }
               <EndTurn />
-              {/* <EndGame /> */}
+              <Undo />
             </div>
             <div className="flex flex-col items-center">
               <div className="text-center">Discard Pile</div>

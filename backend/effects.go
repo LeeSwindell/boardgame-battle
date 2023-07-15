@@ -294,27 +294,8 @@ func (effect GivenPlayerDiscards) Trigger(gs *Gamestate) {
 
 	for i := 0; i < effect.Amount; i++ {
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
-		for i, c := range cards {
-			if c.Id == discardCardId {
-				cards = RemoveCardAtIndex(cards, i)
-				player.Discard = append(player.Discard, c)
-
-				// Wrap the player mapping around onDiscard since it mutates the state directly.
-				if c.onDiscard != nil {
-					gs.Players[user] = player
-					c.onDiscard(user, gs)
-					player = gs.Players[user]
-				}
-			}
-		}
-
-		player.Hand = cards
-		gs.Players[user] = player
-
-		event := Event{senderId: -1, message: "player discarded", data: user}
-		eventBroker.Messages <- event
-		// update turnstats
-
+		DiscardFromId(user, discardCardId, gs)
+		cards = gs.Players[user].Hand
 		if len(cards) == 0 {
 			return
 		}
@@ -341,26 +322,8 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 
 	for i := 0; i < effect.Amount; i++ {
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
-		for i, c := range cards {
-			if c.Id == discardCardId {
-				cards = RemoveCardAtIndex(cards, i)
-				player.Discard = append(player.Discard, c)
-
-				// Wrap the player mapping around onDiscard since it mutates the state directly.
-				if c.onDiscard != nil {
-					gs.Players[user] = player
-					c.onDiscard(user, gs)
-					player = gs.Players[user]
-				}
-			}
-		}
-
-		player.Hand = cards
-		gs.Players[user] = player
-
-		event := Event{senderId: -1, message: "player discarded", data: user}
-		eventBroker.Messages <- event
-		// update turnstats
+		DiscardFromId(user, discardCardId, gs)
+		cards = gs.Players[user].Hand
 
 		if len(cards) == 0 {
 			return
@@ -1468,29 +1431,7 @@ func (effect DiscardACard) Trigger(gs *Gamestate) {
 	}
 
 	choice := AskUserToSelectCard(user, gs.gameid, choices, prompt)
-
-	player := gs.Players[user]
-	cards := player.Hand
-	for i, c := range cards {
-		if c.Id == choice {
-			cards = RemoveCardAtIndex(cards, i)
-			player.Discard = append(player.Discard, c)
-
-			// Wrap the player mapping around onDiscard since it mutates the state directly.
-			if c.onDiscard != nil {
-				player.Hand = cards
-				gs.Players[user] = player
-				c.onDiscard(user, gs)
-				player = gs.Players[user]
-			}
-		}
-	}
-
-	player.Hand = cards
-	gs.Players[user] = player
-
-	event := Event{senderId: -1, message: "player discarded", data: user}
-	eventBroker.Messages <- event
+	DiscardFromId(user, choice, gs)
 
 	assertUniqueCards(gs)
 	log.Println("ending DiscardACard ^^^^^ ONE ERROR MEANS BUG")

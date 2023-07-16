@@ -139,7 +139,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// log.Println("id:", data.ID, "***turn order:", data.TurnOrder, "****players:", data.StartingPlayers)
+	log.Println("****players:", data.StartingPlayers)
 
 	villains, villainDeck := CreateVillains()
 	gs := &Gamestate{

@@ -47,6 +47,9 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 			switch c.CardType {
 			case "spell":
 				gs.turnStats.SpellsPlayed += 1
+				if gs.turnStats.SpellsPlayed == 4 && gs.Players[user].Character == "Hermione" {
+					SelectTwoPlayersToGainStats{AmountDamage: 1, Exclusive: true}.Trigger(gs)
+				}
 			case "item":
 				gs.turnStats.ItemsPlayed += 1
 			case "ally":

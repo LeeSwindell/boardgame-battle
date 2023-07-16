@@ -607,6 +607,29 @@ func (effect AllChooseOne) Trigger(gs *Gamestate) {
 	}
 }
 
+type GivenPlayerChooseOneTargeted struct {
+	// funcs that create an effect with a given target.
+	User            string
+	EffectTargeting []func(target string, effect Effect) Effect
+
+	Effects []Effect
+	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
+	Options     []string `json:"options"`
+	Description string   `json:"description"`
+}
+
+func (effect GivenPlayerChooseOneTargeted) Trigger(gs *Gamestate) {
+	user := effect.User
+	choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
+
+	for i, option := range effect.Options {
+		if choice == option {
+			e := effect.EffectTargeting[i](user, effect.Effects[i])
+			e.Trigger(gs)
+		}
+	}
+}
+
 type AllChooseOneTargeted struct {
 	// funcs that create an effect with a given target.
 	EffectTargeting []func(target string, effect Effect) Effect
@@ -917,6 +940,41 @@ type RavenclawDice struct{}
 
 func (effect RavenclawDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
+
+	if gs.Players[gs.CurrentTurn].Proficiency == "Arithmancy" {
+		options := []string{"Yes", "No"}
+		switch n {
+		case 0:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 1:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 2:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		default:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
+			if choice == "No" {
+				AllDrawCards{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		}
+	}
+
 	switch n {
 	case 0:
 		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -933,6 +991,41 @@ type SlytherinDice struct{}
 
 func (effect SlytherinDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
+
+	if gs.Players[gs.CurrentTurn].Proficiency == "Arithmancy" {
+		options := []string{"Yes", "No"}
+		switch n {
+		case 0:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 1:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 2:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
+			if choice == "No" {
+				AllDrawCards{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		default:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		}
+	}
+
 	switch n {
 	case 0:
 		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -949,6 +1042,41 @@ type GryffindorDice struct{}
 
 func (effect GryffindorDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
+
+	if gs.Players[gs.CurrentTurn].Proficiency == "Arithmancy" {
+		options := []string{"Yes", "No"}
+		switch n {
+		case 0:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 1:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 2:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
+			if choice == "No" {
+				AllDrawCards{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		default:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		}
+	}
+
 	switch n {
 	case 0:
 		AllPlayersGainDamage{Amount: 1}.Trigger(gs)
@@ -965,6 +1093,41 @@ type HufflepuffDice struct{}
 
 func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
+
+	if gs.Players[gs.CurrentTurn].Proficiency == "Arithmancy" {
+		options := []string{"Yes", "No"}
+		switch n {
+		case 0:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 1:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		case 2:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
+			if choice == "No" {
+				AllDrawCards{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		default:
+			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
+			if choice == "No" {
+				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+				return
+			}
+			n = rand.Intn(6)
+		}
+	}
+
 	switch n {
 	case 0:
 		AllPlayersGainMoney{Amount: 1}.Trigger(gs)

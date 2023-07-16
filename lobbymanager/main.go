@@ -65,9 +65,10 @@ type Lobby struct {
 }
 
 type LobbyPlayer struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Character string `json:"character"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Character   string `json:"character"`
+	Proficiency string `json:"proficiency"`
 }
 
 func getUniquePlayerId() uuid.UUID {
@@ -107,6 +108,7 @@ func main() {
 	r.HandleFunc("/lm/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lm/lobby/{id}/refresh", RefreshLobbyHandler)
 	r.HandleFunc("/lm/lobby/{id}/setchar", SetCharHandler)
+	r.HandleFunc("/lm/lobby/{id}/setprof", SetProfHandler)
 	r.HandleFunc("/lm/lobby/{id}/leave", LeaveLobbyHandler)
 	r.HandleFunc("/lm/lobby/{id}/startgame", StartGameHandler)
 	r.HandleFunc("/lm/game/{id}/refreshgamestate", RefreshGamestateHandler)

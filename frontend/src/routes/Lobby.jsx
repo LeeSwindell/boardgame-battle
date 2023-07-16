@@ -49,6 +49,48 @@ function CharSelect({ lobbyid, characterSelection, canEdit }) {
   );
 }
 
+function ProfSelect({ lobbyid, profSelection, canEdit }) {
+  const [proficiency, setProficiency] = useState(profSelection);
+
+  useEffect(() => {
+    if (canEdit) {
+      api
+        .post(`/lobby/${lobbyid}/setprof`, { proficiency })
+        .then(() => {
+          // logger.log('char update');
+        })
+        .catch((res) => {
+          logger.error(res);
+        });
+    }
+  }, [proficiency]);
+
+  if (!canEdit) {
+    return profSelection;
+  }
+
+  const handleOptionChange = (event) => {
+    setProficiency(event.target.value);
+  };
+
+  return (
+    <form>
+      <select name="char" id="char-select" value={profSelection} onChange={handleOptionChange} className="block w-full p-2 rounded bg-gray-50 border border-gray-200 focus:ring-blue-500 focus:border-blue-500 ">
+        <option value="Arithmancy">Arthimancy</option>
+        <option value="Care of Magical Creatures">Care Of Magical Creatures</option>
+        <option value="Charms">Charms</option>
+        <option value="Defense Against the Dark Arts">Defense Against the Dark Arts</option>
+        <option value="Divination">Divination</option>
+        <option value="Flying Lessons">Flying Lessons</option>
+        <option value="Herbology">Herbology</option>
+        <option value="History of Magic">History of Magic</option>
+        <option value="Potions">Potions</option>
+        <option value="Transfiguration">Transfiguration</option>
+      </select>
+    </form>
+  );
+}
+
 function Lobby() {
   const params = useParams();
   const socket = useRef(null);
@@ -93,7 +135,7 @@ function Lobby() {
     api
       .get(`/lobby/${lobbyId}/refresh`)
       .then((res) => {
-        // logger.log(res.data);
+        logger.log(res.data);
         setPlayers(res.data.players);
       })
       .catch(() => {
@@ -109,7 +151,7 @@ function Lobby() {
             api
               .get(`/lobby/${lobbyId}/refresh`)
               .then((res) => {
-                // logger.log(res.data.players);
+                logger.log(res.data.players);
                 setPlayers(res.data.players);
               });
             break;
@@ -137,6 +179,7 @@ function Lobby() {
             <tr>
               <th className="px-6 py-2 font-bold">Name</th>
               <th className="px-6 py-2 font-bold">Character</th>
+              <th className="px-6 py-2 font-bold">Proficiency</th>
             </tr>
           </thead>
           <tbody className="">
@@ -145,6 +188,9 @@ function Lobby() {
                 <td className="px-4 py-2">{player.name}</td>
                 <td className="px-4 py-2">
                   <CharSelect lobbyid={params.id} characterSelection={player.character} canEdit={player.name === localStorage.getItem('sessionid')} player={player.name} />
+                </td>
+                <td className="px-4 py-2">
+                  <ProfSelect lobbyid={params.id} characterSelection={player.proficiency} canEdit={player.name === localStorage.getItem('sessionid')} player={player.name} />
                 </td>
               </tr>
             ))}

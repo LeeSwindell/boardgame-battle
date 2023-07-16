@@ -76,7 +76,6 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 	globalMu.Lock()
 	defer globalMu.Unlock()
 	lobbyid := getUniqueLobbyId()
-	// lobbyNumber++
 	playerid := int(getUniquePlayerId().ID())
 
 	hostname := r.Header.Get("Authorization")
@@ -86,13 +85,15 @@ func CreateLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		Host: hostname,
 		Players: []LobbyPlayer{
 			{
-				ID:        playerid,
-				Name:      hostname,
-				Character: "Harry",
+				ID:          playerid,
+				Name:        hostname,
+				Character:   "Harry",
+				Proficiency: "Arithmancy",
 			},
 		},
 	}
 
+	log.Println("creating lobby:", lobby.Players[0].Character, lobby.Players[0].Proficiency)
 	lobbies[lobbyid] = lobby
 
 	_, err := io.WriteString(w, fmt.Sprint(lobbyid))
@@ -115,9 +116,10 @@ func JoinLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if username != "" {
 		newPlayer := LobbyPlayer{
-			ID:        newPlayerID,
-			Name:      username,
-			Character: "Harry",
+			ID:          newPlayerID,
+			Name:        username,
+			Character:   "Harry",
+			Proficiency: "Arithmancy",
 		}
 		lobby := lobbies[id]
 		lobby.Players = append(lobby.Players, newPlayer)
@@ -145,6 +147,7 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("refresh lobby prof:", lobby.Players[0].Proficiency)
 	res, err := json.Marshal(lobby)
 	if err != nil {
 		log.Println(err)
@@ -181,6 +184,43 @@ func SetCharHandler(w http.ResponseWriter, r *http.Request) {
 	for i, p := range lobbies[id].Players {
 		if p.Name == user {
 			lobbies[id].Players[i].Character = newChar
+			break
+		}
+	}
+
+	hub.SendRefreshRequest()
+}
+
+func SetProfHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("err getting id in setchar:", err.Error())
+	}
+	user := r.Header.Get("Authorization")
+	if user == "" {
+		log.Println("empty username in setchar handler")
+		return
+	}
+	var data map[string]interface{}
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	log.Println(data)
+	newProf, ok := data["proficiency"].(string)
+	if !ok {
+		log.Println("error selecting proficiency")
+		return
+	}
+
+	globalMu.Lock()
+	defer globalMu.Unlock()
+
+	for i, p := range lobbies[id].Players {
+		if p.Name == user {
+			lobbies[id].Players[i].Proficiency = newProf
 			break
 		}
 	}
@@ -237,17 +277,19 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	turnOrder := []string{}
 	for _, p := range lobbies[id].Players {
 		startingPlayers[p.Name] = Player{
-			Name:      p.Name,
-			Character: p.Character,
-			Health:    10,
-			Money:     0,
-			Damage:    0,
-			Deck:      []Card{},
-			Hand:      []Card{},
-			PlayArea:  []Card{},
-			Discard:   []Card{},
+			Name:        p.Name,
+			Character:   p.Character,
+			Health:      10,
+			Money:       0,
+			Damage:      0,
+			Deck:        []Card{},
+			Hand:        []Card{},
+			PlayArea:    []Card{},
+			Discard:     []Card{},
+			Proficiency: p.Proficiency,
 		}
-
+		log.Println("checking prof!!!!1", p.Proficiency)
+		log.Println("checking character: ", p.Character)
 		turnOrder = append(turnOrder, p.Name)
 	}
 

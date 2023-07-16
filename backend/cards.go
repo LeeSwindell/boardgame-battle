@@ -240,6 +240,7 @@ func choChang() Card {
 			ActivePlayerDiscards{Amount: 2},
 			RavenclawDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -311,6 +312,7 @@ func filiusFlitwick() Card {
 			DrawCards{Amount: 1},
 			RavenclawDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -336,6 +338,7 @@ func hogwartsAHistory() Card {
 				Description: "Choose a House dice to roll",
 			},
 		},
+		houseDice: true,
 	}
 }
 
@@ -650,6 +653,7 @@ func cedricDiggory() Card {
 			GainDamage{Amount: 1},
 			HufflepuffDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -720,6 +724,7 @@ func horaceSlughorn() Card {
 			},
 			SlytherinDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -769,6 +774,7 @@ func lunaLovegood() Card {
 			GainStatIfXPlayed{AmountDamage: 1, Cardtype: "item"},
 			RavenclawDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -871,6 +877,7 @@ func pomonaSprout() Card {
 			HealAnyPlayer{Amount: 2},
 			HufflepuffDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -888,6 +895,7 @@ func severusSnape() Card {
 			GainHealth{Amount: 2},
 			SlytherinDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -905,6 +913,7 @@ func swordOfGryffindor() Card {
 			GryffindorDice{},
 			GryffindorDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -983,6 +992,7 @@ func minervaMcgonagall() Card {
 			GainDamage{Amount: 1},
 			GryffindorDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -1148,6 +1158,7 @@ func fredWeasley() Card {
 			WeasleyTwinsEffect{Money: 1},
 			GryffindorDice{},
 		},
+		houseDice: true,
 	}
 }
 
@@ -1165,6 +1176,7 @@ func georgeWeasley() Card {
 			WeasleyTwinsEffect{Health: 1},
 			GryffindorDice{},
 		},
+		houseDice: true,
 	}
 }
 

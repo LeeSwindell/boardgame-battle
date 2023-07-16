@@ -162,6 +162,10 @@ func DrawXCards(user string, gs *Gamestate, amount int) {
 	}
 
 	gs.Players[user] = updated
+	gs.turnStats.CardsDrawn++
+	if gs.Players[user].Character == "Luna" && gs.turnStats.CardsDrawn == 1 {
+		HealAnyPlayer{Amount: 2}.Trigger(gs)
+	}
 }
 
 // Used to draw 5 cards at end of turn, shuffle deck if needed.
@@ -278,6 +282,33 @@ func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
 		}
 	}
 
+	// Check for Neville
+	if change > 0 && gs.Players[gs.CurrentTurn].Character == "Neville" {
+		alreadyHealed := false
+		for _, p := range gs.turnStats.AlliesHealed {
+			if user == p {
+				alreadyHealed = true
+			}
+		}
+		if !alreadyHealed {
+			gs.turnStats.AlliesHealed = append(gs.turnStats.AlliesHealed, user)
+			GivenPlayerChooseOneTargeted{
+				User: user,
+				EffectTargeting: []func(target string, effect Effect) Effect{
+					TargetCreateStats,
+					TargetCreateStats,
+				},
+				Effects: []Effect{
+					ChangeStats{AmountHealth: 1},
+					ChangeStats{AmountMoney: 1},
+				},
+				Options:     []string{"Gain 1 Health", "Gain 1 Money"},
+				Description: "Neville saves the day! Choose one:",
+			}.Trigger(gs)
+		}
+	}
+
+	player = gs.Players[user]
 	player.Health += change
 
 	if player.Health <= 0 {

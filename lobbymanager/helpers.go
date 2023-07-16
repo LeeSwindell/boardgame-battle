@@ -21,15 +21,16 @@ type Gamestate struct {
 }
 
 type Player struct {
-	Name      string
-	Character string
-	Health    int
-	Damage    int
-	Money     int
-	Deck      []Card
-	Hand      []Card
-	Discard   []Card
-	PlayArea  []Card
+	Name        string
+	Character   string
+	Health      int
+	Damage      int
+	Money       int
+	Deck        []Card
+	Hand        []Card
+	Discard     []Card
+	PlayArea    []Card
+	Proficiency string
 }
 
 type Card struct {

@@ -25,6 +25,7 @@ type Gamestate struct {
 type Player struct {
 	Name         string
 	Character    string
+	Proficiency  string
 	Health       int
 	Damage       int
 	Money        int
@@ -46,6 +47,7 @@ type Card struct {
 	Cost      int    `json:"Cost"`
 	effects   []Effect
 	onDiscard func(target string, gs *Gamestate)
+	houseDice bool
 }
 
 type Location struct {
@@ -90,6 +92,8 @@ type TurnStats struct {
 	VillainsKilled int
 	VillainsHit    []int
 	DamageDealt    int
+	CardsDrawn     int
+	AlliesHealed   []string
 }
 
 // Define an effect as something that changes the gamestate.

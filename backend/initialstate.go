@@ -170,10 +170,11 @@ func CreateMarketDeck() []Card {
 }
 
 func CreateMarket() []Card {
-	deck := CreateMarketDeck()
-	market := deck[0:6]
+	// deck := CreateMarketDeck()
+	// market := deck[0:6]
+	// return market
 
-	return market
+	return createTestMarket()
 }
 
 func RefillMarket(index int, gs *Gamestate) {
@@ -184,4 +185,17 @@ func RefillMarket(index int, gs *Gamestate) {
 
 	gs.Market[index] = gs.MarketDeck[0]
 	gs.MarketDeck = gs.MarketDeck[1:]
+}
+
+func createTestMarket() []Card {
+	m := []Card{
+		hogwartsAHistory(),
+		hogwartsAHistory(),
+		hogwartsAHistory(),
+		hogwartsAHistory(),
+		hogwartsAHistory(),
+		hogwartsAHistory(),
+	}
+
+	return m
 }

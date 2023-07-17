@@ -15,6 +15,66 @@ func RonStartingDeck() []Card {
 	return deck
 }
 
+func HarryStartingDeck() []Card {
+	deck := []Card{}
+
+	deck = append(deck, invisibilityCloak())
+	deck = append(deck, hedwig())
+	deck = append(deck, firebolt())
+	for i := 0; i < 7; i++ {
+		deck = append(deck, alohamora())
+	}
+
+	deck = ShuffleCards(deck)
+
+	return deck
+}
+
+func HermioneStartingDeck() []Card {
+	deck := []Card{}
+
+	deck = append(deck, crookshanks())
+	deck = append(deck, talesOfBeedleTheBard())
+	deck = append(deck, timeTurner())
+	for i := 0; i < 7; i++ {
+		deck = append(deck, alohamora())
+	}
+
+	deck = ShuffleCards(deck)
+
+	return deck
+}
+
+func NevilleStartingDeck() []Card {
+	deck := []Card{}
+
+	deck = append(deck, trevor())
+	deck = append(deck, remembrall())
+	deck = append(deck, mandrake())
+	for i := 0; i < 7; i++ {
+		deck = append(deck, alohamora())
+	}
+
+	deck = ShuffleCards(deck)
+
+	return deck
+}
+
+func LunaStartingDeck() []Card {
+	deck := []Card{}
+
+	deck = append(deck, lionHat())
+	deck = append(deck, spectrespecs())
+	deck = append(deck, crumpleHornedSnorkack())
+	for i := 0; i < 7; i++ {
+		deck = append(deck, alohamora())
+	}
+
+	deck = ShuffleCards(deck)
+
+	return deck
+}
+
 // Returns array of active villains, array of villain deck
 func CreateVillains() ([]Villain, []Villain) {
 	villainDeck := []Villain{
@@ -162,6 +222,7 @@ func CreateMarketDeck() []Card {
 		harp(),
 		finiteIncantatem(),
 		confundus(),
+		oldSock(),
 	}
 
 	deck = ShuffleCards(deck)

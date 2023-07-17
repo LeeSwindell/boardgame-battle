@@ -222,6 +222,46 @@ func AskUserToSelectCard(user string, gameid int, choices []Card, prompt string)
 	return selectionId
 }
 
+// Ask the user for input, and display a card. returns the string representing a choice.
+func AskUserInputWithCard(gameid int, user string, path string, prompt string, choices []string) string {
+	url := fmt.Sprintf("%s/game/%d/userchoicewithcard/%s", config.LobbyManagerURL, gameid, user)
+
+	var dataToSend = struct {
+		Path    string   `json:"path"`
+		Choices []string `json:"choices"`
+		Prompt  string   `json:"prompt"`
+	}{Path: path, Prompt: prompt, Choices: choices}
+
+	data, err := json.Marshal(dataToSend)
+	if err != nil {
+		log.Println("err marshaling options:", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Println("err sending AskUserInputWithCard POST:", err.Error())
+	}
+	client := http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
+	defer res.Body.Close()
+
+	// Should receive a string in response.
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println("err reading response body:", err.Error())
+	}
+
+	Logger(string(body))
+
+	selection := string(body)
+
+	return selection
+}
+
 func getGsForGameID(r *http.Request) (*Gamestate, bool) {
 	id, _ := getIdAndUser(r)
 	globalMu.Lock()

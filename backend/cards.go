@@ -12,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		effects:  []Effect{GainMoney{Amount: 1}},
+		effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 10}},
 	}
 }
 
@@ -64,6 +64,248 @@ func bertieBottsEveryFlavourBeans() Card {
 		effects: []Effect{
 			GainMoney{Amount: 1},
 			GainDamagePerAllyPlayed{},
+		},
+	}
+}
+
+func crookshanks() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Crookshanks",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/crookshanks.jpg",
+		CardType: "ally",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 1},
+					GainHealth{Amount: 2},
+				},
+				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func crumpleHornedSnorkack() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Crumple-horned Snorkack",
+		SetId:    "box 1",
+		ImgPath:  "/images/starters/crumplehornedsnorkack.jpg",
+		CardType: "ally",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 1},
+					GainHealth{Amount: 2},
+				},
+				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func firebolt() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Firebolt",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/firebolt.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainDamage{Amount: 1},
+			MoneyIfVillainKilled{Amount: 1},
+		},
+	}
+}
+
+func hedwig() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Hedwig",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/hedwig.jpg",
+		CardType: "ally",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 1},
+					GainHealth{Amount: 2},
+				},
+				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func invisibilityCloak() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Invisibility Cloak",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/invisibilitycloak.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainMoney{Amount: 1},
+		},
+	}
+}
+
+func lionHat() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Lion Hat",
+		SetId:    "box 1",
+		ImgPath:  "/images/starters/lionhat.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainMoney{Amount: 1},
+			LionHatEffect{},
+		},
+	}
+}
+
+type LionHatEffect struct{}
+
+func (effect LionHatEffect) Trigger(gs *Gamestate) {
+	brooms := make(map[string]bool)
+	brooms["Quidditch Gear"] = true
+	brooms["Firebolt"] = true
+	brooms["Cleansweep 11"] = true
+	brooms["Nimbus Two Thousand And One"] = true
+
+	cur := gs.CurrentTurn
+	for _, p := range gs.Players {
+		if p.Name != cur {
+			for _, c := range p.Hand {
+				if brooms[c.Name] {
+					ChangeStats{Target: gs.CurrentTurn, AmountDamage: 1}.Trigger(gs)
+					return
+				}
+			}
+		}
+	}
+}
+
+func mandrake() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Mandrake",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/mandrake.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 1},
+					HealAnyPlayer{Amount: 2},
+				},
+				Options:     []string{"Gain 1 Damage", "Heal any player 2"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func remembrall() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Remembrall",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/remembrall.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainMoney{Amount: 1},
+		},
+		onDiscard: func(target string, gs *Gamestate) {
+			ChangeStats{
+				Target:      target,
+				AmountMoney: 2,
+			}.Trigger(gs)
+		},
+	}
+}
+
+func talesOfBeedleTheBard() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Tales of Beedle the Bard",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/talesofbeedlethebard.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainMoney{Amount: 2},
+					AllPlayersGainMoney{Amount: 1},
+				},
+				Options:     []string{"Gain 2 Money", "All players gain 1 Money"},
+				Description: "Choose one:",
+			},
+		},
+	}
+}
+
+func spectrespecs() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Spectrespecs",
+		SetId:    "box 1",
+		ImgPath:  "/images/starters/spectrespecs.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainMoney{Amount: 1},
+			ScryDarkarts{},
+		},
+	}
+}
+
+func timeTurner() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Time Turner",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/timeturner.jpg",
+		CardType: "item",
+		Cost:     0,
+		effects: []Effect{
+			GainMoney{Amount: 1},
+			PurchasedXGoToDeck{"spell"},
+		},
+	}
+}
+
+func trevor() Card {
+	return Card{
+		Id:       int(uuid.New().ID()),
+		Name:     "Trevor",
+		SetId:    "game 1",
+		ImgPath:  "/images/starters/trevor.jpg",
+		CardType: "ally",
+		Cost:     0,
+		effects: []Effect{
+			ChooseOne{
+				Effects: []Effect{
+					GainDamage{Amount: 1},
+					GainHealth{Amount: 2},
+				},
+				Options:     []string{"Gain 1 Damage", "Gain 2 Health"},
+				Description: "Choose one:",
+			},
 		},
 	}
 }

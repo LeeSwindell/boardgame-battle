@@ -14,6 +14,7 @@ type ChangeStats struct {
 	AmountCards     int
 	AmountToDiscard int
 	DiscardPrompt   string
+	Cause           string
 }
 
 func (effect ChangeStats) Trigger(gs *Gamestate) {
@@ -29,6 +30,10 @@ func (effect ChangeStats) Trigger(gs *Gamestate) {
 	DrawXCards(effect.Target, gs, effect.AmountCards)
 	if effect.AmountToDiscard != 0 {
 		GivenPlayerDiscards{User: effect.Target, Prompt: effect.DiscardPrompt, Amount: effect.AmountToDiscard}.Trigger(gs)
+		cond := effect.Cause == "villain" || effect.Cause == "darkart"
+		if player.Proficiency == "Defense Against the Dark Arts" && cond {
+			ChangeStats{Target: effect.Target, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+		}
 	}
 }
 
@@ -305,6 +310,7 @@ func (effect GivenPlayerDiscards) Trigger(gs *Gamestate) {
 type ActivePlayerDiscards struct {
 	Amount int
 	Prompt string
+	Cause  string
 }
 
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
@@ -324,6 +330,11 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
 		DiscardFromId(user, discardCardId, gs)
 		cards = gs.Players[user].Hand
+
+		cond := effect.Cause == "villain" || effect.Cause == "darkart"
+		if player.Proficiency == "Defense Against the Dark Arts" && cond {
+			ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+		}
 
 		if len(cards) == 0 {
 			return
@@ -497,7 +508,7 @@ func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
 	if len(playernames) == 0 {
 		return
 	}
-	choice := AskUserToSelectPlayer(0, gs.CurrentTurn, playernames)
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 
 	// Use helpers to change player these values before getting/setting player
 	ChangePlayerHealth(choice, effect.AmountHealth, gs)
@@ -826,6 +837,7 @@ func (effect DamageAllPerDetention) Trigger(gs *Gamestate) {
 type AllDiscard struct {
 	Amount int // doesn't do anything.
 	Prompt string
+	Cause  string
 }
 
 // Only discards one card atm.
@@ -855,6 +867,11 @@ func (effect AllDiscard) Trigger(gs *Gamestate) {
 
 		player.Hand = cards
 		gs.Players[user] = player
+
+		cond := effect.Cause == "villain" || effect.Cause == "darkart"
+		if player.Proficiency == "Defense Against the Dark Arts" && cond {
+			ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+		}
 
 		event := Event{senderId: -1, message: "player discarded", data: user}
 		eventBroker.Messages <- event
@@ -1381,9 +1398,35 @@ func (effect ActivePlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 	}
 
 	if len(choices) != 0 {
-		prompt := "Choose an item from your discard to gain to your hand!"
+		prompt := "Choose a card from your discard to gain to your hand!"
 		cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 		MoveCardFromDiscardToHand(user, cardId, gs)
+	}
+}
+
+type ActivePlayerSearchesDeckForX struct {
+	CardType      string // "any" if it doesn't matter what type.
+	Target        string
+	CostRestraint int
+}
+
+func (effect ActivePlayerSearchesDeckForX) Trigger(gs *Gamestate) {
+	user := gs.CurrentTurn
+	if effect.Target != "" {
+		user = effect.Target
+	}
+
+	choices := []Card{}
+	for _, c := range gs.Players[user].Deck {
+		if (c.CardType == effect.CardType || effect.CardType == "any") && (c.Cost <= effect.CostRestraint || effect.CostRestraint == 0) {
+			choices = append(choices, c)
+		}
+	}
+
+	if len(choices) != 0 {
+		prompt := "Choose a card from your deck to gain to your hand"
+		cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
+		MoveCardFromDeckToHand(user, cardId, gs)
 	}
 }
 
@@ -1571,6 +1614,7 @@ type DiscardACard struct {
 	Target   string
 	Prompt   string
 	Cardtype string // "any" for any card
+	Cause    string
 }
 
 func (effect DiscardACard) Trigger(gs *Gamestate) {
@@ -1595,6 +1639,10 @@ func (effect DiscardACard) Trigger(gs *Gamestate) {
 
 	choice := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 	DiscardFromId(user, choice, gs)
+	cond := effect.Cause == "villain" || effect.Cause == "darkart"
+	if gs.Players[user].Proficiency == "Defense Against the Dark Arts" && cond {
+		ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+	}
 
 	assertUniqueCards(gs)
 	log.Println("ending DiscardACard ^^^^^ ONE ERROR MEANS BUG")
@@ -1622,4 +1670,34 @@ func (effect DamageAllPerCreature) Trigger(gs *Gamestate) {
 	}
 
 	DamageAllPlayers{Amount: damage}.Trigger(gs)
+}
+
+type Scry struct {
+	User string
+}
+
+func (effect Scry) Trigger(gs *Gamestate) {
+	player := gs.Players[effect.User]
+
+	topCard := player.Deck[len(player.Deck)-1]
+	path := topCard.ImgPath
+	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "Discard or place card back on deck:", []string{"Discard", "Place on deck"})
+
+	if choice == "Discard" {
+		DiscardFromId(effect.User, topCard.Id, gs)
+	}
+}
+
+type ScryDarkarts struct {
+	User string
+}
+
+func (effect ScryDarkarts) Trigger(gs *Gamestate) {
+
+	path := gs.DarkArts[len(gs.DarkArts)-1].ImgPath
+	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "You look at the top of the Dark Arts deck:", []string{"Discard", "Place on deck"})
+
+	if choice == "Discard" {
+		LoadNewDarkArt(gs)
+	}
 }

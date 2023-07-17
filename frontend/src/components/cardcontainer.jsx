@@ -42,6 +42,15 @@ function CardContainer({
       });
   }
 
+  function UseProficiencyHandler() {
+    // logger.log('damaging villain: ', id);
+    gameapi
+      .get(`/${gameid}/useproficiency`)
+      .then(() => {
+        // logger.log(`damaged villain ${id}`, )
+      });
+  }
+
   const onClick = (e) => {
     e.preventDefault();
     if (e.nativeEvent.button === 2) {
@@ -55,6 +64,10 @@ function CardContainer({
     }
     if (cardType === 'market' && e.nativeEvent.button === 0) {
       buyCardHandler(cardId);
+    }
+    if (cardType === 'proficiency' && e.nativeEvent.button === 0) {
+      logger.log('use prof handler');
+      UseProficiencyHandler();
     }
   };
 

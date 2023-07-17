@@ -27,7 +27,7 @@ func flipendo() DarkArt {
 		SetId:   "game 1",
 		effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
-			ActivePlayerDiscards{Amount: 1, Prompt: "Flipendo! Discard a card"},
+			ActivePlayerDiscards{Amount: 1, Prompt: "Flipendo! Discard a card", Cause: "darkart"},
 		},
 	}
 }
@@ -120,7 +120,7 @@ func (effect HeirOfSlytherinDiceEffect) Trigger(gs *Gamestate) {
 	case 1:
 		HealAllVillains{Amount: 1}.Trigger(gs)
 	case 2:
-		AllDiscard{Amount: 1, Prompt: effect.Prompt}.Trigger(gs)
+		AllDiscard{Amount: 1, Prompt: effect.Prompt, Cause: "darkart"}.Trigger(gs)
 	default:
 		DamageAllPlayers{Amount: 1}.Trigger(gs)
 	}
@@ -231,6 +231,7 @@ func blastended() DarkArt {
 					AmountHealth:    -1,
 					AmountToDiscard: 1,
 					DiscardPrompt:   "Blast-ended Skrewt! Discard a card:",
+					Cause:           "darkart",
 				},
 			},
 		},
@@ -296,6 +297,10 @@ func legilimencyEffect(card Card, user string, gs *Gamestate) {
 	}
 	player.Discard = append(player.Discard, card)
 	player.Deck = player.Deck[:len(player.Deck)-1]
+	gs.Players[user] = player
+	if player.Proficiency == "Defense Against the Dark Arts" {
+		ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+	}
 	eventBroker.Messages <- PlayerDiscarded
 }
 
@@ -312,7 +317,7 @@ func obliviate() DarkArt {
 					TargetCreateStats,
 				},
 				Effects: []Effect{
-					DiscardACard{Cardtype: "spell", Prompt: "Discard a spell"},
+					DiscardACard{Cardtype: "spell", Prompt: "Discard a spell", Cause: "darkart"},
 					ChangeStats{AmountHealth: -2},
 				},
 				Options:     []string{"Discard a spell", "Lose 2 Health"},
@@ -350,6 +355,11 @@ func OppugnoEffect(card Card, user string, gs *Gamestate) {
 	}
 	player.Discard = append(player.Discard, card)
 	player.Deck = player.Deck[:len(player.Deck)-1]
+	gs.Players[user] = player
+	if player.Proficiency == "Defense Against the Dark Arts" {
+		ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+	}
+
 	eventBroker.Messages <- PlayerDiscarded
 }
 
@@ -378,7 +388,7 @@ func poison() DarkArt {
 					TargetCreateStats,
 				},
 				Effects: []Effect{
-					DiscardACard{Cardtype: "ally", Prompt: "Discard an ally"},
+					DiscardACard{Cardtype: "ally", Prompt: "Discard an ally", Cause: "darkart"},
 					ChangeStats{AmountHealth: -2},
 				},
 				Options:     []string{"Discard an ally", "Lose 2 Health"},
@@ -418,7 +428,7 @@ func relashio() DarkArt {
 					TargetCreateStats,
 				},
 				Effects: []Effect{
-					DiscardACard{Cardtype: "item", Prompt: "Discard an item"},
+					DiscardACard{Cardtype: "item", Prompt: "Discard an item", Cause: "darkart"},
 					ChangeStats{AmountHealth: -2},
 				},
 				Options:     []string{"Discard an item", "Lose 2 Health"},

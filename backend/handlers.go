@@ -27,6 +27,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	var cardId CardId
 	json.NewDecoder(r.Body).Decode(&cardId)
 
+	triggerDivination := false
 	for _, c := range gs.Players[user].Hand {
 		if c.Id == cardId.Id {
 			MoveToPlayed(user, c.Id, gs)
@@ -36,6 +37,9 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 				eventBroker.Messages <- SpellPlayed
 			case "item":
 				eventBroker.Messages <- ItemPlayed
+				if gs.Players[user].Proficiency == "Divination" {
+					triggerDivination = true
+				}
 			case "ally":
 				eventBroker.Messages <- AllyPlayed
 			}
@@ -54,6 +58,19 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 				gs.turnStats.ItemsPlayed += 1
 			case "ally":
 				gs.turnStats.AlliesPlayed += 1
+			}
+
+			if gs.Players[user].Proficiency == "Potions" && !gs.Players[user].proficiencyUsed {
+				if gs.turnStats.AlliesPlayed >= 1 && gs.turnStats.ItemsPlayed >= 1 && gs.turnStats.SpellsPlayed >= 1 {
+					SelectPlayerToGainStats{AmountHealth: 1, AmountDamage: 1}.Trigger(gs)
+					p := gs.Players[user]
+					p.proficiencyUsed = true
+					gs.Players[user] = p
+				}
+			}
+
+			if triggerDivination {
+				Scry{User: user}.Trigger(gs)
 			}
 		}
 	}
@@ -93,7 +110,7 @@ func EndTurnHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	gs.DarkArtsPlayed = []DarkArt{}
 	RefillHand(user, gs)
 	NextTurnInOrder(gs)
-	gs.turnStats = TurnStats{}
+	gs.turnStats = TurnStats{AlliesHealed: map[string]int{}}
 	ResetPlayerInfo(gs)
 
 	SendLobbyUpdate(gameid, gs)
@@ -202,6 +219,14 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
 			}
 
+			// check for Care of Magical Creatures proficiency
+			if player.Proficiency == "Care of Magical Creatures" && !player.proficiencyUsed {
+				player.proficiencyUsed = true
+				gs.Players[user] = player
+				HealAnyPlayer{Amount: 2}.Trigger(gs)
+				player = gs.Players[user]
+			}
+
 			if !alreadyHit && gs.Villains[i].Name != "Norbert" {
 				gs.turnStats.VillainsHit = append(gs.turnStats.VillainsHit, gs.Villains[i].Id)
 				eventBroker.Messages <- NewVillainHitEvent
@@ -214,6 +239,9 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 				// trigger villain death effect.
 				for _, effect := range gs.Villains[i].deathEffect {
 					effect.Trigger(gs)
+				}
+				if player.Proficiency == "Care of Magical Creatures" && v.villainType == "creature" || v.villainType == "villain-creature" {
+					RemoveFromLocation{Amount: 1}.Trigger(gs)
 				}
 
 				// remove villain, get new one
@@ -246,12 +274,76 @@ func BuyCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 	}
 
 	player := gs.Players[user]
+	cond1 := player.Proficiency == "Arithmancy"
 	for i, c := range gs.Market {
-		if c.Id == cardid && player.Money >= c.Cost {
+		if c.Id == cardid && (player.Money >= c.Cost || (cond1 && c.houseDice && player.Money >= c.Cost-1)) {
 			PurchaseCard(c, user, gs)
 			RefillMarket(i, gs)
 		}
 	}
 
 	SendLobbyUpdate(gameid, gs)
+}
+
+func UseProficiencyHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	_, user := getIdAndUser(r)
+	if gs.CurrentTurn != user {
+		return
+	}
+
+	player := gs.Players[user]
+	switch player.Proficiency {
+	case "Charms":
+		if player.proficiencyUsed {
+			return
+		}
+		numSpells := 0
+		for _, c := range player.Hand {
+			if c.CardType == "spell" {
+				numSpells++
+			}
+		}
+		if numSpells < 2 {
+			return
+		}
+		player.proficiencyUsed = true
+		gs.Players[user] = player
+
+		DiscardACard{Target: user, Prompt: "Discard 1st spell", Cardtype: "spell"}.Trigger(gs)
+		DiscardACard{Target: user, Prompt: "Discard 2nd spell", Cardtype: "spell"}.Trigger(gs)
+		AllDrawCards{Amount: 1}.Trigger(gs)
+		AllPlayersGainMoney{Amount: 1}.Trigger(gs)
+
+	case "Transfiguration":
+		if player.proficiencyUsed {
+			return
+		}
+		numItems := 0
+		for _, c := range player.Hand {
+			if c.CardType == "item" {
+				numItems++
+			}
+		}
+		if numItems == 0 {
+			return
+		}
+		player.proficiencyUsed = true
+		gs.Players[user] = player
+		DiscardACard{Target: user, Prompt: "Discard an item", Cardtype: "item"}.Trigger(gs)
+		ActivePlayerSearchesDeckForX{CardType: "any", Target: user, CostRestraint: 5}.Trigger(gs)
+
+	case "Flying Lessons":
+		if player.proficiencyUsed || player.Money < 5 {
+			return
+		}
+		player.Money -= 5
+		player.proficiencyUsed = true
+		gs.Players[user] = player
+		RemoveFromLocation{Amount: 1}.Trigger(gs)
+	}
+
+	SendLobbyUpdate(gs.gameid, gs)
 }

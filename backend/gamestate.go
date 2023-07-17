@@ -23,19 +23,20 @@ type Gamestate struct {
 }
 
 type Player struct {
-	Name         string
-	Character    string
-	Proficiency  string
-	Health       int
-	Damage       int
-	Money        int
-	Deck         []Card
-	Hand         []Card
-	Discard      []Card
-	PlayArea     []Card
-	spellsToDeck bool
-	itemsToDeck  bool
-	alliesToDeck bool
+	Name            string
+	Character       string
+	Proficiency     string
+	Health          int
+	Damage          int
+	Money           int
+	Deck            []Card
+	Hand            []Card
+	Discard         []Card
+	PlayArea        []Card
+	spellsToDeck    bool
+	itemsToDeck     bool
+	alliesToDeck    bool
+	proficiencyUsed bool
 }
 
 type Card struct {
@@ -93,7 +94,7 @@ type TurnStats struct {
 	VillainsHit    []int
 	DamageDealt    int
 	CardsDrawn     int
-	AlliesHealed   []string
+	AlliesHealed   map[string]int
 }
 
 // Define an effect as something that changes the gamestate.

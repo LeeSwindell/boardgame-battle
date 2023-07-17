@@ -452,6 +452,28 @@ func AskUserToSelectCardHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(choice))
 }
 
+func AskUserInputWithCardHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	user, ok := vars["user"]
+	if !ok {
+		log.Println("err getting username in AskUserToSelectCard")
+	}
+
+	var data struct {
+		Path    string   `json:"path"`
+		Choices []string `json:"choices"`
+		Prompt  string   `json:"prompt"`
+	}
+	json.NewDecoder(r.Body).Decode(&data)
+
+	listenID := hub.askPlayerChoiceWithCard(user, data.Path, data.Choices, data.Prompt)
+	listenChan := messageBroadcaster.RegisterListener(listenID)
+
+	choice := <-listenChan
+	log.Println("lb choice select card", choice)
+	w.Write([]byte(choice))
+}
+
 func SubmitUserChoiceHandler(w http.ResponseWriter, r *http.Request) {
 	var choice ChoiceMessage
 	json.NewDecoder(r.Body).Decode(&choice)

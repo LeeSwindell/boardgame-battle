@@ -17,7 +17,8 @@ type Message struct {
 	Type        string      `json:"type"`
 	Data        interface{} `json:"data"`
 	Description string      `json:"description"`
-	ID          int         `json:"id"`
+	CardPath    string
+	ID          int `json:"id"`
 }
 
 func newHub() *Hub {
@@ -80,6 +81,27 @@ func (h *Hub) askPlayerChoice(user string, choices []string, description string)
 		Type:        "UserInput",
 		Data:        choices,
 		Description: description,
+		ID:          id,
+	}
+
+	for c := range h.clients {
+		if c.username == user {
+			c.conn.WriteJSON(message)
+		}
+	}
+
+	return id
+}
+
+func (h *Hub) askPlayerChoiceWithCard(user string, path string, choices []string, prompt string) int {
+	// The id is a number to subscribe for the users choice once it comes in - used by the
+	// function calling askPlayerChoice
+	id := int(uuid.New().ID())
+	message := Message{
+		Type:        "UserInput",
+		Data:        choices,
+		Description: prompt,
+		CardPath:    path,
 		ID:          id,
 	}
 

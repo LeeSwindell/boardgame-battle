@@ -109,7 +109,7 @@ type DamageIfDiscard struct {
 	Id     int
 }
 
-// only damages active player. not player who discarded
+// FIX only damages active player. not player who discarded
 func (effect DamageIfDiscard) Trigger(gs *Gamestate) {
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
@@ -409,7 +409,7 @@ func (effect FluffyEffect) Trigger(gs *Gamestate) {
 		ChooseOne{
 			Effects: []Effect{
 				DamageCurrentPlayer{Amount: 1},
-				ActivePlayerDiscards{Amount: 1},
+				ActivePlayerDiscards{Amount: 1, Cause: "villain"},
 			},
 			Options:     []string{"Lose a life", "Discard a card"},
 			Description: desc,
@@ -506,7 +506,7 @@ func (effect TomRiddleEffect) Trigger(gs *Gamestate) {
 		ChooseOne{
 			Effects: []Effect{
 				DamageCurrentPlayer{Amount: 2},
-				ActivePlayerDiscards{Amount: 1},
+				ActivePlayerDiscards{Amount: 1, Cause: "villain"},
 			},
 			Options:     []string{"Lose 2 life", "Discard a card"},
 			Description: desc,
@@ -583,7 +583,11 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 		}
 		player.Discard = append(player.Discard, topCard)
 		player.Deck = player.Deck[:len(player.Deck)-1]
+		gs.Players[user] = player
 		AddToLocation{Amount: 1}.Trigger(gs)
+		if player.Proficiency == "Defense Against the Dark Arts" {
+			ChangeStats{Target: user, AmountDamage: 1, AmountHealth: 1}.Trigger(gs)
+		}
 		eventBroker.Messages <- PlayerDiscarded
 	}
 
@@ -616,7 +620,7 @@ func voledmortFive() Villain {
 		villainType: "villain",
 		effect: []Effect{
 			DamageCurrentPlayer{Amount: 1},
-			ActivePlayerDiscards{Amount: 1, Prompt: "Voldemort attacks! Discard a card"},
+			ActivePlayerDiscards{Amount: 1, Prompt: "Voldemort attacks! Discard a card", Cause: "villain"},
 		},
 		deathEffect:  []Effect{},
 		playBeforeDA: false,

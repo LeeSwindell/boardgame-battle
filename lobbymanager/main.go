@@ -116,6 +116,7 @@ func main() {
 	r.HandleFunc("/lm/game/{id}/askusertodiscard/{user}", AskUserToDiscardHandler)
 	r.HandleFunc("/lm/game/{id}/askusertoselectplayer/{user}", AskUserToSelectPlayerHandler)
 	r.HandleFunc("/lm/game/{id}/askusertoselectcard/{user}", AskUserToSelectCardHandler)
+	r.HandleFunc("/lm/game/{id}/userchoicewithcard/{user}", AskUserInputWithCardHandler)
 	r.HandleFunc("/lm/game/{id}/submituserchoice", SubmitUserChoiceHandler)
 	r.HandleFunc("/lm/testserver", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello from the lobby manager!")

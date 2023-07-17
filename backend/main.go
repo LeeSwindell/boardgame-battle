@@ -102,11 +102,16 @@ func RunGameServer() {
 	r.HandleFunc("/game/{id}/undo", func(w http.ResponseWriter, r *http.Request) {
 		gs, ok := getGsForGameID(r)
 		if !ok || !gs.started {
-			log.Println("undo exiting...")
 			return
 		}
-		log.Println("undoing")
 		undoHandler(w, r, gs)
+	})
+	r.HandleFunc("/game/{id}/useproficiency", func(w http.ResponseWriter, r *http.Request) {
+		gs, ok := getGsForGameID(r)
+		if !ok || !gs.started {
+			return
+		}
+		UseProficiencyHandler(w, r, gs)
 	})
 	r.HandleFunc("/game/testserver", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "hello, world!")
@@ -155,13 +160,26 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		CurrentTurn:     data.TurnOrder[0],
 		TurnOrder:       data.TurnOrder,
 		villainDeck:     villainDeck,
-		turnStats:       TurnStats{},
+		turnStats:       TurnStats{AlliesHealed: map[string]int{}},
 		mu:              sync.Mutex{},
 		gameid:          data.ID,
 	}
 
 	for user, p := range gs.Players {
-		p.Deck = RonStartingDeck()
+		switch p.Character {
+		case "Ron":
+			p.Deck = RonStartingDeck()
+		case "Harry":
+			p.Deck = HarryStartingDeck()
+		case "Hermione":
+			p.Deck = HermioneStartingDeck()
+		case "Neville":
+			p.Deck = NevilleStartingDeck()
+		case "Luna":
+			p.Deck = LunaStartingDeck()
+		default:
+			log.Println("what happened here??")
+		}
 		p.Hand = []Card{}
 		p.PlayArea = []Card{}
 		p.Discard = []Card{}

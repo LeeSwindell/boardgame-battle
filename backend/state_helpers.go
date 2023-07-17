@@ -61,6 +61,18 @@ func MoveCardFromDiscardToHand(user string, cardId int, gs *Gamestate) {
 	}
 }
 
+// Moves the card with cardId from the users discard to their hand.
+func MoveCardFromDeckToHand(user string, cardId int, gs *Gamestate) {
+	player := gs.Players[user]
+	for i, c := range player.Deck {
+		if c.Id == cardId {
+			player.Deck = RemoveCardAtIndex(player.Deck, i)
+			player.Hand = append(player.Hand, c)
+			gs.Players[user] = player
+		}
+	}
+}
+
 // updates values of a player - shuffling discard pile into their deck
 func ShuffleDiscardToDeck(player *Player) {
 	addToDeck := ShuffleCards(player.Discard)
@@ -282,29 +294,43 @@ func ChangePlayerHealth(user string, change int, gs *Gamestate) bool {
 		}
 	}
 
+	startingHealed, alreadyHealed := gs.turnStats.AlliesHealed[user]
+	if change > 0 {
+		gs.turnStats.AlliesHealed[user] += change
+	}
+
 	// Check for Neville
-	if change > 0 && gs.Players[gs.CurrentTurn].Character == "Neville" {
-		alreadyHealed := false
-		for _, p := range gs.turnStats.AlliesHealed {
-			if user == p {
-				alreadyHealed = true
+	// change already healed to map[user]int
+	if change > 0 && gs.Players[gs.CurrentTurn].Character == "Neville" && !alreadyHealed {
+		log.Println("give a choice then!")
+		GivenPlayerChooseOneTargeted{
+			User: user,
+			EffectTargeting: []func(target string, effect Effect) Effect{
+				TargetCreateStats,
+				TargetCreateStats,
+			},
+			Effects: []Effect{
+				ChangeStats{AmountHealth: 1},
+				ChangeStats{AmountMoney: 1},
+			},
+			Options:     []string{"Gain 1 Health", "Gain 1 Money"},
+			Description: "Neville saves the day! Choose one:",
+		}.Trigger(gs)
+	}
+
+	cond := gs.turnStats.AlliesHealed[user] >= 3 && startingHealed < 3
+	if gs.Players[gs.CurrentTurn].Proficiency == "Herbology" && cond {
+		DrawXCards(user, gs, 1)
+		p := gs.Players[gs.CurrentTurn]
+		gs.Players[gs.CurrentTurn] = p
+	}
+
+	// Check for invisibility cloak
+	if change < 0 {
+		for _, c := range player.Hand {
+			if c.Name == "Invisibility Cloak" {
+				change = -1
 			}
-		}
-		if !alreadyHealed {
-			gs.turnStats.AlliesHealed = append(gs.turnStats.AlliesHealed, user)
-			GivenPlayerChooseOneTargeted{
-				User: user,
-				EffectTargeting: []func(target string, effect Effect) Effect{
-					TargetCreateStats,
-					TargetCreateStats,
-				},
-				Effects: []Effect{
-					ChangeStats{AmountHealth: 1},
-					ChangeStats{AmountMoney: 1},
-				},
-				Options:     []string{"Gain 1 Health", "Gain 1 Money"},
-				Description: "Neville saves the day! Choose one:",
-			}.Trigger(gs)
 		}
 	}
 
@@ -329,6 +355,9 @@ func StunPlayer(user string, gs *Gamestate) {
 	assertUniqueCards(gs)
 	Logger("good at start? ^^^")
 	player := gs.Players[user]
+	player.Money = 0
+	player.Damage = 0
+	gs.Players[user] = player
 	discardAmount := len(player.Hand) / 2
 	for i := 0; i < discardAmount; i++ {
 		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
@@ -408,13 +437,18 @@ func ResetPlayerInfo(gs *Gamestate) {
 		player.alliesToDeck = false
 		player.itemsToDeck = false
 		player.spellsToDeck = false
+		player.proficiencyUsed = false
 		gs.Players[user] = player
 	}
 }
 
 func PurchaseCard(c Card, user string, gs *Gamestate) {
 	player := gs.Players[user]
-	player.Money -= c.Cost
+	if c.houseDice && player.Proficiency == "Arithmancy" {
+		player.Money -= c.Cost - 1
+	} else {
+		player.Money -= c.Cost
+	}
 	gs.Players[user] = player
 
 	switch c.CardType {
@@ -443,6 +477,9 @@ func PurchaseCard(c Card, user string, gs *Gamestate) {
 			}.Trigger(gs)
 		} else {
 			GainCardToDiscard{user: user, card: c}.Trigger(gs)
+		}
+		if player.Proficiency == "History of Magic" {
+			HealAnyPlayer{Amount: 1}.Trigger(gs)
 		}
 	case "ally":
 		if player.alliesToDeck {
@@ -547,6 +584,18 @@ func DiscardFromId(user string, cardId int, gs *Gamestate) {
 	for i, c := range player.Hand {
 		if c.Id == cardId {
 			player.Hand = RemoveCardAtIndex(player.Hand, i)
+			player.Discard = append(player.Discard, c)
+			gs.Players[user] = player
+
+			// Wrap the player mapping around onDiscard since it mutates the state directly.
+			if c.onDiscard != nil {
+				c.onDiscard(user, gs)
+			}
+		}
+	}
+	for i, c := range player.Deck {
+		if c.Id == cardId {
+			player.Deck = RemoveCardAtIndex(player.Deck, i)
 			player.Discard = append(player.Discard, c)
 			gs.Players[user] = player
 

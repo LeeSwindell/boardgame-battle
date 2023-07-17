@@ -17,6 +17,8 @@ import { logger } from '../logger/logger';
 import useLobbySocket from '../hooks/useLobbySocket';
 import EndGame from '../components/Endgame';
 import Undo from '../components/Undo';
+import Proficiency from '../components/Proficiency';
+import Card from '../components/Card';
 
 // use react context to pass inspect around
 const InspectContext = createContext();
@@ -56,6 +58,7 @@ function GamestateProvider({ children }) {
             inputs: data.data,
             description: data.description,
             messageID: data.id,
+            cardpath: data.CardPath,
           });
           logger.log('user input:::::', data);
           break;
@@ -144,6 +147,16 @@ function GameWithState() {
           <div className="fixed w-full h-full backdrop-contrast-50">
             <div className="flex w-full h-full justify-center items-center">
               <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl items-center">
+                {
+                  userInput.cardpath
+                  && (
+                  <div className="flex w-full justify-center">
+                    <div className="items-center w-32 h-40 border place-self-center">
+                      <Card src={userInput.cardpath} alt="top card of deck" />
+                    </div>
+                  </div>
+                  )
+                }
                 <p className="p-2 w-full text-center font-bold">
                   {userInput.description}
                 </p>
@@ -188,11 +201,13 @@ function GameWithState() {
                   .map(([username]) => (<PlayerInfo key={username} username={username} />))
               }
               <EndTurn />
-              <Undo />
+              {/* <Undo /> */}
             </div>
             <div className="flex flex-col items-center">
               <div className="text-center">Discard Pile</div>
               <DiscardPile />
+              {gamestate
+              && <CardContainer cardType="proficiency" card={<Proficiency name={gamestate.players[localStorage.getItem('sessionid')].Proficiency} size="wide" />} />}
             </div>
           </div>
         </div>
@@ -204,6 +219,16 @@ function GameWithState() {
       <div className="fixed w-full h-full backdrop-contrast-50">
         <div className="flex w-full h-full justify-center items-center">
           <div className="border rounded-lg p-2 bg-white z-50 shadow-2xl items-center">
+            {
+              userInput.cardpath
+              && (
+              <div className="flex w-full justify-center">
+                <div className="items-center w-32 h-40 border place-self-center">
+                  <Card src={userInput.cardpath} alt="top card of deck" />
+                </div>
+              </div>
+              )
+            }
             <p className="p-2 w-full text-center font-bold">
               {userInput.description}
             </p>

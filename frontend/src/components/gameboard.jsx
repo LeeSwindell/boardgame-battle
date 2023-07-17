@@ -32,20 +32,6 @@ function Gameboard(props) {
 
       {/* Actual board */}
       <div className="fixed mx-1 top-1 left-72 -z-10">
-        {/* Top Row */}
-        {/* <div className="flex flex-none space-x-8 justify-between border items-center">
-
-          <div className="flex space-x-2 justify-center">
-            <DarkArtCard />
-            <CardContainer card={<Monster />} size="small" extra="m-4" />
-          </div>
-          <div className="flex flex-none space-x-2 justify-end">
-            Top Row Market
-            {gamestate
-          && gamestate.market.slice(0, 3).map((c) => <CardContainer key={c.Id} cardId={c.Id} cardType="market" card={<MarketCard img={c.ImgPath} />} size="reg" />)}
-          </div>
-        </div> */}
-
         {/* Middle Row */}
         <div className="flex flex-none ml-2 p-1 space-x-8 justify-between items-center">
           <div className="flex flex-none space-x-1 justify-end">

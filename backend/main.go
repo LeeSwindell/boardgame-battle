@@ -146,7 +146,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("****players:", data.StartingPlayers)
 
-	villains, villainDeck := CreateVillains()
+	villains, villainDeck := CreateBox1Villains()
 	gs := &Gamestate{
 		Players:         data.StartingPlayers,
 		Villains:        villains,

@@ -95,13 +95,47 @@ func CreateVillains() ([]Villain, []Villain) {
 		troll(),
 		norbert(),
 	}
-	// for testing the latest villains.
-	// villains := villainDeck[len(villainDeck)-3:]
 
 	villainDeck = ShuffleVillains(villainDeck)
-	villains := villainDeck[:2]
-	// testing pettigrew
-	villains = append(villains, peterPettigrew())
+	villains := villainDeck[:3]
+	villainDeck = villainDeck[3:]
+	villainDeck = append(villainDeck, voledmortFive())
+
+	for i := range villains {
+		villains[i].Active = true
+	}
+
+	return villains, villainDeck
+}
+
+func CreateBox1Villains() ([]Villain, []Villain) {
+	villainDeck := []Villain{
+		basilisk(),
+		cornishPixies(),
+		dementor(),
+		fluffy(),
+		troll(),
+		norbert(),
+	}
+
+	possVillains := []Villain{
+		draco(),
+		quirrell(),
+		crabbeAndGoyle(),
+		bartyCrouchJr(),
+		bellatrixLestrange(),
+		fenrirGreyback(),
+		doloresUmbridge(),
+		luciusMalfoy(),
+		tomRiddle(),
+		peterPettigrew(),
+	}
+	possVillains = ShuffleVillains(possVillains)[0:5]
+	villainDeck = append(villainDeck, possVillains...)
+
+	villainDeck = ShuffleVillains(villainDeck)
+	villains := villainDeck[:3]
+
 	villainDeck = villainDeck[3:]
 	villainDeck = append(villainDeck, voledmortFive())
 

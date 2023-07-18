@@ -76,37 +76,37 @@ func LunaStartingDeck() []Card {
 }
 
 // Returns array of active villains, array of villain deck
-func CreateVillains() ([]Villain, []Villain) {
-	villainDeck := []Villain{
-		draco(),
-		quirrell(),
-		crabbeAndGoyle(),
-		bartyCrouchJr(),
-		basilisk(),
-		bellatrixLestrange(),
-		cornishPixies(),
-		dementor(),
-		fenrirGreyback(),
-		doloresUmbridge(),
-		fluffy(),
-		luciusMalfoy(),
-		tomRiddle(),
-		peterPettigrew(),
-		troll(),
-		norbert(),
-	}
+// func CreateVillains() ([]Villain, []Villain) {
+// 	villainDeck := []Villain{
+// 		draco(),
+// 		quirrell(),
+// 		crabbeAndGoyle(),
+// 		bartyCrouchJr(),
+// 		basilisk(),
+// 		bellatrixLestrange(),
+// 		cornishPixies(),
+// 		dementor(),
+// 		fenrirGreyback(),
+// 		doloresUmbridge(),
+// 		fluffy(),
+// 		luciusMalfoy(),
+// 		tomRiddle(),
+// 		peterPettigrew(),
+// 		troll(),
+// 		norbert(),
+// 	}
 
-	villainDeck = ShuffleVillains(villainDeck)
-	villains := villainDeck[:3]
-	villainDeck = villainDeck[3:]
-	villainDeck = append(villainDeck, voledmortFive())
+// 	villainDeck = ShuffleVillains(villainDeck)
+// 	villains := villainDeck[:3]
+// 	villainDeck = villainDeck[3:]
+// 	villainDeck = append(villainDeck, voledmortFive())
 
-	for i := range villains {
-		villains[i].Active = true
-	}
+// 	for i := range villains {
+// 		villains[i].Active = true
+// 	}
 
-	return villains, villainDeck
-}
+// 	return villains, villainDeck
+// }
 
 func CreateBox1Villains() ([]Villain, []Villain) {
 	villainDeck := []Villain{
@@ -156,112 +156,242 @@ func CreateLocations() []Location {
 	return locations
 }
 
-func CreateDarkArtDeck() []DarkArt {
-	darkArts := []DarkArt{
-		dementorsKiss(),
-		heWhoMustNotBeNamed(),
-		flipendo(),
-		avadaKedavra(),
-		expulso(),
-		handOfGlory(),
-		heirOfSlytherin(),
-		inquisitorialSquad(),
-		menacingGrowl(),
-		regeneration(),
-		obliviate(),
-		crucio(),
-		fiendfyre(),
-		morsmordre(),
-		blastended(),
-		educationalDecree(),
-		imperio(),
-		legilimency(),
-		oppugno(),
-		petrification(),
-		poison(),
-		ragingTroll(),
-		relashio(),
-		sectumsempra(),
-		slugulusEructo(),
-		tarantallegra(),
-	}
+// func CreateDarkArtDeck() []DarkArt {
+// 	darkArts := []DarkArt{
+// 		dementorsKiss(),
+// 		heWhoMustNotBeNamed(),
+// 		flipendo(),
+// 		avadaKedavra(),
+// 		expulso(),
+// 		handOfGlory(),
+// 		heirOfSlytherin(),
+// 		inquisitorialSquad(),
+// 		menacingGrowl(),
+// 		regeneration(),
+// 		obliviate(),
+// 		crucio(),
+// 		fiendfyre(),
+// 		morsmordre(),
+// 		blastended(),
+// 		educationalDecree(),
+// 		imperio(),
+// 		legilimency(),
+// 		oppugno(),
+// 		petrification(),
+// 		poison(),
+// 		ragingTroll(),
+// 		relashio(),
+// 		sectumsempra(),
+// 		slugulusEructo(),
+// 		tarantallegra(),
+// 	}
 
-	return darkArts
+// 	return darkArts
+// }
+
+func createNumAccurateDarkArts() []DarkArt {
+	deck := []DarkArt{
+		// Year 1
+		expulso(), expulso(), expulso(),
+		petrification(), petrification(),
+		flipendo(), flipendo(),
+		heWhoMustNotBeNamed(), heWhoMustNotBeNamed(), heWhoMustNotBeNamed(),
+		// Year 2
+		handOfGlory(), handOfGlory(),
+		relashio(),
+		obliviate(),
+		poison(),
+		// Year 3
+		oppugno(),
+		tarantallegra(),
+		dementorsKiss(), dementorsKiss(),
+		// Year 4
+		crucio(),
+		regeneration(),
+		avadaKedavra(),
+		imperio(),
+		morsmordre(), morsmordre(),
+		heirOfSlytherin(), heirOfSlytherin(),
+		// Year 5
+		imperio(),
+		educationalDecree(), educationalDecree(),
+		legilimency(),
+		crucio(),
+		morsmordre(),
+		avadaKedavra(),
+		// Year 6
+		sectumsempra(), sectumsempra(),
+		morsmordre(),
+		// Year 7
+		avadaKedavra(),
+		imperio(),
+		fiendfyre(),
+		crucio(),
+		// Box 1
+		menacingGrowl(), menacingGrowl(),
+		blastended(),
+		slugulusEructo(),
+		ragingTroll(), ragingTroll(),
+		inquisitorialSquad(), inquisitorialSquad(),
+	}
+	return ShuffleDarkArts(deck)
 }
 
-func CreateMarketDeck() []Card {
+// func CreateMarketDeck() []Card {
+// 	deck := []Card{
+// 		crystalBall(),
+// 		finite(),
+// 		incendio(),
+// 		oliverWood(),
+// 		reparo(),
+// 		triwizardCup(),
+// 		albusDumbledore(),
+// 		arthurWeasley(),
+// 		bezoar(),
+// 		choChang(),
+// 		deluminator(),
+// 		expectoPatronum(),
+// 		felixFelicis(),
+// 		filiusFlitwick(),
+// 		hogwartsAHistory(),
+// 		mollyWeasley(),
+// 		quidditchGear(),
+// 		siriusBlack(),
+// 		stupefy(),
+// 		sybillTrelawney(),
+// 		butterbeer(),
+// 		dobbyTheHouseElf(),
+// 		essenceOfDittany(),
+// 		fang(),
+// 		fleurDelacour(),
+// 		goldenSnitch(),
+// 		pensieve(),
+// 		rubeusHagrid(),
+// 		advancedPotionMaking(),
+// 		alastorMadEyeMoody(),
+// 		argusFilchAndMrsNorris(),
+// 		cedricDiggory(),
+// 		descendo(),
+// 		expelliarmus(),
+// 		ginnyWeasley(),
+// 		horaceSlughorn(),
+// 		kingsleyShacklebolt(),
+// 		lumos(),
+// 		lunaLovegood(),
+// 		nimbusTwoThousandAndOne(),
+// 		nymphadoraTonks(),
+// 		polyjuicePotion(),
+// 		pomonaSprout(),
+// 		severusSnape(),
+// 		swordOfGryffindor(),
+// 		tergeo(),
+// 		viktorKrum(),
+// 		fawkesThePhoenix(),
+// 		minervaMcgonagall(),
+// 		remusLupin(),
+// 		elderWand(),
+// 		chocolateFrog(),
+// 		gilderoyLockhart(),
+// 		maraudersMap(),
+// 		protego(),
+// 		accio(),
+// 		fredWeasley(),
+// 		georgeWeasley(),
+// 		owls(),
+// 		sortingHat(),
+// 		wingardiumLeviosa(),
+// 		petrificusTotalus(),
+// 		harp(),
+// 		finiteIncantatem(),
+// 		confundus(),
+// 		oldSock(),
+// 	}
+
+// 	deck = ShuffleCards(deck)
+
+// 	return deck
+// }
+
+// returns (deck, current market).
+func createNumAccurateMarketDeck() ([]Card, []Card) {
 	deck := []Card{
-		crystalBall(),
-		finite(),
-		incendio(),
-		oliverWood(),
-		reparo(),
-		triwizardCup(),
-		albusDumbledore(),
-		arthurWeasley(),
-		bezoar(),
-		choChang(),
-		deluminator(),
-		expectoPatronum(),
-		felixFelicis(),
-		filiusFlitwick(),
-		hogwartsAHistory(),
-		mollyWeasley(),
-		quidditchGear(),
-		siriusBlack(),
-		stupefy(),
-		sybillTrelawney(),
-		butterbeer(),
-		dobbyTheHouseElf(),
-		essenceOfDittany(),
-		fang(),
-		fleurDelacour(),
+		// Year 1
+		wingardiumLeviosa(), wingardiumLeviosa(), wingardiumLeviosa(),
+		descendo(), descendo(),
+		reparo(), reparo(), reparo(), reparo(), reparo(), reparo(),
+		lumos(), lumos(),
+		incendio(), incendio(), incendio(), incendio(),
+		essenceOfDittany(), essenceOfDittany(), essenceOfDittany(), essenceOfDittany(),
+		quidditchGear(), quidditchGear(), quidditchGear(), quidditchGear(),
 		goldenSnitch(),
-		pensieve(),
+		sortingHat(),
+		oliverWood(),
+		albusDumbledore(),
 		rubeusHagrid(),
-		advancedPotionMaking(),
-		alastorMadEyeMoody(),
-		argusFilchAndMrsNorris(),
-		cedricDiggory(),
-		descendo(),
-		expelliarmus(),
+		// Year 2
+		finite(), finite(),
+		expelliarmus(), expelliarmus(),
+		polyjuicePotion(), polyjuicePotion(),
+		nimbusTwoThousandAndOne(), nimbusTwoThousandAndOne(),
+		fawkesThePhoenix(),
+		mollyWeasley(),
+		dobbyTheHouseElf(),
+		arthurWeasley(),
 		ginnyWeasley(),
-		horaceSlughorn(),
-		kingsleyShacklebolt(),
-		lumos(),
-		lunaLovegood(),
-		nimbusTwoThousandAndOne(),
-		nymphadoraTonks(),
-		polyjuicePotion(),
+		gilderoyLockhart(),
+		// Year 3
+		petrificusTotalus(), petrificusTotalus(),
+		expectoPatronum(), expectoPatronum(),
+		maraudersMap(),
+		crystalBall(), crystalBall(),
+		butterbeer(), butterbeer(), butterbeer(),
+		chocolateFrog(), chocolateFrog(), chocolateFrog(),
+		remusLupin(), sybillTrelawney(), siriusBlack(),
+		// Year 4
+		protego(), protego(), protego(),
+		accio(), accio(),
+		pensieve(), triwizardCup(),
+		hogwartsAHistory(), hogwartsAHistory(), hogwartsAHistory(), hogwartsAHistory(), hogwartsAHistory(), hogwartsAHistory(),
+		fleurDelacour(),
+		alastorMadEyeMoody(),
+		filiusFlitwick(),
 		pomonaSprout(),
 		severusSnape(),
-		swordOfGryffindor(),
-		tergeo(),
-		viktorKrum(),
-		fawkesThePhoenix(),
 		minervaMcgonagall(),
-		remusLupin(),
-		elderWand(),
-		chocolateFrog(),
-		gilderoyLockhart(),
-		maraudersMap(),
-		protego(),
-		accio(),
-		fredWeasley(),
+		viktorKrum(),
+		cedricDiggory(),
+		// Year 5
+		owls(), owls(),
+		choChang(),
 		georgeWeasley(),
-		owls(),
-		sortingHat(),
-		wingardiumLeviosa(),
-		petrificusTotalus(),
+		fredWeasley(),
+		kingsleyShacklebolt(),
+		nymphadoraTonks(),
+		lunaLovegood(),
+		stupefy(), stupefy(),
+		// Year 6
+		horaceSlughorn(),
+		advancedPotionMaking(),
+		bezoar(), bezoar(),
+		deluminator(),
+		elderWand(),
+		felixFelicis(), felixFelicis(),
+		confundus(), confundus(),
+		// Year 7
+		swordOfGryffindor(),
+		// Box 1
+		finiteIncantatem(), finiteIncantatem(),
+		tergeo(), tergeo(), tergeo(), tergeo(), tergeo(), tergeo(),
 		harp(),
-		finiteIncantatem(),
-		confundus(),
-		oldSock(),
+		oldSock(), oldSock(),
+		argusFilchAndMrsNorris(),
+		fang(),
 	}
 
 	deck = ShuffleCards(deck)
-
-	return deck
+	market := deck[0:6]
+	deck = deck[6:]
+	return deck, market
 }
 
 func CreateMarket() []Card {
@@ -275,7 +405,7 @@ func CreateMarket() []Card {
 func RefillMarket(index int, gs *Gamestate) {
 	// refill deck if empty
 	if len(gs.MarketDeck) == 0 {
-		gs.MarketDeck = CreateMarketDeck()
+		gs.MarketDeck, _ = createNumAccurateMarketDeck()
 	}
 
 	gs.Market[index] = gs.MarketDeck[0]

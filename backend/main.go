@@ -147,13 +147,14 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("****players:", data.StartingPlayers)
 
 	villains, villainDeck := CreateBox1Villains()
+	marketdeck, market := createNumAccurateMarketDeck()
 	gs := &Gamestate{
 		Players:         data.StartingPlayers,
 		Villains:        villains,
 		Locations:       CreateLocations(),
-		DarkArts:        CreateDarkArtDeck(),
-		MarketDeck:      CreateMarketDeck(),
-		Market:          CreateMarket(),
+		DarkArts:        createNumAccurateDarkArts(),
+		MarketDeck:      marketdeck,
+		Market:          market,
 		CurrentDarkArt:  0,
 		CurrentLocation: 0,
 		DarkArtsPlayed:  []DarkArt{},

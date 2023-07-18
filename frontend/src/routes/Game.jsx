@@ -142,6 +142,10 @@ function GameWithState() {
     return (
       <>
         {
+          (gamestate.currentturn === localStorage.getItem('sessionid'))
+          && <div className="absolute -z-50 bg-blue-50 h-screen w-screen" />
+        }
+        {
           userInput
           && (
           <div className="fixed w-full h-full backdrop-contrast-50">
@@ -194,7 +198,7 @@ function GameWithState() {
             </div>
             <Hand />
           </div>
-          <div className="border justify-between items-center fixed top-0 right-0 bg-white">
+          <div className=" justify-between items-center fixed top-0 right-0 bg-white">
             <div>
               {
                 Object.entries(gamestate.players)

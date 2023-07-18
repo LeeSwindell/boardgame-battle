@@ -107,40 +107,6 @@ func getUserInput(id int, user string, options []string, prompt string) string {
 	return string(body)
 }
 
-// Sends a request to lobby manager for the cardId to discard from a users hand.
-func AskUserToDiscard(gameid int, user string, hand []Card, promptString string) string {
-	url := fmt.Sprintf("%s/game/%d/askusertodiscard/%s", config.LobbyManagerURL, gameid, user)
-
-	var dataToSend = struct {
-		Hand   []Card `json:"hand"`
-		Prompt string `json:"prompt"`
-	}{Hand: hand, Prompt: promptString}
-
-	data, err := json.Marshal(dataToSend)
-	if err != nil {
-		log.Println("err marshaling options:", err)
-	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
-	if err != nil {
-		log.Println("err sending user discard POST:", err.Error())
-	}
-	client := http.Client{}
-
-	res, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Println("err reading response body:", err.Error())
-	}
-
-	return string(body)
-}
-
 // FIX ADD PROMPT
 func AskUserToSelectPlayer(gameid int, user string, players []string) string {
 	url := fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)

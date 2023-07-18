@@ -361,6 +361,7 @@ func StunPlayer(user string, gs *Gamestate) {
 	discardAmount := len(player.Hand) / 2
 	for i := 0; i < discardAmount; i++ {
 		desc := fmt.Sprintf("Stunned! Discard a card: %d of %d", i+1, discardAmount)
+		SendLobbyUpdate(gs.gameid, gs)
 		cardName := AskUserToSelectCard(user, gs.gameid, player.Hand, desc)
 
 		testids := []int{}

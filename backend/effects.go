@@ -99,6 +99,7 @@ type ChooseOne struct {
 }
 
 func (effect ChooseOne) Trigger(gs *Gamestate) {
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := getUserInput(gs.gameid, gs.CurrentTurn, effect.Options, effect.Description)
 
 	for i, option := range effect.Options {
@@ -298,6 +299,7 @@ func (effect GivenPlayerDiscards) Trigger(gs *Gamestate) {
 	}
 
 	for i := 0; i < effect.Amount; i++ {
+		SendLobbyUpdate(gs.gameid, gs)
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
 		DiscardFromId(user, discardCardId, gs)
 		cards = gs.Players[user].Hand
@@ -327,6 +329,7 @@ func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
 	}
 
 	for i := 0; i < effect.Amount; i++ {
+		SendLobbyUpdate(gs.gameid, gs)
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
 		DiscardFromId(user, discardCardId, gs)
 		cards = gs.Players[user].Hand
@@ -485,6 +488,7 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 	if len(playernames) == 0 {
 		return
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 	ChangePlayerHealth(choice, effect.Amount, gs)
 }
@@ -508,6 +512,7 @@ func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
 	if len(playernames) == 0 {
 		return
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 
 	// Use helpers to change player these values before getting/setting player
@@ -536,6 +541,7 @@ func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
 	if len(playernames) == 0 {
 		return
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
 
 	ChangePlayerHealth(choice, effect.AmountHealth, gs)
@@ -576,6 +582,7 @@ func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
 
 		if len(choices) != 0 {
 			prompt := "Choose an item from your discard to gain to your hand!"
+			SendLobbyUpdate(gs.gameid, gs)
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 			MoveCardFromDiscardToHand(user, cardId, gs)
 		}
@@ -608,6 +615,7 @@ type AllChooseOne struct {
 
 func (effect AllChooseOne) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
+		SendLobbyUpdate(gs.gameid, gs)
 		choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
 
 		for i, option := range effect.Options {
@@ -631,6 +639,7 @@ type GivenPlayerChooseOneTargeted struct {
 
 func (effect GivenPlayerChooseOneTargeted) Trigger(gs *Gamestate) {
 	user := effect.User
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
 
 	for i, option := range effect.Options {
@@ -653,6 +662,7 @@ type AllChooseOneTargeted struct {
 
 func (effect AllChooseOneTargeted) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
+		SendLobbyUpdate(gs.gameid, gs)
 		choice := getUserInput(gs.gameid, user, effect.Options, effect.Description)
 
 		for i, option := range effect.Options {
@@ -689,6 +699,7 @@ func (effect ChosenPlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 
 	if len(choices) != 0 {
 		prompt := "Choose one to gain to your hand (from discard)"
+		SendLobbyUpdate(gs.gameid, gs)
 		cardId := AskUserToSelectCard(effect.Playername, gs.gameid, choices, prompt)
 		MoveCardFromDiscardToHand(effect.Playername, cardId, gs)
 	}
@@ -714,6 +725,7 @@ func (effect AllSearchHandOrDiscardForX) Trigger(gs *Gamestate) {
 			}
 		}
 		if len(choices) != 0 {
+			SendLobbyUpdate(gs.gameid, gs)
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, effect.prompt)
 			MoveCardFromDiscardToHand(user, cardId, gs)
 		}
@@ -773,6 +785,7 @@ func (effect AllBanishItem) Trigger(gs *Gamestate) {
 			}
 		}
 		if len(choices) != 0 {
+			SendLobbyUpdate(gs.gameid, gs)
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, "Choose a card to banish")
 			BanishCard(user, cardId, gs)
 		}
@@ -787,6 +800,7 @@ func (effect AllBanishCard) Trigger(gs *Gamestate) {
 		choices := append(player.Hand, player.Discard...)
 
 		if len(choices) != 0 {
+			SendLobbyUpdate(gs.gameid, gs)
 			cardId := AskUserToSelectCard(user, gs.gameid, choices, "Choose a card to banish")
 			BanishCard(user, cardId, gs)
 		}
@@ -850,6 +864,7 @@ func (effect AllDiscard) Trigger(gs *Gamestate) {
 			return
 		}
 
+		SendLobbyUpdate(gs.gameid, gs)
 		discardCardId := AskUserToSelectCard(user, gs.gameid, cards, effect.Prompt)
 		for i, c := range cards {
 			if c.Id == discardCardId {
@@ -962,6 +977,7 @@ func (effect RavenclawDice) Trigger(gs *Gamestate) {
 		options := []string{"Yes", "No"}
 		switch n {
 		case 0:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -969,6 +985,7 @@ func (effect RavenclawDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 1:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
@@ -976,6 +993,7 @@ func (effect RavenclawDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 2:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
@@ -983,6 +1001,7 @@ func (effect RavenclawDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		default:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
 			if choice == "No" {
 				AllDrawCards{Amount: 1}.Trigger(gs)
@@ -1013,6 +1032,7 @@ func (effect SlytherinDice) Trigger(gs *Gamestate) {
 		options := []string{"Yes", "No"}
 		switch n {
 		case 0:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -1020,6 +1040,7 @@ func (effect SlytherinDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 1:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
@@ -1027,6 +1048,7 @@ func (effect SlytherinDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 2:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
 			if choice == "No" {
 				AllDrawCards{Amount: 1}.Trigger(gs)
@@ -1034,6 +1056,7 @@ func (effect SlytherinDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		default:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
@@ -1064,6 +1087,7 @@ func (effect GryffindorDice) Trigger(gs *Gamestate) {
 		options := []string{"Yes", "No"}
 		switch n {
 		case 0:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
@@ -1071,6 +1095,7 @@ func (effect GryffindorDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 1:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
@@ -1078,6 +1103,7 @@ func (effect GryffindorDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 2:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
 			if choice == "No" {
 				AllDrawCards{Amount: 1}.Trigger(gs)
@@ -1085,6 +1111,7 @@ func (effect GryffindorDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		default:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -1115,6 +1142,7 @@ func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 		options := []string{"Yes", "No"}
 		switch n {
 		case 0:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Money, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainMoney{Amount: 1}.Trigger(gs)
@@ -1122,6 +1150,7 @@ func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 1:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Damage, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainDamage{Amount: 1}.Trigger(gs)
@@ -1129,6 +1158,7 @@ func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		case 2:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Cards, would you like to reroll?")
 			if choice == "No" {
 				AllDrawCards{Amount: 1}.Trigger(gs)
@@ -1136,6 +1166,7 @@ func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 			}
 			n = rand.Intn(6)
 		default:
+			SendLobbyUpdate(gs.gameid, gs)
 			choice := getUserInput(gs.gameid, gs.CurrentTurn, options, "You rolled Health, would you like to reroll?")
 			if choice == "No" {
 				AllPlayersGainHealth{Amount: 1}.Trigger(gs)
@@ -1170,6 +1201,7 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 		Options:     effect.Options,
 		Description: effect.Prompt + "(1 of 2)",
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := getUserInput(gs.gameid, gs.CurrentTurn, firstChoice.Options, firstChoice.Description)
 
 	secondChoice := ChooseOne{}
@@ -1181,6 +1213,7 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 			secondChoice.Description = effect.Prompt + "(2 of 2)"
 		}
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice.Options, firstChoice.Description)
 	for i, option := range firstChoice.Options {
 		if choice == option {
@@ -1309,6 +1342,7 @@ func (effect ActivePlayerBanishes) Trigger(gs *Gamestate) {
 		return
 	}
 
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectCard(user, gs.gameid, cards, "Banish a card:")
 	BanishCard(user, choice, gs)
 }
@@ -1346,6 +1380,7 @@ func (effect ActivePlayerBanishAndGainXIfY) Trigger(gs *Gamestate) {
 		return
 	}
 
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectCard(user, gs.gameid, cards, "Banish a card:")
 	choiceType := BanishCard(user, choice, gs)
 
@@ -1380,6 +1415,7 @@ func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
 	if len(players) == 0 {
 		return
 	}
+	SendLobbyUpdate(gs.gameid, gs)
 	effect.X.Target = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
 	effect.X.Trigger(gs)
 }
@@ -1399,6 +1435,7 @@ func (effect ActivePlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 
 	if len(choices) != 0 {
 		prompt := "Choose a card from your discard to gain to your hand!"
+		SendLobbyUpdate(gs.gameid, gs)
 		cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 		MoveCardFromDiscardToHand(user, cardId, gs)
 	}
@@ -1425,6 +1462,7 @@ func (effect ActivePlayerSearchesDeckForX) Trigger(gs *Gamestate) {
 
 	if len(choices) != 0 {
 		prompt := "Choose a card from your deck to gain to your hand"
+		SendLobbyUpdate(gs.gameid, gs)
 		cardId := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 		MoveCardFromDeckToHand(user, cardId, gs)
 	}
@@ -1538,6 +1576,7 @@ func (effect BlockVillainEffects) Trigger(gs *Gamestate) {
 	}
 
 	if len(choices) > 0 {
+		SendLobbyUpdate(gs.gameid, gs)
 		choice := AskUserToSelectPlayer(gs.gameid, user, choices)
 		for i, v := range gs.Villains {
 			if v.Name == choice {
@@ -1584,6 +1623,7 @@ func (effect ActivePlayerSelectsOtherPlayerToDoX) Trigger(gs *Gamestate) {
 		return
 	}
 
+	SendLobbyUpdate(gs.gameid, gs)
 	effect.X.Target = AskUserToSelectPlayer(gs.gameid, user, otherPlayers)
 	effect.X.Trigger(gs)
 }
@@ -1637,6 +1677,7 @@ func (effect DiscardACard) Trigger(gs *Gamestate) {
 		prompt = "Discard a card"
 	}
 
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserToSelectCard(user, gs.gameid, choices, prompt)
 	DiscardFromId(user, choice, gs)
 	cond := effect.Cause == "villain" || effect.Cause == "darkart"
@@ -1681,6 +1722,7 @@ func (effect Scry) Trigger(gs *Gamestate) {
 
 	topCard := player.Deck[len(player.Deck)-1]
 	path := topCard.ImgPath
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "Discard or place card back on deck:", []string{"Discard", "Place on deck"})
 
 	if choice == "Discard" {
@@ -1695,6 +1737,7 @@ type ScryDarkarts struct {
 func (effect ScryDarkarts) Trigger(gs *Gamestate) {
 
 	path := gs.DarkArts[len(gs.DarkArts)-1].ImgPath
+	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "You look at the top of the Dark Arts deck:", []string{"Discard", "Place on deck"})
 
 	if choice == "Discard" {

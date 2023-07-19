@@ -14,7 +14,7 @@ function DiscardPile() {
   };
 
   return (
-    <button className="w-32 h-40 rounded p-2 m-2 border" type="button" onClick={onClick} onContextMenu={onClick}>
+    <button className="w-32 h-40 rounded m-2 " type="button" onClick={onClick} onContextMenu={onClick}>
       {gamestate.players[user].Discard[gamestate.players[user].Discard.length - 1]
        && (
        <MarketCard

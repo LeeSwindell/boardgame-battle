@@ -198,7 +198,7 @@ function GameWithState() {
             </div>
             <Hand />
           </div>
-          <div className=" justify-between items-center fixed top-0 right-0 bg-white">
+          <div className="rounded-lg justify-between items-center fixed top-0 right-0 bg-white">
             <div>
               {
                 Object.entries(gamestate.players)

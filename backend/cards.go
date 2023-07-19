@@ -12,7 +12,7 @@ func alohamora() Card {
 		ImgPath:  "/images/starters/alohomora.jpg",
 		CardType: "spell",
 		Cost:     0,
-		effects:  []Effect{GainMoney{Amount: 10}, GainDamage{Amount: 10}},
+		effects:  []Effect{GainMoney{Amount: 1}},
 	}
 }
 
@@ -1594,7 +1594,7 @@ func confundus() Card {
 		SetId:    "game 6",
 		ImgPath:  "/images/marketcards/confundus.jpg",
 		CardType: "spell",
-		Cost:     6,
+		Cost:     3,
 		effects: []Effect{
 			GainDamage{Amount: 1},
 			ConfundusEffect{Id: id},

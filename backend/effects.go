@@ -381,6 +381,7 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 		return
 	}
 
+	startingControl := loc.CurControl
 	loc.CurControl -= effect.Amount
 	if loc.CurControl < 0 {
 		loc.CurControl = 0
@@ -394,7 +395,8 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 	// For Harry's character effect.
 	for _, p := range gs.Players {
 		if p.Character == "Harry" {
-			AllPlayersGainHealth{Amount: 1}.Trigger(gs)
+			HealAmount := startingControl - loc.CurControl
+			AllPlayersGainHealth{Amount: HealAmount}.Trigger(gs)
 		}
 	}
 
@@ -1719,6 +1721,10 @@ type Scry struct {
 
 func (effect Scry) Trigger(gs *Gamestate) {
 	player := gs.Players[effect.User]
+	if len(player.Deck) == 0 {
+		ShuffleDiscardToDeck(&player)
+		gs.Players[effect.User] = player
+	}
 
 	topCard := player.Deck[len(player.Deck)-1]
 	path := topCard.ImgPath
@@ -1735,8 +1741,8 @@ type ScryDarkarts struct {
 }
 
 func (effect ScryDarkarts) Trigger(gs *Gamestate) {
-
-	path := gs.DarkArts[len(gs.DarkArts)-1].ImgPath
+	effect.User = gs.CurrentTurn
+	path := gs.DarkArts[(gs.CurrentDarkArt+1)%len(gs.DarkArts)].ImgPath
 	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "You look at the top of the Dark Arts deck:", []string{"Discard", "Place on deck"})
 

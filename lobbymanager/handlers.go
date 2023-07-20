@@ -56,6 +56,14 @@ func AddClientWithUsernameHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		log.Println("error adding client with username, no username")
 	}
+	getId, ok := vars["id"]
+	if !ok {
+		log.Println("error adding client with username, no id")
+	}
+	id, err := strconv.Atoi(getId)
+	if err != nil {
+		log.Println("addclientwithusername err, ", err)
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -64,7 +72,9 @@ func AddClientWithUsernameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, pid: pid, username: username}
+	log.Println(id)
+
+	client := &Client{hub: hub, conn: conn, pid: pid, username: username, lobbygroup: id}
 	client.hub.register <- client
 
 	// println("player ", pid.String(), " is connecting")
@@ -147,7 +157,6 @@ func RefreshLobbyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("refresh lobby prof:", lobby.Players[0].Proficiency)
 	res, err := json.Marshal(lobby)
 	if err != nil {
 		log.Println(err)
@@ -344,18 +353,16 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 
 func RefreshGamestateHandler(w http.ResponseWriter, r *http.Request) {
 	// Not needed until lobbies are grouped by id - currently only one game will work.
-	// vars := mux.Vars(r)
-	// id, err := strconv.Atoi(vars["id"])
-	// if err != nil {
-	// 	log.Println("err getting id in refreshgamestatehandler:", err.Error())
-	// }
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		log.Println("err getting id in refreshgamestatehandler:", err.Error())
+	}
 
 	var gs Gamestate
 	json.NewDecoder(r.Body).Decode(&gs)
 
-	log.Println("sending game state refresh?")
-	hub.SendGameState(&gs)
-	log.Println("sent game state refresh")
+	hub.SendGameState(&gs, id)
 }
 
 func GetUserInputHandler(w http.ResponseWriter, r *http.Request) {

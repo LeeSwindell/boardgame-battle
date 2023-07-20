@@ -377,6 +377,7 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 	}
 
 	loc := gs.Locations[gs.CurrentLocation]
+	log.Println("removing from location: start amount", loc.CurControl)
 	if loc.CurControl == 0 {
 		return
 	}
@@ -387,10 +388,14 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 		loc.CurControl = 0
 	}
 
+	log.Println("removing from location: 391 amount", loc.CurControl)
+
 	// For Lucius effect - happens only when location control Actually changes.
 	for i := 0; i < gs.Locations[gs.CurrentLocation].CurControl-loc.CurControl; i++ {
 		eventBroker.Messages <- LocationRemovedEvent
 	}
+
+	log.Println("removing from location: 399 amount", loc.CurControl)
 
 	// For Harry's character effect.
 	for _, p := range gs.Players {
@@ -399,6 +404,7 @@ func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
 			AllPlayersGainHealth{Amount: HealAmount}.Trigger(gs)
 		}
 	}
+	log.Println("removing from location: 407 amount", loc.CurControl)
 
 	gs.Locations[gs.CurrentLocation] = loc
 }

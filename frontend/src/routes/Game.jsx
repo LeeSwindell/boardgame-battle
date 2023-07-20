@@ -46,27 +46,30 @@ function GamestateProvider({ children }) {
   const [gamestate, setGamestate] = useState();
   const [userInput, setUserInput] = useState();
   const { gameid } = useParams();
-  const socket = useLobbySocket({
-    onMessage: (event) => {
-      const data = JSON.parse(event.data);
-      switch (data.type) {
-        case 'Gamestate':
-          setGamestate(data.data);
-          break;
-        case 'UserInput':
-          setUserInput({
-            inputs: data.data,
-            description: data.description,
-            messageID: data.id,
-            cardpath: data.CardPath,
-          });
-          logger.log('user input:::::', data);
-          break;
-        default:
-          break;
-      }
+  const socket = useLobbySocket(
+    {
+      onMessage: (event) => {
+        const data = JSON.parse(event.data);
+        switch (data.type) {
+          case 'Gamestate':
+            setGamestate(data.data);
+            break;
+          case 'UserInput':
+            setUserInput({
+              inputs: data.data,
+              description: data.description,
+              messageID: data.id,
+              cardpath: data.CardPath,
+            });
+            logger.log('user input:::::', data);
+            break;
+          default:
+            break;
+        }
+      },
     },
-  });
+    gameid,
+  );
   const value = useMemo(
     () => ({
       gamestate, setGamestate, socket, userInput, setUserInput, gameid,
@@ -76,11 +79,9 @@ function GamestateProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(gameid);
     gameapi
       .get(`/${gameid}/getgamestate`)
       .then((response) => {
-        console.log(response.data);
         setGamestate(response.data);
         gameapi.get(`/${gameid}/firstturn`);
       })
@@ -166,7 +167,6 @@ function GameWithState() {
                 </p>
                 <div className="flex items-center justify-evenly">
                   {userInput.inputs.map((option, i) => {
-                    console.log('options', option);
                     if (typeof option === 'string') {
                       return (
                         <button key={option + i} type="submit" className="p-2 m-2 w-16 w-fit border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold text-center justify-between" onClick={SubmitUserChoice(option)}>
@@ -175,7 +175,6 @@ function GameWithState() {
                       );
                     }
                     if (typeof option === 'object') {
-                      console.log('inside market card option');
                       return (
                         <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
                           <MarketCard img={option.ImgPath} />
@@ -238,7 +237,6 @@ function GameWithState() {
             </p>
             <div className="flex items-center justify-evenly">
               {userInput.inputs.map((option, i) => {
-                console.log('options', option);
                 if (typeof option === 'string') {
                   return (
                     <button key={option + i} type="submit" className="p-2 m-2 w-20 w-fit border rounded bg-blue-500 hover:bg-blue-700 text-white font-bold text-center justify-between" onClick={SubmitUserChoice(option)}>
@@ -247,7 +245,6 @@ function GameWithState() {
                   );
                 }
                 if (typeof option === 'object') {
-                  console.log('inside market card option');
                   return (
                     <button key={option + i} type="submit" className="rounded h-40 w-32" onClick={SubmitUserChoice(option.Id)}>
                       <MarketCard img={option.ImgPath} />

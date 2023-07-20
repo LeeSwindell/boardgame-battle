@@ -62,14 +62,16 @@ func (h *Hub) SendStartGame() {
 	}
 }
 
-func (h *Hub) SendGameState(gs *Gamestate) {
+func (h *Hub) SendGameState(gs *Gamestate, id int) {
 	message := Message{
 		Type: "Gamestate",
 		Data: gs,
 	}
 
 	for c := range h.clients {
-		c.conn.WriteJSON(message)
+		if c.lobbygroup == id {
+			c.conn.WriteJSON(message)
+		}
 	}
 }
 

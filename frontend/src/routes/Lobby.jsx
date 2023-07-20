@@ -106,7 +106,6 @@ function Lobby() {
 
   // Create the socket connection
   useEffect(() => {
-    console.log('useeffect socket hook - Lobby route');
     // socket.current = new WebSocket('ws://localhost:8000/connectsocket');
     if (socketUrl === 'localhost:8000/lm') {
       socket.current = new WebSocket(`ws://${socketUrl}/connectsocket`);
@@ -114,11 +113,8 @@ function Lobby() {
       socket.current = new WebSocket(`wss://${socketUrl}/connectsocket`);
     }
 
-    console.log('trying to open socket for lobby');
-    console.log(`wss://${socketUrl}/connectsocket`);
     socket.current.onopen = () => {
-      console.log('lobby socket opened');
-      // logger.log('lobby socket opened');
+      logger.log('lobby socket opened');
     };
     socket.current.onclose = () => logger.log('lobby socket closed');
 

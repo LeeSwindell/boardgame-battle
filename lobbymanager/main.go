@@ -103,7 +103,7 @@ func main() {
 	r.HandleFunc("/lm/sessionid", sessionidHandler)
 	r.HandleFunc("/lm/lobbies", GetLobbiesHandler)
 	r.HandleFunc("/lm/connectsocket", AddClientHandler)
-	r.HandleFunc("/lm/connectsocket/{username}", AddClientWithUsernameHandler)
+	r.HandleFunc("/lm/connectsocket/{username}/{id}", AddClientWithUsernameHandler)
 	r.HandleFunc("/lm/lobby/create", CreateLobbyHandler)
 	r.HandleFunc("/lm/lobby/{id}/join", JoinLobbyHandler)
 	r.HandleFunc("/lm/lobby/{id}/refresh", RefreshLobbyHandler)

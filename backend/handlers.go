@@ -240,7 +240,7 @@ func DamageVillainHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate)
 				for _, effect := range gs.Villains[i].deathEffect {
 					effect.Trigger(gs)
 				}
-				if player.Proficiency == "Care of Magical Creatures" && v.villainType == "creature" || v.villainType == "villain-creature" {
+				if player.Proficiency == "Care of Magical Creatures" && (v.villainType == "creature" || v.villainType == "villain-creature") {
 					RemoveFromLocation{Amount: 1}.Trigger(gs)
 				}
 

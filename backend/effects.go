@@ -1222,8 +1222,8 @@ func (effect ChooseTwo) Trigger(gs *Gamestate) {
 		}
 	}
 	SendLobbyUpdate(gs.gameid, gs)
-	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice.Options, firstChoice.Description)
-	for i, option := range firstChoice.Options {
+	choice = getUserInput(gs.gameid, gs.CurrentTurn, secondChoice.Options, secondChoice.Description)
+	for i, option := range secondChoice.Options {
 		if choice == option {
 			secondChoice.Effects[i].Trigger(gs)
 		}

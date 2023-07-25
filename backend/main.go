@@ -160,6 +160,7 @@ func StartGameHandler(w http.ResponseWriter, r *http.Request) {
 		DarkArtsPlayed:  []DarkArt{},
 		CurrentTurn:     data.TurnOrder[0],
 		TurnOrder:       data.TurnOrder,
+		EffectLog:       []string{},
 		villainDeck:     villainDeck,
 		turnStats:       TurnStats{AlliesHealed: map[string]int{}},
 		mu:              sync.Mutex{},

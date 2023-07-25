@@ -21,6 +21,11 @@ function Gameboard(props) {
             && <CardContainer key={v.Id} cardId={v.Id} cardType="villain" card={<Villain img={v.ImgPath} maxHp={v.MaxHp} curDamage={v.CurDamage} />} size="wide" />
           ))}
         </div>
+        {/* FIX!!!! */}
+        <div className="w-40">
+          # of Villains left:
+          {gamestate.villains.length}
+        </div>
       </div>
 
       <div className="inset-y-0 left-40 top-1 w-16 fixed -z-10">

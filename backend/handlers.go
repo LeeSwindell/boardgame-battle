@@ -46,6 +46,7 @@ func PlayCardHandler(w http.ResponseWriter, r *http.Request, gs *Gamestate) {
 
 			for _, e := range c.effects {
 				e.Trigger(gs)
+				e.Log(gs)
 			}
 
 			switch c.CardType {

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -108,18 +107,28 @@ func getUserInput(id int, user string, options []string, prompt string) string {
 }
 
 // FIX ADD PROMPT
-func AskUserToSelectPlayer(gameid int, user string, players []string) string {
+func AskUserToSelectPlayer(gameid int, user string, players []string, prompt string) string {
 	url := fmt.Sprintf("%s/game/%d/askusertoselectplayer/%s", config.LobbyManagerURL, gameid, user)
 
 	// Encode the players slice as JSON
-	playerJSON, err := json.Marshal(players)
+	// playerJSON, err := json.Marshal(players)
+	// if err != nil {
+	// 	log.Println("err encoding players slice:", err)
+	// 	return ""
+	// }
+
+	var dataToSend = struct {
+		Players []string `json:"players"`
+		Prompt  string   `json:"prompt"`
+	}{Players: players, Prompt: prompt}
+
+	data, err := json.Marshal(dataToSend)
 	if err != nil {
-		log.Println("err encoding players slice:", err)
-		return ""
+		log.Println("err marshaling options:", err.Error())
 	}
 
 	// Create a new http.Request object with the POST method and the encoded values.
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(playerJSON)))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
 		log.Println("err creating http.request in selectplayer", err)
 	}

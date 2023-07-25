@@ -1,11 +1,17 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/google/uuid"
 )
 
 type RevealDarkArts struct {
 	Amount int
+}
+
+func (effect RevealDarkArts) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect RevealDarkArts) Trigger(gs *Gamestate) {

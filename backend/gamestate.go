@@ -14,6 +14,7 @@ type Gamestate struct {
 	CurrentDarkArt  int               `json:"currentdarkart"`
 	CurrentLocation int               `json:"currentlocation"`
 	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
+	EffectLog       []string          `json:"effectlog"`
 	villainDeck     []Villain
 	turnNumber      int
 	turnStats       TurnStats
@@ -100,4 +101,5 @@ type TurnStats struct {
 // Define an effect as something that changes the gamestate.
 type Effect interface {
 	Trigger(gs *Gamestate)
+	Log(gs *Gamestate)
 }

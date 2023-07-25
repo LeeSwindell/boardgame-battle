@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
+	"reflect"
 )
 
 // Wrapper for changing stats of a given player
@@ -15,6 +17,10 @@ type ChangeStats struct {
 	AmountToDiscard int
 	DiscardPrompt   string
 	Cause           string
+}
+
+func (effect ChangeStats) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ChangeStats) Trigger(gs *Gamestate) {
@@ -41,6 +47,10 @@ type DamageAllPlayers struct {
 	Amount int
 }
 
+func (effect DamageAllPlayers) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageAllPlayers) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		stunned := ChangePlayerHealth(user, -effect.Amount, gs)
@@ -54,6 +64,10 @@ type DamageCurrentPlayer struct {
 	Amount int
 }
 
+func (effect DamageCurrentPlayer) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageCurrentPlayer) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	stunned := ChangePlayerHealth(user, -effect.Amount, gs)
@@ -64,6 +78,10 @@ func (effect DamageCurrentPlayer) Trigger(gs *Gamestate) {
 
 type DamageAllPlayersButCurrent struct {
 	Amount int
+}
+
+func (effect DamageAllPlayersButCurrent) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DamageAllPlayersButCurrent) Trigger(gs *Gamestate) {
@@ -83,6 +101,11 @@ type GainMoney struct {
 }
 
 // Gives the current player Amount of money.
+
+func (effect GainMoney) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainMoney) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	player := gs.Players[user]
@@ -96,6 +119,10 @@ type ChooseOne struct {
 	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
 	Options     []string `json:"options"`
 	Description string   `json:"description"`
+}
+
+func (effect ChooseOne) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ChooseOne) Trigger(gs *Gamestate) {
@@ -114,6 +141,10 @@ type GainDamage struct {
 	Description string
 }
 
+func (effect GainDamage) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 // Gives the current player Amount of damage
 func (effect GainDamage) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
@@ -127,6 +158,11 @@ type GainHealth struct {
 }
 
 // Gives the current player Amount of health
+
+func (effect GainHealth) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainHealth) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	ChangePlayerHealth(user, effect.Amount, gs)
@@ -135,6 +171,11 @@ func (effect GainHealth) Trigger(gs *Gamestate) {
 type GainDamagePerAllyPlayed struct{}
 
 // Gives the current player damage per ally already played this turn.
+
+func (effect GainDamagePerAllyPlayed) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainDamagePerAllyPlayed) Trigger(gs *Gamestate) {
 	amount := gs.turnStats.AlliesPlayed
 
@@ -151,6 +192,11 @@ type GainXIfVillainKilled struct {
 }
 
 // Gives current player X (this turn) if a villain is killed.
+
+func (effect GainXIfVillainKilled) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainXIfVillainKilled) Trigger(gs *Gamestate) {
 	effect.GainX.Target = gs.CurrentTurn
 
@@ -206,6 +252,11 @@ type MoneyIfVillainKilled struct {
 }
 
 // Gives current player money (this turn) if a villain is killed.
+
+func (effect MoneyIfVillainKilled) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect MoneyIfVillainKilled) Trigger(gs *Gamestate) {
 	// check if villain already killed
 	if gs.turnStats.VillainsKilled > 0 {
@@ -262,6 +313,10 @@ type AllPlayersGainHealth struct {
 	Amount int
 }
 
+func (effect AllPlayersGainHealth) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllPlayersGainHealth) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		ChangePlayerHealth(user, effect.Amount, gs)
@@ -270,6 +325,10 @@ func (effect AllPlayersGainHealth) Trigger(gs *Gamestate) {
 
 type AllPlayersGainMoney struct {
 	Amount int
+}
+
+func (effect AllPlayersGainMoney) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllPlayersGainMoney) Trigger(gs *Gamestate) {
@@ -283,6 +342,10 @@ type GivenPlayerDiscards struct {
 	User   string
 	Amount int
 	Prompt string
+}
+
+func (effect GivenPlayerDiscards) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect GivenPlayerDiscards) Trigger(gs *Gamestate) {
@@ -313,6 +376,10 @@ type ActivePlayerDiscards struct {
 	Amount int
 	Prompt string
 	Cause  string
+}
+
+func (effect ActivePlayerDiscards) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ActivePlayerDiscards) Trigger(gs *Gamestate) {
@@ -349,6 +416,10 @@ type AddToLocation struct {
 	Amount int
 }
 
+func (effect AddToLocation) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AddToLocation) Trigger(gs *Gamestate) {
 	loc := gs.Locations[gs.CurrentLocation]
 	loc.CurControl += effect.Amount
@@ -366,6 +437,10 @@ func (effect AddToLocation) Trigger(gs *Gamestate) {
 
 type RemoveFromLocation struct {
 	Amount int
+}
+
+func (effect RemoveFromLocation) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect RemoveFromLocation) Trigger(gs *Gamestate) {
@@ -414,6 +489,10 @@ type DrawCards struct {
 	Amount int
 }
 
+func (effect DrawCards) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DrawCards) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	DrawXCards(user, gs, effect.Amount)
@@ -421,6 +500,10 @@ func (effect DrawCards) Trigger(gs *Gamestate) {
 
 type AllDrawCards struct {
 	Amount int
+}
+
+func (effect AllDrawCards) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllDrawCards) Trigger(gs *Gamestate) {
@@ -431,6 +514,10 @@ func (effect AllDrawCards) Trigger(gs *Gamestate) {
 
 type SendGameUpdateEffect struct{}
 
+func (effect SendGameUpdateEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect SendGameUpdateEffect) Trigger(gs *Gamestate) {
 	SendLobbyUpdate(gs.gameid, gs)
 }
@@ -438,6 +525,10 @@ func (effect SendGameUpdateEffect) Trigger(gs *Gamestate) {
 type HealAnyIfVillainKilled struct {
 	Id     int
 	Amount int
+}
+
+func (effect HealAnyIfVillainKilled) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect HealAnyIfVillainKilled) Trigger(gs *Gamestate) {
@@ -487,6 +578,10 @@ type HealAnyPlayer struct {
 	Amount int
 }
 
+func (effect HealAnyPlayer) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 	playernames := []string{}
 	for p := range gs.Players {
@@ -497,7 +592,8 @@ func (effect HealAnyPlayer) Trigger(gs *Gamestate) {
 		return
 	}
 	SendLobbyUpdate(gs.gameid, gs)
-	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
+	prompt := "Select player to heal for " + string(effect.Amount)
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames, prompt)
 	ChangePlayerHealth(choice, effect.Amount, gs)
 }
 
@@ -507,6 +603,10 @@ type SelectPlayerToGainStats struct {
 	AmountDamage int
 	AmountCards  int
 	ExcludeUser  string
+}
+
+func (effect SelectPlayerToGainStats) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
@@ -521,7 +621,8 @@ func (effect SelectPlayerToGainStats) Trigger(gs *Gamestate) {
 		return
 	}
 	SendLobbyUpdate(gs.gameid, gs)
-	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
+	prompt := fmt.Sprintf("Select player to gain stats: damage: %d, hp: %d, cards: %d, $:%d", effect.AmountDamage, effect.AmountHealth, effect.AmountCards, effect.AmountMoney)
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames, prompt)
 
 	// Use helpers to change player these values before getting/setting player
 	ChangePlayerHealth(choice, effect.AmountHealth, gs)
@@ -541,6 +642,10 @@ type SelectTwoPlayersToGainStats struct {
 	Exclusive    bool
 }
 
+func (effect SelectTwoPlayersToGainStats) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
 	playernames := []string{}
 	for p := range gs.Players {
@@ -550,7 +655,8 @@ func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
 		return
 	}
 	SendLobbyUpdate(gs.gameid, gs)
-	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames)
+	prompt := fmt.Sprintf("Select player to gain stats: damage: %d, hp: %d, cards: %d, $:%d", effect.AmountDamage, effect.AmountHealth, effect.AmountCards, effect.AmountMoney)
+	choice := AskUserToSelectPlayer(gs.gameid, gs.CurrentTurn, playernames, prompt)
 
 	ChangePlayerHealth(choice, effect.AmountHealth, gs)
 	DrawXCards(choice, gs, effect.AmountCards)
@@ -579,6 +685,10 @@ func (effect SelectTwoPlayersToGainStats) Trigger(gs *Gamestate) {
 
 type AllSearchDiscardPileForItem struct{}
 
+func (effect AllSearchDiscardPileForItem) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllSearchDiscardPileForItem) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		choices := []Card{}
@@ -601,6 +711,10 @@ type HealAllVillains struct {
 	Amount int
 }
 
+func (effect HealAllVillains) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect HealAllVillains) Trigger(gs *Gamestate) {
 	for i, v := range gs.Villains {
 		// check active to avoid healing dead heroes with their own death effect
@@ -619,6 +733,10 @@ type AllChooseOne struct {
 	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
 	Options     []string `json:"options"`
 	Description string   `json:"description"`
+}
+
+func (effect AllChooseOne) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllChooseOne) Trigger(gs *Gamestate) {
@@ -645,6 +763,10 @@ type GivenPlayerChooseOneTargeted struct {
 	Description string   `json:"description"`
 }
 
+func (effect GivenPlayerChooseOneTargeted) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GivenPlayerChooseOneTargeted) Trigger(gs *Gamestate) {
 	user := effect.User
 	SendLobbyUpdate(gs.gameid, gs)
@@ -666,6 +788,10 @@ type AllChooseOneTargeted struct {
 	// Options is the description given to user. The index of it should be the same as the Effect that it triggers.
 	Options     []string `json:"options"`
 	Description string   `json:"description"`
+}
+
+func (effect AllChooseOneTargeted) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllChooseOneTargeted) Trigger(gs *Gamestate) {
@@ -697,6 +823,10 @@ type ChosenPlayerSearchesDiscardForX struct {
 	Playername string
 }
 
+func (effect ChosenPlayerSearchesDiscardForX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect ChosenPlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 	choices := []Card{}
 	for _, c := range gs.Players[effect.Playername].Discard {
@@ -716,6 +846,10 @@ func (effect ChosenPlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
 type AllSearchHandOrDiscardForX struct {
 	SearchType string
 	prompt     string
+}
+
+func (effect AllSearchHandOrDiscardForX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllSearchHandOrDiscardForX) Trigger(gs *Gamestate) {
@@ -745,6 +879,10 @@ type ChosenPlayerGainsHealth struct {
 	Amount     int
 }
 
+func (effect ChosenPlayerGainsHealth) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect ChosenPlayerGainsHealth) Trigger(gs *Gamestate) {
 	stunned := ChangePlayerHealth(effect.Playername, effect.Amount, gs)
 	if stunned {
@@ -755,6 +893,10 @@ func (effect ChosenPlayerGainsHealth) Trigger(gs *Gamestate) {
 type GainDetentionToDiscard struct {
 	// whether to give the active player the detention, or not.
 	Active bool
+}
+
+func (effect GainDetentionToDiscard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect GainDetentionToDiscard) Trigger(gs *Gamestate) {
@@ -769,6 +911,10 @@ type GainDetentionToHand struct {
 	Active bool
 }
 
+func (effect GainDetentionToHand) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainDetentionToHand) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	player := gs.Players[user]
@@ -777,6 +923,10 @@ func (effect GainDetentionToHand) Trigger(gs *Gamestate) {
 }
 
 type AllBanishItem struct{}
+
+func (effect AllBanishItem) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect AllBanishItem) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
@@ -802,6 +952,10 @@ func (effect AllBanishItem) Trigger(gs *Gamestate) {
 
 type AllBanishCard struct{}
 
+func (effect AllBanishCard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllBanishCard) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		player := gs.Players[user]
@@ -817,6 +971,10 @@ func (effect AllBanishCard) Trigger(gs *Gamestate) {
 
 type DamageActivePerDetention struct {
 	Amount int
+}
+
+func (effect DamageActivePerDetention) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DamageActivePerDetention) Trigger(gs *Gamestate) {
@@ -837,6 +995,10 @@ func (effect DamageActivePerDetention) Trigger(gs *Gamestate) {
 
 type DamageAllPerDetention struct {
 	Amount int
+}
+
+func (effect DamageAllPerDetention) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DamageAllPerDetention) Trigger(gs *Gamestate) {
@@ -863,6 +1025,11 @@ type AllDiscard struct {
 }
 
 // Only discards one card atm.
+
+func (effect AllDiscard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllDiscard) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		player := gs.Players[user]
@@ -906,6 +1073,10 @@ type DamageAllPerMatchingCost struct {
 	Amount int
 }
 
+func (effect DamageAllPerMatchingCost) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageAllPerMatchingCost) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
 		damage := 0
@@ -926,6 +1097,10 @@ func (effect DamageAllPerMatchingCost) Trigger(gs *Gamestate) {
 type DamageActivePerMatchingCost struct {
 	Cost   int
 	Amount int
+}
+
+func (effect DamageActivePerMatchingCost) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DamageActivePerMatchingCost) Trigger(gs *Gamestate) {
@@ -949,6 +1124,10 @@ type DamageActivePerCardGreaterThanCost struct {
 	Amount int
 }
 
+func (effect DamageActivePerCardGreaterThanCost) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageActivePerCardGreaterThanCost) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	damage := 0
@@ -969,6 +1148,10 @@ type AllPlayersGainDamage struct {
 	Amount int
 }
 
+func (effect AllPlayersGainDamage) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllPlayersGainDamage) Trigger(gs *Gamestate) {
 	for _, p := range gs.Players {
 		p.Damage += effect.Amount
@@ -977,6 +1160,10 @@ func (effect AllPlayersGainDamage) Trigger(gs *Gamestate) {
 }
 
 type RavenclawDice struct{}
+
+func (effect RavenclawDice) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect RavenclawDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
@@ -1033,6 +1220,10 @@ func (effect RavenclawDice) Trigger(gs *Gamestate) {
 
 type SlytherinDice struct{}
 
+func (effect SlytherinDice) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect SlytherinDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
 
@@ -1088,6 +1279,10 @@ func (effect SlytherinDice) Trigger(gs *Gamestate) {
 
 type GryffindorDice struct{}
 
+func (effect GryffindorDice) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GryffindorDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
 
@@ -1142,6 +1337,10 @@ func (effect GryffindorDice) Trigger(gs *Gamestate) {
 }
 
 type HufflepuffDice struct{}
+
+func (effect HufflepuffDice) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect HufflepuffDice) Trigger(gs *Gamestate) {
 	n := rand.Intn(6)
@@ -1203,6 +1402,10 @@ type ChooseTwo struct {
 	Prompt    string
 }
 
+func (effect ChooseTwo) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect ChooseTwo) Trigger(gs *Gamestate) {
 	firstChoice := ChooseOne{
 		Effects:     effect.Effects,
@@ -1241,6 +1444,11 @@ type GainStatIfXPlayed struct {
 }
 
 // Triggers off its own card, e.g. play an ally card which triggers when an ally is played.
+
+func (effect GainStatIfXPlayed) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainStatIfXPlayed) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	triggerEffect := false
@@ -1309,6 +1517,10 @@ type AllPlayersAtMaxHealthGainX struct {
 	AmountCards  int
 }
 
+func (effect AllPlayersAtMaxHealthGainX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AllPlayersAtMaxHealthGainX) Trigger(gs *Gamestate) {
 	for user, p := range gs.Players {
 		if p.Health >= 10 {
@@ -1326,6 +1538,10 @@ type ActivePlayerBanishes struct {
 	Discard  bool
 	Deck     bool
 	PlayArea bool
+}
+
+func (effect ActivePlayerBanishes) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ActivePlayerBanishes) Trigger(gs *Gamestate) {
@@ -1366,6 +1582,10 @@ type ActivePlayerBanishAndGainXIfY struct {
 	GainX    Effect
 }
 
+func (effect ActivePlayerBanishAndGainXIfY) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect ActivePlayerBanishAndGainXIfY) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	player := gs.Players[user]
@@ -1401,6 +1621,10 @@ type GainXPerSpellPlayed struct {
 	X ChangeStats
 }
 
+func (effect GainXPerSpellPlayed) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainXPerSpellPlayed) Trigger(gs *Gamestate) {
 	effect.X.Target = gs.CurrentTurn
 	numSpells := gs.turnStats.SpellsPlayed
@@ -1411,6 +1635,10 @@ func (effect GainXPerSpellPlayed) Trigger(gs *Gamestate) {
 
 type ChoosePlayerToGainX struct {
 	X ChangeStats
+}
+
+func (effect ChoosePlayerToGainX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
@@ -1424,12 +1652,16 @@ func (effect ChoosePlayerToGainX) Trigger(gs *Gamestate) {
 		return
 	}
 	SendLobbyUpdate(gs.gameid, gs)
-	effect.X.Target = AskUserToSelectPlayer(gs.gameid, currentTurn, players)
+	effect.X.Target = AskUserToSelectPlayer(gs.gameid, currentTurn, players, "select player to change stats a lot")
 	effect.X.Trigger(gs)
 }
 
 type ActivePlayerSearchesDiscardForX struct {
 	CardType string // "any" if it doesn't matter what type.
+}
+
+func (effect ActivePlayerSearchesDiscardForX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ActivePlayerSearchesDiscardForX) Trigger(gs *Gamestate) {
@@ -1453,6 +1685,10 @@ type ActivePlayerSearchesDeckForX struct {
 	CardType      string // "any" if it doesn't matter what type.
 	Target        string
 	CostRestraint int
+}
+
+func (effect ActivePlayerSearchesDeckForX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ActivePlayerSearchesDeckForX) Trigger(gs *Gamestate) {
@@ -1480,6 +1716,10 @@ type GainXIfYSpellsPlayed struct {
 	Id int
 	X  ChangeStats
 	Y  int
+}
+
+func (effect GainXIfYSpellsPlayed) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect GainXIfYSpellsPlayed) Trigger(gs *Gamestate) {
@@ -1529,6 +1769,10 @@ type PurchasedXGoToDeck struct {
 	X string
 }
 
+func (effect PurchasedXGoToDeck) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect PurchasedXGoToDeck) Trigger(gs *Gamestate) {
 	player := gs.Players[gs.CurrentTurn]
 	switch effect.X {
@@ -1548,6 +1792,10 @@ type GainCardToTopDeck struct {
 	card Card
 }
 
+func (effect GainCardToTopDeck) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainCardToTopDeck) Trigger(gs *Gamestate) {
 	player := gs.Players[effect.user]
 	player.Deck = append(player.Deck, effect.card)
@@ -1559,6 +1807,10 @@ type GainCardToDiscard struct {
 	card Card
 }
 
+func (effect GainCardToDiscard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect GainCardToDiscard) Trigger(gs *Gamestate) {
 	player := gs.Players[effect.user]
 	player.Discard = append(player.Discard, effect.card)
@@ -1568,6 +1820,10 @@ func (effect GainCardToDiscard) Trigger(gs *Gamestate) {
 type BlockVillainEffects struct {
 	villain  bool
 	creature bool
+}
+
+func (effect BlockVillainEffects) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect BlockVillainEffects) Trigger(gs *Gamestate) {
@@ -1585,7 +1841,8 @@ func (effect BlockVillainEffects) Trigger(gs *Gamestate) {
 
 	if len(choices) > 0 {
 		SendLobbyUpdate(gs.gameid, gs)
-		choice := AskUserToSelectPlayer(gs.gameid, user, choices)
+		prompt := "Select a villain to block"
+		choice := AskUserToSelectPlayer(gs.gameid, user, choices, prompt)
 		for i, v := range gs.Villains {
 			if v.Name == choice {
 				gs.Villains[i].BlockedUntil = unblockedAt
@@ -1598,6 +1855,10 @@ type PreviousHeroDoesX struct {
 	X ChangeStats
 }
 
+func (effect PreviousHeroDoesX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect PreviousHeroDoesX) Trigger(gs *Gamestate) {
 	prevHero := getPreviousUser(gs)
 	effect.X.Target = prevHero
@@ -1608,6 +1869,10 @@ type NextHeroDoesX struct {
 	X ChangeStats
 }
 
+func (effect NextHeroDoesX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect NextHeroDoesX) Trigger(gs *Gamestate) {
 	nextHero := getNextUser(gs)
 	effect.X.Target = nextHero
@@ -1616,6 +1881,10 @@ func (effect NextHeroDoesX) Trigger(gs *Gamestate) {
 
 type ActivePlayerSelectsOtherPlayerToDoX struct {
 	X ChangeStats
+}
+
+func (effect ActivePlayerSelectsOtherPlayerToDoX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect ActivePlayerSelectsOtherPlayerToDoX) Trigger(gs *Gamestate) {
@@ -1632,12 +1901,17 @@ func (effect ActivePlayerSelectsOtherPlayerToDoX) Trigger(gs *Gamestate) {
 	}
 
 	SendLobbyUpdate(gs.gameid, gs)
-	effect.X.Target = AskUserToSelectPlayer(gs.gameid, user, otherPlayers)
+	prompt := "select a player to do ?????"
+	effect.X.Target = AskUserToSelectPlayer(gs.gameid, user, otherPlayers, prompt)
 	effect.X.Trigger(gs)
 }
 
 type AllRevealTopCardAndX struct {
 	X func(card Card, user string, gs *Gamestate)
+}
+
+func (effect AllRevealTopCardAndX) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect AllRevealTopCardAndX) Trigger(gs *Gamestate) {
@@ -1663,6 +1937,10 @@ type DiscardACard struct {
 	Prompt   string
 	Cardtype string // "any" for any card
 	Cause    string
+}
+
+func (effect DiscardACard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DiscardACard) Trigger(gs *Gamestate) {
@@ -1710,6 +1988,10 @@ type DamageAllPerCreature struct {
 	Amount int
 }
 
+func (effect DamageAllPerCreature) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageAllPerCreature) Trigger(gs *Gamestate) {
 	damage := 0
 	for _, v := range gs.Villains {
@@ -1723,6 +2005,10 @@ func (effect DamageAllPerCreature) Trigger(gs *Gamestate) {
 
 type Scry struct {
 	User string
+}
+
+func (effect Scry) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect Scry) Trigger(gs *Gamestate) {
@@ -1746,9 +2032,13 @@ type ScryDarkarts struct {
 	User string
 }
 
+func (effect ScryDarkarts) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect ScryDarkarts) Trigger(gs *Gamestate) {
 	effect.User = gs.CurrentTurn
-	path := gs.DarkArts[(gs.CurrentDarkArt+1)%len(gs.DarkArts)].ImgPath
+	path := gs.DarkArts[(gs.CurrentDarkArt)%len(gs.DarkArts)].ImgPath
 	SendLobbyUpdate(gs.gameid, gs)
 	choice := AskUserInputWithCard(gs.gameid, effect.User, path, "You look at the top of the Dark Arts deck:", []string{"Discard", "Place on deck"})
 

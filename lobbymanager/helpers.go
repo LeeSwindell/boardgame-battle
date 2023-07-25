@@ -18,6 +18,7 @@ type Gamestate struct {
 	CurrentDarkArt  int               `json:"currentdarkart"`
 	CurrentLocation int               `json:"currentlocation"`
 	DarkArtsPlayed  []DarkArt         `json:"darkartsplayed"`
+	EffectLog       []string          `json:"effectlog"`
 }
 
 type Player struct {

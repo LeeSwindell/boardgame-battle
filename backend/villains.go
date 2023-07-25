@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/google/uuid"
 )
@@ -27,6 +28,10 @@ func draco() Villain {
 type DamageActiveIfLocationAdded struct {
 	Amount int
 	Id     int
+}
+
+func (effect DamageActiveIfLocationAdded) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect DamageActiveIfLocationAdded) Trigger(gs *Gamestate) {
@@ -102,6 +107,10 @@ func crabbeAndGoyle() Villain {
 		deathEffect:  []Effect{AllDrawCards{Amount: 1}},
 		playBeforeDA: true,
 	}
+}
+
+func (effect DamageIfDiscard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 type DamageIfDiscard struct {
@@ -234,6 +243,10 @@ type DamageActiveForEachEvenInHand struct {
 	Amount int
 }
 
+func (effect DamageActiveForEachEvenInHand) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DamageActiveForEachEvenInHand) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 
@@ -335,6 +348,10 @@ type DoloresEffect struct {
 	id int
 }
 
+func (effect DoloresEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect DoloresEffect) Trigger(gs *Gamestate) {
 	// find player who was active when location got added.
 	currentTurn := gs.CurrentTurn
@@ -394,6 +411,10 @@ func fluffy() Villain {
 
 type FluffyEffect struct{}
 
+func (effect FluffyEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 // For each item, choose one: lose a life or discard.
 func (effect FluffyEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
@@ -440,6 +461,10 @@ func luciusMalfoy() Villain {
 
 type LuciusEffect struct {
 	id int
+}
+
+func (effect LuciusEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 // FIX CHECK IF THIS GETS TRIGGERED WHEN HE DIES -  CHECK IF VILLAIN STILL ACTIVE WHEN TRIGGERING.
@@ -491,6 +516,10 @@ func tomRiddle() Villain {
 
 type TomRiddleEffect struct{}
 
+func (effect TomRiddleEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 // For each ally, choose one: lose 2 life or discard.
 func (effect TomRiddleEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
@@ -516,6 +545,10 @@ func (effect TomRiddleEffect) Trigger(gs *Gamestate) {
 
 // player that kills tom gets to choose it all
 type TomRiddleDeathEffect struct{}
+
+func (effect TomRiddleDeathEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect TomRiddleDeathEffect) Trigger(gs *Gamestate) {
 	for user := range gs.Players {
@@ -553,6 +586,10 @@ func peterPettigrew() Villain {
 }
 
 type PeterPettigrewEffect struct{}
+
+func (effect PeterPettigrewEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 // Don't "Reveal" the card for now, just discard it if it matches.
 func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
@@ -600,6 +637,10 @@ func (effect PeterPettigrewEffect) Trigger(gs *Gamestate) {
 }
 
 type PeterPettigrewDeathEffect struct{}
+
+func (effect PeterPettigrewDeathEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect PeterPettigrewDeathEffect) Trigger(gs *Gamestate) {
 	for user := range gs.Players {

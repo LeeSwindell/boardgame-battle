@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"reflect"
 
 	"github.com/google/uuid"
 )
@@ -61,6 +62,10 @@ type AvadaKedavraEffect struct {
 	Damage int
 }
 
+func (effect AvadaKedavraEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect AvadaKedavraEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	stunned := ChangePlayerHealth(user, -effect.Damage, gs)
@@ -110,6 +115,10 @@ func heirOfSlytherin() DarkArt {
 
 type HeirOfSlytherinDiceEffect struct {
 	Prompt string
+}
+
+func (effect HeirOfSlytherinDiceEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
 }
 
 func (effect HeirOfSlytherinDiceEffect) Trigger(gs *Gamestate) {
@@ -179,6 +188,10 @@ func crucio() DarkArt {
 
 type LoadDarkArtEffect struct{}
 
+func (effect LoadDarkArtEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect LoadDarkArtEffect) Trigger(gs *Gamestate) {
 	LoadNewDarkArt(gs)
 }
@@ -210,6 +223,10 @@ func morsmordre() DarkArt {
 }
 
 type CheckForDeathEater struct{}
+
+func (effect CheckForDeathEater) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect CheckForDeathEater) Trigger(gs *Gamestate) {
 	for _, v := range gs.Villains {

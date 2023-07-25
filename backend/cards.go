@@ -1,6 +1,8 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/google/uuid"
 )
 
@@ -176,6 +178,10 @@ func lionHat() Card {
 }
 
 type LionHatEffect struct{}
+
+func (effect LionHatEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect LionHatEffect) Trigger(gs *Gamestate) {
 	brooms := make(map[string]bool)
@@ -662,6 +668,10 @@ func sybillTrelawney() Card {
 
 type SybillDiscard struct{}
 
+func (effect SybillDiscard) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect SybillDiscard) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 	player := gs.Players[user]
@@ -1079,6 +1089,10 @@ type PolyjuiceEffect struct {
 	Id int
 }
 
+func (effect PolyjuiceEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect PolyjuiceEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 
@@ -1429,6 +1443,10 @@ type WeasleyTwinsEffect struct {
 	Health int
 }
 
+func (effect WeasleyTwinsEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
+
 func (effect WeasleyTwinsEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
 
@@ -1469,6 +1487,10 @@ func oldSock() Card {
 }
 
 type OldSockEffect struct{}
+
+func (effect OldSockEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect OldSockEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn
@@ -1603,6 +1625,10 @@ func confundus() Card {
 }
 
 type ConfundusEffect struct{ Id int }
+
+func (effect ConfundusEffect) Log(gs *Gamestate) {
+	gs.EffectLog = append(gs.EffectLog, reflect.Type.Name(reflect.TypeOf(effect)))
+}
 
 func (effect ConfundusEffect) Trigger(gs *Gamestate) {
 	user := gs.CurrentTurn

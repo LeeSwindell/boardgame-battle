@@ -211,6 +211,14 @@ function GameWithState() {
               <DiscardPile />
               {gamestate
               && <CardContainer cardType="proficiency" card={<Proficiency name={gamestate.players[localStorage.getItem('sessionid')].Proficiency} size="wide" />} />}
+              <div className="overflow-y-scroll h-32">
+                <ol>
+                  {
+                gamestate.effectlog
+                && gamestate.effectlog.reverse().map((e, index) => (<li key={String(Math.random())}>{`${gamestate.effectlog.length - index}. ${e}`}</li>))
+              }
+                </ol>
+              </div>
             </div>
           </div>
         </div>

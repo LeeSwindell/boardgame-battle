@@ -2,7 +2,12 @@
 
 ## What is this?
 
-This is a fullstack app for playing the boardgame Hogwarts Battle. My wondeful co-founder over at Restart Round and I started playing this game on a trip, and didn't finish it. So I spent months recreating the entire game's rules in Go, and built a React frontend to play the game. We finally beat it in time for an expansion to be released! Technically this is also a platform that could support any game engine/API with the lobbies.
+This is a fullstack app for playing the boardgame Hogwarts Battle. My wonderful
+co-founder over at Restart Round and I started playing this game on a trip, and
+didn't finish it. So I spent months recreating the entire game's rules in Go,
+and built a React frontend to play the game. We finally beat it in time for an
+expansion to be released! Technically this is also a platform that could support
+any game engine/API with the lobbies.
 
 I hosted the game on a home server using Caddy (an Nginx alternative). I would love to host it for you all to play, but if you want to play, you'll have to buy the game yourself! What is included here is all of the code For the Frontend, Game engine, and lobby system. There's some neat tech related to concurrency, multi-threading, pub/sub, and websockets for a synchronized live-view of the frontend. If you want to run this game yourself, there's instructions below.
 
